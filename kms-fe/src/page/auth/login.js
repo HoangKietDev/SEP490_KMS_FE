@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+
 function LoginPage() {
     const [state, setState] = useState({
         username: "",
@@ -29,7 +30,7 @@ function LoginPage() {
 
     return (
         <div className="">
-            <div class="container" style={{ borderRadius: "10px", boxShadow: '0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22)', marginTop: '7rem' }}>
+            <div class="container" style={{ borderRadius: "10px", boxShadow: '0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22)', marginTop: '11rem' }}>
                 <div class="row justify-content-center">
                     <div class="col-md-12">
                         <div class="row">
@@ -39,40 +40,45 @@ function LoginPage() {
                                     <p>Enter your personal details and start journey with us</p>
                                 </div>
                             </div>
-                            <div class="col-6 align-items-center p-5">
+                            <div class="col-6 align-items-center p-5 justify-content-center">
+                                <div class="text-end">
+                                    <div class="w-100">
+                                        <a href="/" class="mb-4 fs-4 text-decoration-none text-dark border rounded-pill p-4">Back to HomePage </a>
+                                    </div>
+                                </div>
                                 <div class="text-center">
                                     <div class="w-100">
-                                        <h3 class="mb-4">Sign In</h3>
+                                        <h1 class="mb-4 ">Sign In</h1>
                                     </div>
                                 </div>
                                 <form onSubmit={handleOnSubmit}>
                                     <div class="form-group mb-3">
-                                        <label class="label" for="name">Username</label>
-                                        <input type="text" class="form-control rounded-pill mt-2 px-4" placeholder="Username" required style={{ backgroundColor: "#f0f0f0", height: '50px' }} 
-                                        name="username"
-                                        value={state.username}
-                                        onChange={handleChange}
+                                        <label class="label text-dark fs-4 my-2" for="name">Username</label>
+                                        <input type="text" class="form-control rounded-pill mt-2 px-4 fs-4" placeholder="Username" required style={{ backgroundColor: "#f0f0f0", height: '50px' }}
+                                            name="username"
+                                            value={state.username}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                     <div class="form-group mb-3">
-                                        <label class="label" for="password">Password</label>
-                                        <input type="password" class="form-control rounded-pill mt-2 px-4" placeholder="Password" required style={{ backgroundColor: "#f0f0f0", height: '50px' }} 
-                                        name="password"
-                                        value={state.password}
-                                        onChange={handleChange}
+                                        <label class="label text-dark fs-4 my-2" for="password">Password</label>
+                                        <input type="password" class="form-control rounded-pill mt-2 px-4 fs-4" placeholder="Password" required style={{ backgroundColor: "#f0f0f0", height: '50px' }}
+                                            name="password"
+                                            value={state.password}
+                                            onChange={handleChange}
                                         />
                                     </div>
                                     <div class="form-group">
-                                        <button type="submit" class="form-control btn btn-info submit px-3 rounded-pill my-2 px-2" style={{ height: "50px" }}>Sign In</button>
+                                        <button type="submit" class="form-control btn btn-info submit px-3 rounded-pill my-2 px-2 text-dark fs-4" style={{ height: "50px" }}>Sign In</button>
                                     </div>
                                     <div class=" d-md-flex justify-content-between pt-2">
                                         <div class="w-50 text-start">
-                                            <label class="checkbox-wrap checkbox-primary mb-0">Remember Me
+                                            <label class="checkbox-wrap checkbox-primary mb-0 fs-4">Remember Me
                                                 <input type="checkbox" checked />
                                                 <span class="checkmark"></span>
                                             </label>
                                         </div>
-                                        <div class="w-50 text-end">
+                                        <div class="w-50 text-end fs-4">
                                             <a href="#">Forgot Password </a>
                                         </div>
                                     </div>
