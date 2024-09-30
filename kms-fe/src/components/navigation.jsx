@@ -2,64 +2,116 @@ import React from "react";
 
 export const Navigation = (props) => {
   return (
-    <nav id="menu" className="navbar navbar-default navbar-fixed-top">
-      <div className="container">
-        <div className="navbar-header">
-          <button
-            type="button"
-            className="navbar-toggle collapsed"
-            data-toggle="collapse"
-            data-target="#bs-example-navbar-collapse-1"
+    <nav
+      id="menu"
+      className="s"
+      style={{
+        position: "fixed",
+        top: 0,
+        width: "100%",
+        backgroundColor: "#fff",
+        borderBottom: "1px solid #ddd",
+        zIndex: 1000,
+        padding: "10px 0",
+      }}
+    >
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0 50px",
+        }}
+      >
+        {/* Logo section */}
+        <div>
+        <div className="s-header">
+          <a
+            className="navbar-brand"
+            href="#page-top"
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              color: "#333",
+              letterSpacing: "2px",
+            }}
           >
-            {" "}
-            <span className="sr-only">Toggle navigation</span>{" "}
-            <span className="icon-bar"></span>{" "}
-            <span className="icon-bar"></span>{" "}
-            <span className="icon-bar"></span>{" "}
-          </button>
-          <a className="navbar-brand page-scroll" href="#page-top">
-            Kindergarten
-          </a>{" "}
+            KINDERGARTEN
+  
+          </a>
         </div>
+        </div>
+        
 
-        <div
-          className="collapse navbar-collapse"
-          id="bs-example-navbar-collapse-1"
-        >
-          <ul className="nav navbar-nav navbar-right">
-            <li>
-              <a href="#about" className="page-scroll">
-                About
+        {/* Navigation links */}
+        <div className="navbar-collapse" id="navbar">
+          <ul
+            className="nav navbar-nav"
+            style={{
+              listStyleType: "none",
+              display: "flex", // Dàn hàng ngang
+              flexDirection: "row", // Đảm bảo hướng ngang
+              justifyContent: "space-between", // Giãn đều khoảng cách
+              alignItems: "center",
+              margin: 0,
+              padding: 0,
+              width: "100%", // Đảm bảo toàn bộ width được dùng
+            }}
+          >
+
+
+            <li style={{ padding: "0 20px" }}>
+              <a
+                href="#about"
+                style={{
+                  color: "#333",
+                  textDecoration: "none",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                ABOUT
               </a>
             </li>
-            <li>
-              <a href="#services" className="page-scroll">
-                Program
+            <li style={{ padding: "0 20px" }}>
+              <a
+                href="#services"
+                style={{
+                  color: "#333",
+                  textDecoration: "none",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                PROGRAM
               </a>
             </li>
-            {/* <li>
-              <a href="#portfolio" className="page-scroll">
-                Gallery
-              </a>
-            </li> */}
-            {/* <li>
-              <a href="#testimonials" className="page-scroll">
-                Testimonials
-              </a>
-            </li> */}
-            {/* <li>
-              <a href="#team" className="page-scroll">
-                Team
-              </a>
-            </li> */}
-            <li>
-              <a href="#contact" className="page-scroll">
-              Contact for consultation
+
+            <li style={{ padding: "0 20px" }}>
+              <a
+                href="#contact"
+                style={{
+                  color: "#333",
+                  textDecoration: "none",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                CONTACT
               </a>
             </li>
-            <li>
-              <a href="/login" className="page-scroll">
-              Sign In
+            <li style={{ padding: "0 20px" }}>
+              <a
+                href="/login"
+                style={{
+                  color: "#333",
+                  textDecoration: "none",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                }}
+              >
+                SIGN IN
               </a>
             </li>
           </ul>
