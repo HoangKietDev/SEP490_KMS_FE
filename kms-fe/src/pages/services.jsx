@@ -13,7 +13,7 @@ const Services = () => {
         <meta name="description" content="Ascent - Chindcare & Kids School React.js and Tailwind CSS Template" />
       </Helmet>
       <main>
-        <PageTitle pageName={"Services"} breadcrumbCurrent={"Services"} />
+        <PageTitle pageName={"Program"} breadcrumbCurrent={"Program"} />
         <ServicesTwo />
         <NewsletterTwo />
       </main>

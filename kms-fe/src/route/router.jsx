@@ -55,10 +55,10 @@ export const router = createBrowserRouter([
             //     path: "/blog-details",
             //     element: <BlogDetails />
             // },
-            // {
-            //     path: "/services",
-            //     element: <Services />
-            // },
+            {
+                path: "/programs",
+                element: <Services />
+            },
             // {
             //     path: "/service-details",
             //     element: <ServiceDetails />

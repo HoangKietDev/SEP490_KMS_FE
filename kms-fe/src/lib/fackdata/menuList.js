@@ -22,7 +22,8 @@ export const menuList = [
     {
         id: 3,
         path: "#",
-        label: "Services",
+        label: "Program",
+        path: "/programs",
         dropDownMenu: false
         // [
         //     {
