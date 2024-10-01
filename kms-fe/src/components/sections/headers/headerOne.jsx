@@ -1,18 +1,29 @@
-import React, { useState } from 'react'
-import DesktopMenu from './desktopMenu'
-import MobileMenu from './mobileMenu'
-import logo from "@/assets/images/logo.png"
-import { Button } from '@/components/ui/button'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import DesktopMenu from './desktopMenu';
+import MobileMenu from './mobileMenu';
+import logo from '@/assets/images/logo.png';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { FaMagnifyingGlass, FaArrowRight } from "react-icons/fa6";
-import TopHeader from './topHeader'
-import SearchForm from './searchForm'
-import Logo from '@/components/ui/logo'
-import StickyHeader from '@/components/ui/stickyHeader'
+import TopHeader from './topHeader';
+import SearchForm from './searchForm';
+import Logo from '@/components/ui/logo';
+import StickyHeader from '@/components/ui/stickyHeader';
 
 const HeaderOne = () => {
-    const [isSerchActive, setIsSerchActive] = useState(false)
-    const [isMobleMenuActive, setIsMobleMenuActive] = useState(false)
+    const [isSerchActive, setIsSerchActive] = useState(false);
+    const [isMobleMenuActive, setIsMobleMenuActive] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        setIsLoggedIn(!!storedUser); // Set isLoggedIn to true if user exists
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        setIsLoggedIn(false);
+    };
 
     return (
         <StickyHeader>
@@ -31,9 +42,15 @@ const HeaderOne = () => {
                                         <div className="ml-16 cursor-pointer" onClick={() => setIsSerchActive(true)}>
                                             <FaMagnifyingGlass className='text-xl' />
                                         </div>
-                                        <Button asChild variant="ghost" className="sm:flex hidden">
-                                            <Link to={"/contact-us"}> Login <FaArrowRight /></Link>
-                                        </Button>
+                                        {isLoggedIn ? (
+                                            <Button  onClick={handleLogout} asChild variant="ghost" className="sm:flex hidden">
+                                                <Link> Logout <FaArrowRight /></Link>
+                                            </Button>
+                                        ) : (
+                                            <Button asChild variant="ghost" className="sm:flex hidden">
+                                                <Link to={"/login"}> Login <FaArrowRight /></Link>
+                                            </Button>
+                                        )}
 
                                         <div className="flex xl:hidden flex-col items-end cursor-pointer transition-all duration-500" onClick={() => setIsMobleMenuActive(true)}>
                                             <span className="block h-[3px] w-5 bg-muted"></span>
@@ -50,7 +67,7 @@ const HeaderOne = () => {
                 </div>
             </header>
         </StickyHeader>
-    )
-}
+    );
+};
 
-export default HeaderOne
+export default HeaderOne;

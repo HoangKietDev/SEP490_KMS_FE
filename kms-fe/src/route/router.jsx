@@ -12,6 +12,8 @@ import LayoutTwo from "@/layout/layoutTwo";
 import HomeTwo from "@/pages/home-2";
 import HomeOne from "@/pages/home-1";
 import LayoutThree from "@/layout/layoutThree";
+import LoginPage from "@/pages/common/login";
+
 
 
 export const router = createBrowserRouter([
@@ -74,17 +76,12 @@ export const router = createBrowserRouter([
             // },
         ]
     },
+    {
+        path: "/login",
+        element: <LoginPage />,
+    },
 ])
 
 // export const authRouter = createBrowserRouter([
-//     // {
-//     //     path: "/",
-//     //     element: <RootLayout />,
-//     //     children: [
-//     //         {
-//     //             path: "/",
-//     //             element: <HomeOne />
-//     //         },
-//     //     ]
-//     // },
+    
 // ])
