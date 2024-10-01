@@ -20,7 +20,7 @@ const AgeOne = () => {
                                 <SectionName>Student knowledge</SectionName>
                                 <Title size={"3.5xl"}>Knowledge for All learn design Excellence for Everyone</Title>
                             </div>
-                            <SectionDescription className={'pt-5 pb-7.5'}>Lorem ipsum dolor sit amet consectetur adipiscing elit platea  the osr of a proin mollis pretium facilisi in, ligula volutpat </SectionDescription>
+                            <SectionDescription className={'pt-5 pb-7.5'}>We believe in providing accessible education and fostering creativity for all learners. Our program emphasizes inclusive design principles, ensuring that every student has the opportunity to excel and innovate. </SectionDescription>
                             <Button asChild variant="pill">
                                 <Link to={"/about-us"}>Learn More</Link>
                             </Button>
@@ -30,15 +30,15 @@ const AgeOne = () => {
                         <div className="relative flex justify-center flex-wrap sm:flex-nowrap lg:justify-between md:gap-7.5 sm:gap-4 gap-3">
                             <div className="mt-[110px] flex flex-col items-end md:gap-7.5 sm:gap-4 gap-3">
                                 <BigCard One={"1-2"} />
-                                <SmallCard className={"bg-primary"} age={"9-11"} />
+                                {/* <SmallCard className={"bg-primary"} age={"9-11"} /> */}
                             </div>
                             <div className="flex flex-col md:gap-7.5 sm:gap-4 gap-3">
-                                <SmallCard className={"bg-secondary"} age={"3-5"} />
-                                <SmallCard className={"bg-destructive"} age={"6-8"} />
-                                <SmallCard className={"bg-green"} age={"16-18"} />
+                                <SmallCard className={"bg-secondary"} age={"0-3"} />
+                                <SmallCard className={"bg-destructive"} age={"3-6"} />
+                                {/* <SmallCard className={"bg-green"} age={"16-18"} /> */}
                             </div>
                             <div className="self-center ">
-                                <SmallCard className={"bg-primary"} age={"12-15"} />
+                                {/* <SmallCard className={"bg-primary"} age={"12-15"} /> */}
                             </div>
                         </div>
 

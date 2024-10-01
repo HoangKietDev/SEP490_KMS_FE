@@ -28,7 +28,7 @@ const ServicesOne = () => {
                             <Title size={"3.5xl"}>Building a Str Foundation for Success</Title>
                         </div>
                         <div className="flex-shrink-0 flex-grow-0 basis-auto lg:w-[50%]">
-                            <SectionDescription>Lorem ipsum dolor sit amet consectetur adipiscing elit platea pharetra, nostra mattis hendrerit proin mollis pretium facilisi in, ligula volutpat </SectionDescription>
+                            <SectionDescription>We are dedicated to establishing a solid foundation for every student. Our program emphasizes essential skills and knowledge, fostering resilience and confidence to ensure lifelong success in their educational journey. </SectionDescription>
                         </div>
 
                     </div>

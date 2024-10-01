@@ -19,17 +19,17 @@ const SuccessProjectOne = () => {
                     <div className="lg:max-w-[600px]">
                         <SectionName className={"text-primary-foreground"}>Number Talks</SectionName>
                         <Title size={"3.5xl"} className={"lg:max-w-[410px] pb-5"}>Invest in education invest in the future</Title>
-                        <SectionDescription> Lorem ipsum dolor sit amet consectetur. Amet lectus mi ultricies dictum facilisis sem. Imperdiet massa turpis sit proin metus volutpat loren ipsum Lorem ipsum dolor sit amet consectetur. Amet lectus mi ultricies dictum</SectionDescription>
+                        <SectionDescription> The customer is very happy to be followed. As I have said many times, my bed is easy to read. The destruction of the mass of the ugly is the fear of the life of Loren himself. My favorite bed has been told many times</SectionDescription>
                         <Button asChild variant="outline" className="mt-10">
                             <Link to={"/contact-us"}>Get a quote</Link>
                         </Button>
                     </div>
 
                     <div className="grid sm:grid-cols-2 grid-cols-1 gap-7.5">
-                        <CardOne icon={<Kindergarden />} color={"bg-primary"} number={"20k"} title={"Running Students"} />
-                        <CardOne icon={<Book />} color={"bg-destructive"} number={"12K"} title={"Completed"} />
-                        <CardOne icon={<Blocks />} color={"bg-green"} number={"3K"} title={"Award Winning"} />
-                        <CardOne icon={<Chalkboard />} color={"bg-secondary"} number={"23K"} title={"Guardian Satishfaction"} />
+                        <CardOne icon={<Kindergarden />} color={"bg-primary"} number={"500"} title={"Running Students"} />
+                        <CardOne icon={<Book />} color={"bg-destructive"} number={"300"} title={"Completed"} />
+                        {/* <CardOne icon={<Blocks />} color={"bg-green"} number={"3K"} title={"Award Winning"} />
+                        <CardOne icon={<Chalkboard />} color={"bg-secondary"} number={"23K"} title={"Guardian Satishfaction"} /> */}
 
                     </div>
 

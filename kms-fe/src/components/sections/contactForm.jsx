@@ -39,7 +39,7 @@ const ContactForm = () => {
                         </div>
                         <div>
                             <div className="bg-background shadow-[0px_5px_60px_0px_rgba(0,0,0,0.05)] rounded-[10px] lg:p-10 p-5">
-                                <h3 className="text-[28px] font-bold leading-[148%] font-nunito">Send a message</h3>
+                                <h3 className="text-[28px] font-bold leading-[148%] font-nunito">Contact for consultation</h3>
                                 <form action="#" className="mt-7">
                                     <div className="grid sm:grid-cols-2 grid-cols-1 gap-7.5">
                                         <div className="relative">
@@ -47,13 +47,13 @@ const ContactForm = () => {
                                             <label htmlFor="name" className="absolute right-5 top-1/2 -translate-y-1/2"> <FaPaperPlane /></label>
                                         </div>
                                         <div className="relative">
-                                            <Input type={"email"} placeholder={"Your Email"} id="email" className={"text-[#686868] placeholder:[#686868] border-[#F2F2F2] lg:py-[15px] px-5"} />
-                                            <label htmlFor="email" className="absolute right-5 top-1/2 -translate-y-1/2"><FaPhone /></label>
+                                            <Input type={"number"} placeholder={"Your Phone"} id="email" className={"text-[#686868] placeholder:[#686868] border-[#F2F2F2] lg:py-[15px] px-5"} />
+                                            <label htmlFor="phone" className="absolute right-5 top-1/2 -translate-y-1/2"><FaPhone /></label>
                                         </div>
                                     </div>
                                     <div className="relative mt-5">
-                                        <Input type={"text"} placeholder={"Your Address"} id="address" className={"text-[#686868] placeholder:[#686868] border-[#F2F2F2] lg:py-[15px] px-5"} />
-                                        <label htmlFor="address" className="absolute right-5 top-1/2 -translate-y-1/2"> <FaLocationDot /></label>
+                                        <Input type={"email"} placeholder={"Your Email"} id="address" className={"text-[#686868] placeholder:[#686868] border-[#F2F2F2] lg:py-[15px] px-5"} />
+                                        <label htmlFor="email" className="absolute right-5 top-1/2 -translate-y-1/2"> <FaLocationDot /></label>
                                     </div>
 
                                     <div className="relative mt-5">

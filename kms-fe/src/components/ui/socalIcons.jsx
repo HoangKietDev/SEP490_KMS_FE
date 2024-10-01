@@ -9,21 +9,21 @@ const icons = [
         link: "",
         icon: <FaFacebookF />
     },
-    {
-        id: 2,
-        link: "",
-        icon: <FaXTwitter />
-    },
-    {
-        id: 3,
-        link: "",
-        icon: <FaLinkedin />
-    },
-    {
-        id: 4,
-        link: "",
-        icon: <FaPinterestP />
-    },
+    // {
+    //     id: 2,
+    //     link: "",
+    //     icon: <FaXTwitter />
+    // },
+    // {
+    //     id: 3,
+    //     link: "",
+    //     icon: <FaLinkedin />
+    // },
+    // {
+    //     id: 4,
+    //     link: "",
+    //     icon: <FaPinterestP />
+    // },
 
 ]
 const SocalIcons = ({className, prentClass}) => {

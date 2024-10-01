@@ -46,13 +46,13 @@ const FooterTwo = () => {
 
                         <ul className="flex flex-col lg:gap-[15px] gap-2.5 lg:pt-7.5 pt-5">
                             <li className="text-cream-foreground flex gap-4">
-                                <FaLocationDot className='mt-1.5' /> <span className="max-w-[168px]">1179 KFC Road, Lisbon, Portugal</span>
+                                <FaLocationDot className='mt-1.5' /> <span className="max-w-[168px]">Hanoi</span>
                             </li>
                             <li className="text-cream-foreground flex gap-4">
-                                <FaEnvelope className='mt-1.5' /> <Link to="#">sakib23@gmail.com</Link>
+                                <FaEnvelope className='mt-1.5' /> <Link to="#">bachnshe161333</Link>
                             </li>
                             <li className="text-cream-foreground flex gap-4">
-                                <FaPhone className='mt-1.5' /> <Link to="#">012547892354</Link>
+                                <FaPhone className='mt-1.5' /> <Link to="#">0383919968</Link>
                             </li>
                         </ul>
                     </SlideUp>

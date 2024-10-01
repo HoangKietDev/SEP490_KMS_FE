@@ -32,7 +32,7 @@ const AboutOne = ({ gridClass, isAboutpage }) => {
                                             <img src={customer} alt="customer" />
                                         </div>
                                         <div>
-                                            <h6 className="text-cream-foreground font-bold text-2xl">5,000+</h6>
+                                            <h6 className="text-cream-foreground font-bold text-2xl">500</h6>
                                             <p className="text-cream-foreground">Satisfied Clients</p>
                                         </div>
                                     </div>
@@ -55,9 +55,7 @@ const AboutOne = ({ gridClass, isAboutpage }) => {
                     <div className={`${isAboutpage ? "" : "lg:max-w-[439px]"} pt-7.5`}>
                         <SectionName>About Us</SectionName>
                         <Title size={"3.5xl"} className={"pb-5"}>Unlocking Potential, One Child at a just Time in school</Title>
-                        <SectionDescription>Lorem ipsum dolor sit amet consectetur. Amet lectus mi ultricies dictum facilisis sem. Imperdiet
-                            massa turpis sit proin metus volutpat loren ipsum Lorem ipsum dolor sit amet consectetur. Amet
-                            lectus mi ultricies dictum</SectionDescription>
+                        <SectionDescription>We focus on nurturing each child's unique strengths, helping them grow academically and personally. By fostering a love for learning, we empower students to reach their full potential and succeed in both school and life.</SectionDescription>
                         <div className='lg:mt-10 mt-7'>
                             <Button asChild variant="outline">
                                 <Link to="/about-us">Get a quote</Link>

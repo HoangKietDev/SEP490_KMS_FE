@@ -8,7 +8,7 @@ export const bolgData = [
         thumb:blog_1,
         title:"Empowering Children Through Education the a Igniting",
         blog_desc:"",
-        date:"October 19, 2023",
+        date:"Sep 19, 2024",
         author:"admin"
     },
     {
@@ -16,7 +16,7 @@ export const bolgData = [
         thumb:blog_2,
         title:"Joyful Journeys Childcare and EducationIgniting Curiosity",
         blog_desc:"",
-        date:"October 20, 2023",
+        date:"Sep 20, 2024",
         author:"admin"
     },
     {
@@ -24,7 +24,7 @@ export const bolgData = [
         thumb:blog_3,
         title:"Empowering Children Through Education the a Igniting",
         blog_desc:"",
-        date:"October 21, 2023",
+        date:"Sep 21, 2024",
         author:"admin"
     },
 ]

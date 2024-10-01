@@ -32,7 +32,7 @@ const HeaderOne = () => {
                                             <FaMagnifyingGlass className='text-xl' />
                                         </div>
                                         <Button asChild variant="ghost" className="sm:flex hidden">
-                                            <Link to={"/contact-us"}> Get A Quote <FaArrowRight /></Link>
+                                            <Link to={"/contact-us"}> Login <FaArrowRight /></Link>
                                         </Button>
 
                                         <div className="flex xl:hidden flex-col items-end cursor-pointer transition-all duration-500" onClick={() => setIsMobleMenuActive(true)}>
