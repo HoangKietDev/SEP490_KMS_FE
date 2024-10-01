@@ -13,7 +13,7 @@ import HomeTwo from "@/pages/home-2";
 import HomeOne from "@/pages/home-1";
 import LayoutThree from "@/layout/layoutThree";
 import LoginPage from "@/pages/common/login";
-
+import Profile from "@/pages/common/profile";
 
 
 export const router = createBrowserRouter([
@@ -24,6 +24,16 @@ export const router = createBrowserRouter([
             {
                 path: "/",
                 element: <HomeOne />
+            },
+        ]
+    },
+    {
+        path: "/",
+        element: <RootLayout />,
+        children: [
+            {
+                path: "/profile",
+                element: <Profile />
             },
         ]
     },
