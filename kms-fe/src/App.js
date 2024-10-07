@@ -60,6 +60,9 @@ import basicelements from "./screens/Forms/BasicElements";
 import tablenormal from "./screens/Tables/TableNormal";
 import echart from "./screens/Charts/Echart";
 import leafletmap from "./screens/Maps/GoogleMaps";
+import viewclass from "./screens/Class/ViewClass";
+import createclass from "./screens/Class/CreateClass";
+import updateclass from "./screens/Class/UpdateClass";
 
 window.__DEV__ = true;
 
@@ -167,6 +170,21 @@ class App extends React.Component {
                     path={`${process.env.PUBLIC_URL}/ioT`}
                     component={ioT}
                   /> */}
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/viewclass`}
+                    component={viewclass}
+                  />
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/createclass`}
+                    component={createclass}
+                  />
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/updateclass/:classId`}
+                    component={updateclass}
+                  />
                   <Route
                     exact
                     path={`${process.env.PUBLIC_URL}/appinbox`}
