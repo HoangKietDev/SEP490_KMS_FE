@@ -4,27 +4,38 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 
-class CategoryUpdate extends React.Component {
+class ServiceUpdate extends React.Component {
     state = {
-        categoriesDetail: null,
+        categories: [],
+        serviceDetail: null,
         errorMessage: "",
-        categoryName: "", // Initialize with empty string
-        description: "", // Initialize with empty string
-        submeet: false,
+        serviceName: "",
+        servicePrice: "",
+        serviceDes: "",
+        categoryServiceId: ""
     };
 
     componentDidMount() {
-        const { categoryServiceId } = this.props.match.params; // Get categoryServiceId from URL
+        const { serviceId } = this.props.match.params;
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/CategoryService/GetCategoryServiceById/${categoryServiceId}`);
+                const response = await axios.get(`http://localhost:5124/api/Service/GetServiceById/${serviceId}`);
                 const data = response.data;
 
+                const CategoryResponse = await axios.get('http://localhost:5124/api/CategoryService/GetAllCategoryService');
+                const Categorydata = CategoryResponse.data;
+                this.setState({ categories: Categorydata });
+
                 this.setState({
-                    categoriesDetail: data,
-                    categoryName: data.categoryName, // Set initial state from fetched data
-                    description: data.description, // Set initial state from fetched data
+                    serviceDetail: data,
+                    serviceName: data.serviceName,
+                    servicePrice: data.servicePrice,
+                    serviceDes: data.serviceDes,
+                    categoryServiceId: data.categoryService.categoryServiceId,
                 });
+
+                console.log(Categorydata);
+
             } catch (error) {
                 console.error('Error fetching category details:', error);
             }
@@ -36,43 +47,45 @@ class CategoryUpdate extends React.Component {
     handleSubmit = async (event) => {
 
         event.preventDefault(); // Make sure this is at the top
-
-        if (!this.state.categoryName) {
-            this.setState({ submeet: true });
-            return;
-        }
-        const updatedCategory = {
-            categoryServiceId: this.state.categoriesDetail?.categoryServiceId,
-            categoryName: this.state.categoryName, // Use state instead of event target
-            description: this.state.description, // Use state instead of event target
+        const updatedService = {
+            serviceId: this.state.serviceDetail?.serviceId,
+            serviceName: this.state.serviceName,
+            servicePrice: this.state.servicePrice,
+            serviceDes: this.state.serviceDes,
+            categoryServiceId: this.state.categoryServiceId,
+            schoolId: 1,
+            categoryService: {
+                categoryServiceId: this.state.categoryServiceId,
+                categoryName: this.state.categories.find(cat => cat.categoryServiceId === this.state.categoryServiceId)?.categoryName, // Find category name based on selected id
+            }
         };
 
         try {
-            await axios.put(`http://localhost:5124/api/CategoryService/UpdateCategoryService`, updatedCategory, {
+            await axios.put(`http://localhost:5124/api/Service/UpdateService`, updatedService, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Category has been updated successfully!");
-            this.props.history.push('/category'); // Redirect to category list after successful update
+            alert("Service has been updated successfully!");
+            this.props.history.push('/service');
         } catch (error) {
-            console.error('Error updating category:', error);
-            this.setState({ errorMessage: 'Error updating category' });
+            console.error('Error updating Service:', error);
+            this.setState({ errorMessage: 'Error updating Service' });
         }
     };
 
     render() {
-        const { categoriesDetail, categoryName, description, submeet } = this.state;
+        const { categories, serviceName, servicePrice, serviceDes, categoryServiceId } = this.state;
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
                 <div>
                     <div className="container-fluid">
                         <PageHeader
-                            HeaderText="Category Update"
+                            HeaderText="Service Update"
                             Breadcrumb={[
-                                { name: "Category", navigate: "" },
-                                { name: "Category Update", navigate: "" },
+                                { name: "Service", navigate: "" },
+                                { name: "Service Update", navigate: "" },
                             ]}
                         />
                         <div className="row clearfix">
@@ -80,54 +93,76 @@ class CategoryUpdate extends React.Component {
                                 <div className="card">
                                     <div className="body">
                                         <form onSubmit={this.handleSubmit}>
-                                            <div className="form-group">
-                                                <label>Category Service Name</label>
-                                                <input
-                                                    className={`form-control ${categoryName === "" && submeet && "parsley-error"
-                                                        }`}
-                                                    value={categoryName} // Bind value from state
-                                                    name="categoryName"
-                                                    required=""
-                                                    onChange={(e) => {
-                                                        this.setState({
-                                                            [e.target.name]: e.target.value,
-                                                            submeet: false,
-                                                        });
-                                                    }}
-                                                />
-                                                {categoryName === "" && submeet ? (
-                                                    <ul className="parsley-errors-list filled" id="parsley-id-29">
-                                                        <li className="parsley-required">This value is required.</li>
-                                                    </ul>
-                                                ) : null}
+                                            <div className="row">
+                                                <div className="form-group col-md-6">
+                                                    <label>Service Name</label>
+                                                    <input
+                                                        className={`form-control ${serviceName === "" && "parsley-error"
+                                                            }`}
+                                                        value={serviceName} // Bind value from state
+                                                        name="serviceName"
+                                                        required=""
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            this.setState({
+                                                                [e.target.name]: e.target.value,
+                                                            });
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label>Service Price</label>
+                                                    <input
+                                                        className="form-control"
+                                                        value={servicePrice}
+                                                        name="servicePrice"
+                                                        required=""
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            this.setState({ [e.target.name]: e.target.value });
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div className="form-group">
-                                                <label>Description</label>
-                                                <input
-                                                    className="form-control"
-                                                    value={description} // Bind value from state
-                                                    name="description"
-                                                    type="text"
-                                                    onChange={(e) => {
-                                                        this.setState({ description: e.target.value, submeet: false });
-                                                    }}
-                                                />
+                                            <div className="row">
+                                                <div className="form-group col-md-6">
+                                                    <label>Service Description</label>
+                                                    <input
+                                                        className={`form-control ${serviceDes === "" && "parsley-error"
+                                                            }`}
+                                                        value={serviceDes} // Bind value from state
+                                                        name="serviceDes"
+                                                        required=""
+                                                        type="text"
+                                                        onChange={(e) => {
+                                                            this.setState({
+                                                                [e.target.name]: e.target.value,
+                                                            });
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label>Category Name</label>
+                                                    <select
+                                                        className="form-control"
+                                                        value={categoryServiceId} // Bind categoryServiceId directly
+                                                        name="categoryServiceId"
+                                                        required=""
+                                                        onChange={(e) => this.setState({ categoryServiceId: e.target.value })}
+                                                    >
+                                                        <option value="">Select Category</option>
+                                                        {categories.map((option) => (
+                                                            <option key={option?.categoryServiceId} value={option?.categoryServiceId}>
+                                                                {option.categoryName}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div className="form-group">
-                                                <label>Status</label>
-                                                <br />
-                                                <label className="fancy-radio">
-                                                    <input name="gender" type="radio" value="male" />
-                                                    <span><i></i>Enable</span>
-                                                </label>
-                                                <label className="fancy-radio">
-                                                    <input name="gender" type="radio" value="female" />
-                                                    <span><i></i>Disable</span>
-                                                </label>
-                                            </div>
+
                                             <br />
-                                            <button type="submit" className="btn btn-primary">Update Category</button>
-                                            <a href="/category" className="btn btn-success text-center">Back to Category List</a>
+                                            <button type="submit" className="btn btn-primary">Update Service</button>
+                                            <a href="/service" className="btn btn-success text-center">Back to Service List</a>
                                         </form>
                                     </div>
                                 </div>
@@ -140,6 +175,6 @@ class CategoryUpdate extends React.Component {
     }
 }
 
-const mapStateToProps = ({ CreateCategoryReducer }) => ({});
+const mapStateToProps = ({ updatedServiceReducer }) => ({});
 
-export default connect(mapStateToProps, {})(CategoryUpdate);
+export default connect(mapStateToProps, {})(ServiceUpdate);

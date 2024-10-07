@@ -4,24 +4,23 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 
 
-class CategoryDetail extends React.Component {
+class ServiceDetail extends React.Component {
 
     state = {
-        categoriesDetail: null,
+        serviceDetail: null,
     };
     componentDidMount() {
-        const { categoryServiceId } = this.props.match.params; // Lấy classId từ URL
-        this.setState({ categoryServiceId: parseInt(categoryServiceId) }); // Cập nhật classId vào state
+        const { serviceId } = this.props.match.params; // Lấy classId từ URL
+        this.setState({ serviceId: parseInt(serviceId) }); // Cập nhật classId vào state
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/CategoryService/GetCategoryServiceById/${categoryServiceId}`);
+                const response = await axios.get(`http://localhost:5124/api/Service/GetServiceById/${serviceId}`);
                 const data = response.data;
-                this.setState({ categoriesDetail: data });
+                this.setState({ serviceDetail: data });
                 console.log(data);
-                // console.log(categoryId);
 
             } catch (error) {
-                console.error('Error fetching category details:', error);
+                console.error('Error fetching service details:', error);
             }
         };
 
@@ -29,7 +28,7 @@ class CategoryDetail extends React.Component {
     };
 
     render() {
-        const { categoriesDetail } = this.state;
+        const { serviceDetail } = this.state;
 
         return (
             <div
@@ -41,10 +40,10 @@ class CategoryDetail extends React.Component {
                 <div>
                     <div className="container-fluid">
                         <PageHeader
-                            HeaderText="Category Detail"
+                            HeaderText="Service Detail"
                             Breadcrumb={[
-                                { name: "Category", navigate: "" },
-                                { name: "Category Detail", navigate: "" },
+                                { name: "Service", navigate: "" },
+                                { name: "Service Detail", navigate: "" },
                             ]}
                         />
                         <div className="row clearfix">
@@ -52,47 +51,47 @@ class CategoryDetail extends React.Component {
                                 <div className="card">
                                     <div className="body">
                                         <form className="ng-untouched ng-dirty ng-invalid">
-                                            <div className="form-group">
-                                                <label>Category Service Name</label>
-                                                <input
-                                                    className={`form-control`}
-                                                    value={categoriesDetail?.categoryName}
-                                                    name="categoryname"
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Description</label>
-                                                <input
-                                                    className={`form-control`}
-                                                    value={categoriesDetail?.description}
-                                                    name="description"
-                                                />
-                                            </div>
-                                            <div className="form-group">
-                                                <label>Status</label>
-                                                <br />
-                                                <label className="fancy-radio">
+                                            <div className="row">
+                                                <div className="form-group col-md-6">
+                                                    <label>Service Name</label>
                                                     <input
-                                                        data-parsley-errors-container="#error-radio"
-                                                        name="gender"
-                                                        required=""
-                                                        type="radio"
-                                                        value="male"
+                                                        className={`form-control`}
+                                                        value={serviceDetail?.serviceName}
+                                                        name="serviceName"
                                                     />
-                                                    <span>
-                                                        <i></i>Enable
-                                                    </span>
-                                                </label>
-                                                <label className="fancy-radio">
-                                                    <input name="gender" type="radio" value="female" />
-                                                    <span>
-                                                        <i></i>Disable
-                                                    </span>
-                                                </label>
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label>Service Price</label>
+                                                    <input
+                                                        className={`form-control`}
+                                                        value={serviceDetail?.servicePrice}
+                                                        name="servicePrice"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="row">
+                                                <div className="form-group col-md-6">
+                                                    <label>Service Description</label>
+                                                    <input
+                                                        className={`form-control`}
+                                                        value={serviceDetail?.serviceDes}
+                                                        name="serviceDes"
+                                                    />
+                                                </div>
+                                                <div className="form-group col-md-6">
+                                                    <label>Category Name</label>
+                                                    <input
+                                                        className={`form-control`}
+                                                        value={serviceDetail?.categoryService?.categoryName}
+                                                        name="categoryName"
+                                                    />
+                                                </div>
+
                                             </div>
                                             <br />
-                                            <a href="/category" className="btn btn-success text-center">
-                                                Back to Category List
+                                            <a href="/service" className="btn btn-success text-center">
+                                                Back to Service List
                                             </a>
                                         </form>
 
@@ -108,6 +107,6 @@ class CategoryDetail extends React.Component {
     }
 }
 
-const mapStateToProps = ({ CreateCategoryReducer }) => ({});
+const mapStateToProps = ({ CreateServiceReducer }) => ({});
 
-export default connect(mapStateToProps, {})(CategoryDetail);
+export default connect(mapStateToProps, {})(ServiceDetail);
