@@ -572,7 +572,7 @@ class NavbarMenu extends React.Component {
                           className={activeKey === "services" ? "active" : ""}
                           onClick={() => { }}
                         >
-                          <Link to="/services">List Services</Link>
+                          <Link to="/service">List Services</Link>
                         </li>
                         <li
                           className={activeKey === "create-service" ? "active" : ""}

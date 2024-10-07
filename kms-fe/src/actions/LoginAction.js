@@ -1,10 +1,10 @@
-export const UPDATE_USERNAME = "loginReducer/UPDATE_USERNAME";
+export const UPDATE_EMAIL = "loginReducer/UPDATE_EMAIL";
 export const UPDATE_PASSWORD = "loginReducer/UPDATE_PASSWORD";
 export const ON_LOGGEDIN = "loginReducer/ON_LOGGEDIN";
 
-export const updateUsername = (val) => (disptch) => {
+export const updateEmail = (val) => (disptch) => {
   disptch({
-    type: UPDATE_USERNAME,
+    type: UPDATE_EMAIL,
     payload: val,
   });
 };

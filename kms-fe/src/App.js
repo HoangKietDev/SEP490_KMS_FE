@@ -63,7 +63,10 @@ import Category from "./screens/CategoryService/Category";
 import CategoryCreate from "./screens/CategoryService/CategoryCreate";
 import CategoryDetail from "./screens/CategoryService/CategoryDetail";
 import CategoryUpdate from "./screens/CategoryService/CategoryUpdate";
-
+import Service from "./screens/Service/Service";
+// import CategoryCreate from "./screens/CategoryService/CategoryCreate";
+import ServiceDetail from "./screens/Service/ServiceDetail";
+import ServiceUpdate from "./screens/Service/ServiceUpdate";
 
 
 window.__DEV__ = true;
@@ -149,6 +152,26 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/category-update/:categoryServiceId`}
                   component={CategoryUpdate}
+                />
+                <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/service`}
+                  component={Service}
+                />
+                {/* <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/create-service`}
+                  component={CategoryCreate}
+                /> */}
+                <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/service-detail/:serviceId`}
+                  component={ServiceDetail}
+                />
+                <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/service-update/:serviceId`}
+                  component={ServiceUpdate}
                 />
                 <Route
                   path={`${process.env.PUBLIC_URL}/viewclass`}
