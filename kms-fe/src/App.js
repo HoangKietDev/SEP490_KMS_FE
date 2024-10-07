@@ -149,7 +149,26 @@ class App extends React.Component {
                     path={`${process.env.PUBLIC_URL}/category-detail/:categoryServiceId`}
                     component={CategoryDetail}
                   />
-                  
+                   <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/service`}
+                  component={Service}
+                />
+                {/* <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/create-service`}
+                  component={CategoryCreate}
+                /> */}
+                <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/service-detail/:serviceId`}
+                  component={ServiceDetail}
+                />
+                <Route
+                  exact
+                  path={`${process.env.PUBLIC_URL}/service-update/:serviceId`}
+                  component={ServiceUpdate}
+                />
                   <Route
                     exact
                     path={`${process.env.PUBLIC_URL}/viewallstudent`}
