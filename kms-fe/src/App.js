@@ -33,13 +33,8 @@ import widgetsdata from "./screens/Widgets/Data";
 import widgetsweather from "./screens/Widgets/Weather";
 import widgetsblog from "./screens/Widgets/Blog";
 import widgetsecommers from "./screens/Widgets/ECommers";
-import registration from "./screens/Auth/Registration";
-import lockscreen from "./screens/Auth/Lockscreen";
 import forgotpassword from "./screens/Auth/ForgotPassword";
 import page404 from "./screens/Auth/Page404";
-import page403 from "./screens/Auth/Page403";
-import page500 from "./screens/Auth/Page500";
-import page503 from "./screens/Auth/Page503";
 import blankpage from "./screens/Pages/BlankPage";
 import profilev1page from "./screens/Pages/ProfileV1";
 import profilev2page from "./screens/Pages/ProfileV2";
@@ -60,6 +55,13 @@ import basicelements from "./screens/Forms/BasicElements";
 import tablenormal from "./screens/Tables/TableNormal";
 import echart from "./screens/Charts/Echart";
 import leafletmap from "./screens/Maps/GoogleMaps";
+
+import Category from "./screens/CategoryService/Category";
+import CategoryCreate from "./screens/CategoryService/CategoryCreate";
+import CategoryDetail from "./screens/CategoryService/CategoryDetail";
+
+
+
 
 window.__DEV__ = true;
 
@@ -85,16 +87,10 @@ class App extends React.Component {
         {activeKey1 === "" ||
         activeKey1 === "/" ||
         activeKey1 === "login" ||
-        activeKey1 === "registration" ||
-        activeKey1 === "lockscreen" ||
         activeKey1 === "forgotpassword" ||
         activeKey1 === "page404" ||
-        activeKey1 === "page403" ||
-        activeKey1 === "page500" ||
-        activeKey1 === "page503" ||
         activeKey1 === "maintanance" ? (
             <Switch>
-              {/* <Route exact path={`${process.env.PUBLIC_URL}`} component={Login} /> */}
               <Route
                 exact
                 path={`${process.env.PUBLIC_URL}/`}
@@ -117,32 +113,6 @@ class App extends React.Component {
               />
               <Route
                 exact
-                path={`${process.env.PUBLIC_URL}/page403`}
-                component={page403}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/page500`}
-                component={page500}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/page503`}
-                component={page503}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/registration`}
-                component={registration}
-              />
-              <Route exact path={`registration`} component={registration} />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/lockscreen`}
-                component={lockscreen}
-              />
-              <Route
-                exact
                 path={`${process.env.PUBLIC_URL}/maintanance`}
                 component={maintanance}
               />
@@ -157,16 +127,21 @@ class App extends React.Component {
                     path={`${process.env.PUBLIC_URL}/dashboard`}
                     component={dashboard}
                   />
-                  {/* <Route
+                  <Route
                     exact
-                    path={`${process.env.PUBLIC_URL}/demographic`}
-                    component={demographic}
+                    path={`${process.env.PUBLIC_URL}/category`}
+                    component={Category}
                   />
                   <Route
                     exact
-                    path={`${process.env.PUBLIC_URL}/ioT`}
-                    component={ioT}
-                  /> */}
+                    path={`${process.env.PUBLIC_URL}/create-category`}
+                    component={CategoryCreate}
+                  />
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/category-detail/:categoryServiceId`}
+                    component={CategoryDetail}
+                  />
                   <Route
                     exact
                     path={`${process.env.PUBLIC_URL}/appinbox`}
