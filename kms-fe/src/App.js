@@ -59,7 +59,7 @@ import leafletmap from "./screens/Maps/GoogleMaps";
 import Category from "./screens/CategoryService/Category";
 import CategoryCreate from "./screens/CategoryService/CategoryCreate";
 import CategoryDetail from "./screens/CategoryService/CategoryDetail";
-
+import CategoryUpdate from "./screens/CategoryService/CategoryUpdate";
 
 
 
@@ -142,6 +142,12 @@ class App extends React.Component {
                     path={`${process.env.PUBLIC_URL}/category-detail/:categoryServiceId`}
                     component={CategoryDetail}
                   />
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/category-update/:categoryServiceId`}
+                    component={CategoryUpdate}
+                  />
+                  
                   <Route
                     exact
                     path={`${process.env.PUBLIC_URL}/appinbox`}
