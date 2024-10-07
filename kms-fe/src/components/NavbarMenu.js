@@ -41,7 +41,7 @@ class NavbarMenu extends React.Component {
   activeMenutabwhenNavigate(activeKey) {
     if (
       activeKey === "/dashboard" ||
-      activeKey === "/demographic" 
+      activeKey === "/demographic"
     ) {
       this.activeMenutabContainer("dashboradContainer");
     } else if (
@@ -147,6 +147,13 @@ class NavbarMenu extends React.Component {
       activeMenu.children[1].classList.toggle("in");
     }, 10);
   }
+
+  handleLogOut = async (evt) => {
+    evt.preventDefault();
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  };
+
   render() {
     const {
       addClassactive,
@@ -449,14 +456,27 @@ class NavbarMenu extends React.Component {
                     <i className="icon-settings"></i>Settings
                   </Dropdown.Item>
                   <li className="divider"></li>
-                  <Dropdown.Item href="login">
+                  <Dropdown.Item onClick={this.handleLogOut}>
                     {" "}
                     <i className="icon-power"></i>Logout
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
               <hr />
-          
+              <ul className="row list-unstyled">
+                <li className="col-4">
+                  <small>User</small>
+                  <h6>456</h6>
+                </li>
+                <li className="col-4">
+                  <small>Student</small>
+                  <h6>1350</h6>
+                </li>
+                <li className="col-4">
+                  <small>Teacher</small>
+                  <h6>100</h6>
+                </li>
+              </ul>
             </div>
             <ul className="nav nav-tabs">
               <li className="nav-item">
@@ -470,17 +490,7 @@ class NavbarMenu extends React.Component {
                   Menu
                 </a>
               </li>
-              <li className="nav-item">
-                <a
-                  className={sideMenuTab[1] ? "nav-link active" : "nav-link"}
-                  data-toggle="tab"
-                  onClick={() => {
-                    this.props.onPressSideMenuTab(1);
-                  }}
-                >
-                  <i className="icon-book-open"></i>
-                </a>
-              </li>
+
               <li className="nav-item">
                 <a
                   className={sideMenuTab[2] ? "nav-link active" : "nav-link"}
@@ -492,17 +502,7 @@ class NavbarMenu extends React.Component {
                   <i className="icon-settings"></i>
                 </a>
               </li>
-              <li className="nav-item">
-                <a
-                  className={sideMenuTab[3] ? "nav-link active" : "nav-link"}
-                  data-toggle="tab"
-                  onClick={() => {
-                    this.props.onPressSideMenuTab(3);
-                  }}
-                >
-                  <i className="icon-question"></i>
-                </a>
-              </li>
+
             </ul>
             <div className="tab-content p-l-0 p-r-0">
               <div
@@ -540,7 +540,37 @@ class NavbarMenu extends React.Component {
                         </li>
                       </ul>
                     </li>
-                    {/* <li id="AppContainer" className="">
+
+                    {/* Category service */}
+                    <li className="" id="categoryContainer">
+                      <a
+                        href="#!"
+                        className="has-arrow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.activeMenutabContainer("categoryContainer");
+                        }}
+                      >
+                        <i className="icon-globe"></i> <span>Category</span>
+                      </a>
+                      <ul className="collapse">
+                        <li
+                          className={activeKey === "category" ? "active" : ""}
+                        >
+                          <Link to="/category">List category service</Link>
+                        </li>
+                        <li
+                          className={
+                            activeKey === "create-category" ? "active" : ""
+                          }
+                        >
+                          <Link to="/create-category">New category service</Link>
+                        </li>
+                      </ul>
+                    </li>
+
+                    {/* Services */}
+                    <li id="AppContainer" className="">
                       <a
                         href="#!"
                         className="has-arrow"
@@ -549,43 +579,23 @@ class NavbarMenu extends React.Component {
                           this.activeMenutabContainer("AppContainer");
                         }}
                       >
-                        <i className="icon-grid"></i> <span>App</span>
+                        <i className="icon-grid"></i> <span>Services</span>
                       </a>
                       <ul className="collapse">
                         <li
-                          className={activeKey === "appinbox" ? "active" : ""}
+                          className={activeKey === "services" ? "active" : ""}
                           onClick={() => { }}
                         >
-                          <Link to="appinbox">Inbox</Link>
+                          <Link to="/services">List Services</Link>
                         </li>
                         <li
-                          className={activeKey === "appchat" ? "active" : ""}
+                          className={activeKey === "create-service" ? "active" : ""}
                           onClick={() => { }}
                         >
-                          <Link to="appchat">Chat</Link>
-                        </li>
-                        <li
-                          className={
-                            activeKey === "appcalendar" ? "active" : ""
-                          }
-                          onClick={() => { }}
-                        >
-                          <Link to="appcalendar">Calendar</Link>
-                        </li>
-                        <li
-                          className={activeKey === "appcontact" ? "active" : ""}
-                          onClick={() => { }}
-                        >
-                          <Link to="appcontact">Contact Card</Link>
-                        </li>
-                        <li
-                          className={activeKey === "apptaskbar" ? "active" : ""}
-                          onClick={() => { }}
-                        >
-                          <Link to="apptaskbar">Taskboard</Link>
+                          <Link to="/create-service">New Service </Link>
                         </li>
                       </ul>
-                    </li> */}
+                    </li> 
                     <li id="ClassContainer" className="">
                       <a
                         href="#!"

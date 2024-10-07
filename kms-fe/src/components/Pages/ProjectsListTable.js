@@ -2,47 +2,71 @@ import React from "react";
 import { connect } from "react-redux";
 
 class ProjectsListTable extends React.Component {
+  handleEdit = (categoryServiceId) => {
+    // Chuyển hướng đến trang cập nhật lớp học
+    this.props.history.push(`/category-detail/${categoryServiceId}`);
+  };
+
   render() {
-    const { bodyData } = this.props;
+    const { categories } = this.props;
+
     return (
-      <div className="table-responsive">
-        <table className="table m-b-0 table-hover">
-          <thead className="thead-light">
-            <tr>
-              <th>Class Name</th>
-              <th>Status</th>
-              <th>Expire Date</th>
-              <th>School ID</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bodyData.map((data, i) => {
-              return (
-                <tr key={"class" + i}>
-                  <td>{data.className}</td>
-                  <td>
-                    {data.isActive === 1 ? (
-                      <span className="badge badge-success">Active</span>
-                    ) : (
-                      <span className="badge badge-default">Inactive</span>
-                    )}
-                  </td>
-                  <td>{new Date(data.expireDate).toLocaleDateString()}</td>
-                  <td>{data.schoolId}</td>
-                  <td className="project-actions">
-                    <a className="btn btn-outline-secondary mr-1">
-                      <i className="icon-eye"></i>
-                    </a>
-                    <a className="btn btn-outline-secondary">
-                      <i className="icon-pencil"></i>
-                    </a>
-                  </td>
+
+      <div className="col-lg-12">
+        <div className="card">
+          <div className="header">
+          </div>
+          <div className="table-responsive">
+            <table className="table m-b-0 table-hover">
+              <thead className="thead-light">
+                <tr>
+                  <th>#</th>
+                  <th>CategoryName</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {categories.map((category, i) => {
+                  return (
+                    <tr key={"dihf" + i}>
+
+                      <td className="project-title">
+                        <th scope="row">{i + 1}</th>
+                      </td>
+                      <td>
+                        <a onClick={() => this.handleEdit(category.categoryServiceId)} >{category?.categoryName}</a>
+                      </td>
+                      <td>
+                        {category?.description}
+                      </td>
+                      <td>
+                        {category?.status === "Active" ? (
+                          <span className="badge badge-success">Active</span>
+                        ) : category?.status === "InActive" ? (
+                          <span className="badge badge-default">InActive</span>
+                        ) : category?.status === "PENDING" ? (
+                          <span className="badge badge-warning">Pending</span>
+                        ) : category?.status === "Closed" ? (
+                          <span className="badge badge-primary">Closed</span>
+                        ) : null}
+                      </td>
+                      <td className="project-actions">
+                        <a className="btn btn-outline-secondary mr-1">
+                          <i className="icon-eye"></i>
+                        </a>
+                        <a className="btn btn-outline-secondary">
+                          <i className="icon-pencil"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
   }

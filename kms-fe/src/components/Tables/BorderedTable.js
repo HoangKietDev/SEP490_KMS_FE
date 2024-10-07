@@ -1,61 +1,46 @@
 import React from "react";
+import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
 
 class BorderedTable extends React.Component {
+  
+  handleEdit = (categoryServiceId) => {
+    // Chuyển hướng đến trang cập nhật lớp học
+    this.props.history.push(`/category-detail/${categoryServiceId}`);
+  };
   render() {
+
+    const { categories } = this.props;
+
     return (
       <div className="col-lg-12">
         <div className="card">
           <div className="header">
-            <h2>
-              Bordered Table{" "}
-              <small>
-                Add <code>.table-bordered</code> for borders on all sides of the
-                table and cells.
-              </small>
-            </h2>
           </div>
           <div className="body table-responsive">
-            <table className="table table-bordered">
+            <table className="table table-bordered table-hover">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>FIRST NAME</th>
-                  <th>LAST NAME</th>
-                  <th>USERNAME</th>
+                  <th>CategoryService</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Mark</td>
-                  <td>Otto</td>
-                  <td>@mdo</td>
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  <td>Jacob</td>
-                  <td>Thornton</td>
-                  <td>@fat</td>
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  <td>Larry</td>
-                  <td>the Bird</td>
-                  <td>@twitter</td>
-                </tr>
-                <tr>
-                  <th scope="row">4</th>
-                  <td>Larry</td>
-                  <td>Jellybean</td>
-                  <td>@lajelly</td>
-                </tr>
-                <tr>
-                  <th scope="row">5</th>
-                  <td>Larry</td>
-                  <td>Kikat</td>
-                  <td>@lakitkat</td>
-                </tr>
+                {categories.map((category, index) => (
+                  <tr key={index}>
+                    <th scope="row">{index + 1}</th>
+                    <td><a onClick={() => this.handleEdit(category.categoryServiceId)} >{category?.categoryName}</a></td>
+                    <td>{category?.status}</td>
+                    <td>{category?.description}</td>
+                    <td>
+                      <Button variant="primary">Update</Button>{' '}
+                      <Button variant="warning">Enable</Button>{' '}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
