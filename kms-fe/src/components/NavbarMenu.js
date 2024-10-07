@@ -56,7 +56,7 @@ class NavbarMenu extends React.Component {
       activeKey === "/" ||
       activeKey === "/viewclass" ||
       activeKey === "/createclass" ||
-      activeKey === "/updateclass" 
+      activeKey === "/updateclass"
     ) {
       this.activeMenutabContainer("ClassContainer");
     } else if (
@@ -94,24 +94,24 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("WidgetsContainer");
     } else if (activeKey === "/login") {
       this.activeMenutabContainer("WidgetsContainer");
-    // } else if (
-    //   activeKey === "/teamsboard" ||
-    //   activeKey === "/profilev2page" ||
-    //   activeKey === "/helperclass" ||
-    //   activeKey === "/searchresult" ||
-    //   activeKey === "/invoicesv2" ||
-    //   activeKey === "/invoices" ||
-    //   activeKey === "/pricing" ||
-    //   activeKey === "/timeline" ||
-    //   activeKey === "/profilev1page" ||
-    //   activeKey === "/blankpage" ||
-    //   activeKey === "/imagegalleryprofile" ||
-    //   activeKey === "/projectslist" ||
-    //   activeKey === "/maintanance" ||
-    //   activeKey === "/testimonials" ||
-    //   activeKey === "/faqs"
-    // ) {
-    //   this.activeMenutabContainer("PagesContainer");
+      // } else if (
+      //   activeKey === "/teamsboard" ||
+      //   activeKey === "/profilev2page" ||
+      //   activeKey === "/helperclass" ||
+      //   activeKey === "/searchresult" ||
+      //   activeKey === "/invoicesv2" ||
+      //   activeKey === "/invoices" ||
+      //   activeKey === "/pricing" ||
+      //   activeKey === "/timeline" ||
+      //   activeKey === "/profilev1page" ||
+      //   activeKey === "/blankpage" ||
+      //   activeKey === "/imagegalleryprofile" ||
+      //   activeKey === "/projectslist" ||
+      //   activeKey === "/maintanance" ||
+      //   activeKey === "/testimonials" ||
+      //   activeKey === "/faqs"
+      // ) {
+      //   this.activeMenutabContainer("PagesContainer");
     } else if (
       activeKey === "/formvalidation" ||
       activeKey === "/basicelements"
@@ -155,6 +155,8 @@ class NavbarMenu extends React.Component {
   };
 
   render() {
+    const username = localStorage.getItem("username") || "User"; // Thay "User" bằng tên mặc định nếu không có
+
     const {
       addClassactive,
       addClassactiveChildAuth,
@@ -440,7 +442,7 @@ class NavbarMenu extends React.Component {
                   id="dropdown-basic"
                   className="user-name"
                 >
-                  <strong>Alizee Thomas</strong>
+                  <strong>{username}</strong> {/* Hiển thị username */}
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu className="dropdown-menu-right account">
@@ -448,35 +450,19 @@ class NavbarMenu extends React.Component {
                     <i className="icon-user"></i>My Profile
                   </Dropdown.Item>
                   <Dropdown.Item href="appinbox">
-                    {" "}
                     <i className="icon-envelope-open"></i>Messages
                   </Dropdown.Item>
                   <Dropdown.Item>
-                    {" "}
                     <i className="icon-settings"></i>Settings
                   </Dropdown.Item>
                   <li className="divider"></li>
                   <Dropdown.Item onClick={this.handleLogOut}>
-                    {" "}
                     <i className="icon-power"></i>Logout
                   </Dropdown.Item>
                 </Dropdown.Menu>
               </Dropdown>
               <hr />
-              <ul className="row list-unstyled">
-                <li className="col-4">
-                  <small>User</small>
-                  <h6>456</h6>
-                </li>
-                <li className="col-4">
-                  <small>Student</small>
-                  <h6>1350</h6>
-                </li>
-                <li className="col-4">
-                  <small>Teacher</small>
-                  <h6>100</h6>
-                </li>
-              </ul>
+
             </div>
             <ul className="nav nav-tabs">
               <li className="nav-item">
@@ -595,7 +581,7 @@ class NavbarMenu extends React.Component {
                           <Link to="/create-service">New Service </Link>
                         </li>
                       </ul>
-                    </li> 
+                    </li>
                     <li id="ClassContainer" className="">
                       <a
                         href="#!"
@@ -608,7 +594,7 @@ class NavbarMenu extends React.Component {
                         <i className="icon-grid"></i> <span>CLass Management</span>
                       </a>
                       <ul className="collapse">
-                       
+
                         <li
                           className={activeKey === "classviewclass" ? "active" : ""}
                           onClick={() => { }}
@@ -621,7 +607,7 @@ class NavbarMenu extends React.Component {
                         >
                           <Link to="/reateclass">Create Class</Link>
                         </li>
-                        
+
                       </ul>
                     </li>
                     <li id="FileManagerContainer" className="">
@@ -905,7 +891,7 @@ class NavbarMenu extends React.Component {
                         </li>
                       </ul>
                     </li>
-                    {/* <li id="PagesContainer" className="">
+                    <li id="PagesContainer" className="">
                       <a
                         href="#!"
                         className="has-arrow"
@@ -1046,7 +1032,7 @@ class NavbarMenu extends React.Component {
                           <Link to="faqs">FAQ</Link>
                         </li>
                       </ul>
-                    </li> */}
+                    </li>
                     <li id="FormsContainer" className="">
                       <a
                         href="#!"

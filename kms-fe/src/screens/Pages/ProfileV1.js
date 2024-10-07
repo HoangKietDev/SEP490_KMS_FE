@@ -3,11 +3,35 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { Tabs, Tab } from "react-bootstrap";
 import imageuser from "../../assets/images/user.png";
+
 class ProfileV1Page extends React.Component {
+  state = {
+    userData: null,
+  };
+
   componentDidMount() {
     window.scrollTo(0, 0);
+    this.fetchUserData();
   }
+
+  fetchUserData = async () => {
+    try {
+      const response = await fetch("http://localhost:5124/api/Login/GetAllData");
+      const data = await response.json();
+      // Giả sử bạn lấy thông tin của user đầu tiên trong danh sách
+      this.setState({ userData: data[0] });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
   render() {
+    const { userData } = this.state;
+
+    if (!userData) {
+      return <div>Loading...</div>; // Thêm loading khi dữ liệu chưa có
+    }
+
     return (
       <div
         style={{ flex: 1 }}
@@ -19,19 +43,14 @@ class ProfileV1Page extends React.Component {
           <div className="container-fluid">
             <PageHeader
               HeaderText="User Profile"
-              Breadcrumb={[
-                { name: "Profile", navigate: "" },
-              ]}
+              Breadcrumb={[{ name: "Profile", navigate: "" }]}
             />
             <div className="row clearfix">
               <div className="col-lg-12">
                 <div className="card">
                   <div className="body">
-                    <Tabs
-                      defaultActiveKey="settings"
-                      id="uncontrolled-tab-example"
-                    >
-                      <Tab eventKey="settings" title="settings">
+                    <Tabs defaultActiveKey="settings" id="uncontrolled-tab-example">
+                      <Tab eventKey="settings" title="Settings">
                         <div>
                           <div className="body">
                             <h6>Profile Photo</h6>
@@ -59,6 +78,7 @@ class ProfileV1Page extends React.Component {
                               </div>
                             </div>
                           </div>
+
                           <div className="body">
                             <h6>Basic Information</h6>
                             <div className="row clearfix">
@@ -68,6 +88,8 @@ class ProfileV1Page extends React.Component {
                                     className="form-control"
                                     placeholder="First Name"
                                     type="text"
+                                    value={userData.firstname || ""}
+                                    readOnly
                                   />
                                 </div>
                                 <div className="form-group">
@@ -75,6 +97,8 @@ class ProfileV1Page extends React.Component {
                                     className="form-control"
                                     placeholder="Last Name"
                                     type="text"
+                                    value={userData.lastName || ""}
+                                    readOnly
                                   />
                                 </div>
                                 <div className="form-group">
@@ -132,22 +156,19 @@ class ProfileV1Page extends React.Component {
                                   <input
                                     className="form-control"
                                     placeholder="Mail"
-                                    type="mail"
+                                    type="email"
+                                    value={userData.mail || ""}
+                                    readOnly
                                   />
                                 </div>
+                               
                                 <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="State/Province"
-                                    type="text"
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <select className="form-control">
+                                  <select className="form-control" defaultValue="VN">
                                     <option value="">-- Select Country --</option>
                                     <option value="VN">Viet Nam</option>
                                   </select>
                                 </div>
+
                               </div>
                             </div>
                             <button className="btn btn-primary" type="button">
@@ -165,11 +186,10 @@ class ProfileV1Page extends React.Component {
                                 <div className="form-group">
                                   <input
                                     className="form-control"
-                                    disabled=""
+                                    disabled
                                     placeholder="Username"
                                     type="text"
-                                    value="alizeethomas"
-                                    onChange={() => { }}
+                                    value={userData.accounts[0].username || ""}
                                   />
                                 </div>
                                 <div className="form-group">
@@ -177,8 +197,8 @@ class ProfileV1Page extends React.Component {
                                     className="form-control"
                                     placeholder="Email"
                                     type="email"
-                                    value="alizee.info@yourdomain.com"
-                                    onChange={() => { }}
+                                    value={userData.mail || ""}
+                                    readOnly
                                   />
                                 </div>
                                 <div className="form-group">
@@ -186,7 +206,7 @@ class ProfileV1Page extends React.Component {
                                     className="form-control"
                                     placeholder="Phone Number"
                                     type="text"
-                                    onChange={() => { }}
+                                    value={userData.phoneNumber || ""}
                                   />
                                 </div>
                               </div>
