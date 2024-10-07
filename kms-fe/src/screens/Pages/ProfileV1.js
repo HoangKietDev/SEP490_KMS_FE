@@ -7,6 +7,16 @@ import imageuser from "../../assets/images/user.png";
 class ProfileV1Page extends React.Component {
   state = {
     userData: null,
+    updatedUserData: {
+      firstname: "",
+      lastName: "",
+      address: "",
+      phoneNumber: "",
+      gender: 0, // 0 cho Female, 1 cho Male
+      dob: "",
+      mail: "",
+      accounts: [],
+    },
   };
 
   componentDidMount() {
@@ -16,19 +26,85 @@ class ProfileV1Page extends React.Component {
 
   fetchUserData = async () => {
     try {
-      const response = await fetch("http://localhost:5124/api/Login/GetAllData");
+      const response = await fetch("http://localhost:5124/api/User/1");
       const data = await response.json();
-      // Giả sử bạn lấy thông tin của user đầu tiên trong danh sách
-      this.setState({ userData: data[0] });
+      this.setState({
+        userData: data,
+        updatedUserData: {
+          firstname: data.firstname,
+          lastName: data.lastName,
+          address: data.address,
+          phoneNumber: data.phoneNumber,
+          gender: data.gender || 0, // Đảm bảo giá trị mặc định là 0 (Female)
+          dob: data.dob ? data.dob.split("T")[0] : "",
+          mail: data.mail,
+          accounts: data.accounts,
+        },
+      });
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
 
-  render() {
-    const { userData } = this.state;
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState((prevState) => ({
+      updatedUserData: {
+        ...prevState.updatedUserData,
+        [name]: value,
+      },
+    }));
+  };
 
-    if (!userData) {
+  handleGenderChange = (e) => {
+    const selectedGender = e.target.value === "male" ? 1 : 0;
+    this.setState((prevState) => ({
+      updatedUserData: {
+        ...prevState.updatedUserData,
+        gender: selectedGender,
+      },
+    }));
+  };
+
+  handleUpdate = async () => {
+    const { updatedUserData } = this.state;
+    const requestBody = {
+      userId: 1, // Cần điều chỉnh nếu userId khác
+      firstname: updatedUserData.firstname,
+      lastName: updatedUserData.lastName,
+      address: updatedUserData.address,
+      phoneNumber: updatedUserData.phoneNumber,
+      gender: updatedUserData.gender,
+      dob: updatedUserData.dob,
+    };
+
+    try {
+      const response = await fetch("http://localhost:5124/api/User/UpdateClass", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("User updated successfully:", result);
+        alert("Cập nhật người dùng thành công!"); // Hiển thị thông báo thành công
+      } else {
+        console.error("Failed to update user:", response.statusText);
+        alert("Cập nhật người dùng thất bại."); // Hiển thị thông báo thất bại
+      }
+    } catch (error) {
+      console.error("Error updating user data:", error);
+      alert("Có lỗi xảy ra trong quá trình cập nhật."); // Hiển thị thông báo lỗi
+    }
+  };
+
+  render() {
+    const { updatedUserData } = this.state;
+
+    if (!updatedUserData) {
       return <div>Loading...</div>; // Thêm loading khi dữ liệu chưa có
     }
 
@@ -84,31 +160,35 @@ class ProfileV1Page extends React.Component {
                             <div className="row clearfix">
                               <div className="col-lg-6 col-md-12">
                                 <div className="form-group">
+                                  <label>First Name</label>
                                   <input
                                     className="form-control"
-                                    placeholder="First Name"
                                     type="text"
-                                    value={userData.firstname || ""}
-                                    readOnly
+                                    name="firstname"
+                                    value={updatedUserData.firstname || ""}
+                                    onChange={this.handleChange}
                                   />
                                 </div>
                                 <div className="form-group">
+                                  <label>Last Name</label>
                                   <input
                                     className="form-control"
-                                    placeholder="Last Name"
                                     type="text"
-                                    value={userData.lastName || ""}
-                                    readOnly
+                                    name="lastName"
+                                    value={updatedUserData.lastName || ""}
+                                    onChange={this.handleChange}
                                   />
                                 </div>
                                 <div className="form-group">
+                                  <label>Gender</label>
                                   <div>
                                     <label className="fancy-radio">
                                       <input
-                                        name="gender2"
+                                        name="gender"
                                         type="radio"
                                         value="male"
-                                        onChange={() => { }}
+                                        checked={updatedUserData.gender === 1}
+                                        onChange={this.handleGenderChange}
                                       />
                                       <span>
                                         <i></i>Male
@@ -116,10 +196,11 @@ class ProfileV1Page extends React.Component {
                                     </label>
                                     <label className="fancy-radio">
                                       <input
-                                        name="gender2"
+                                        name="gender"
                                         type="radio"
                                         value="female"
-                                        onChange={() => { }}
+                                        checked={updatedUserData.gender === 0}
+                                        onChange={this.handleGenderChange}
                                       />
                                       <span>
                                         <i></i>Female
@@ -128,118 +209,64 @@ class ProfileV1Page extends React.Component {
                                   </div>
                                 </div>
                                 <div className="form-group">
-                                  <div className="input-group">
-                                    <div className="input-group-prepend">
-                                      <span className="input-group-text">
-                                        <i className="icon-calendar"></i>
-                                      </span>
-                                    </div>
-                                    <input
-                                      className="form-control"
-                                      data-date-autoclose="true"
-                                      data-provide="datepicker"
-                                      placeholder="Birthdate"
-                                    />
-                                  </div>
+                                  <label>Birthdate</label>
+                                  <input
+                                    className="form-control"
+                                    type="date"
+                                    name="dob"
+                                    value={updatedUserData.dob || ""}
+                                    onChange={this.handleChange} // Xử lý thay đổi ngày
+                                  />
                                 </div>
                               </div>
                               <div className="col-lg-6 col-md-12">
                                 <div className="form-group">
+                                  <label>Address</label>
                                   <input
                                     className="form-control"
-                                    placeholder="Address"
                                     type="text"
+                                    name="address"
+                                    value={updatedUserData.address || ""}
+                                    onChange={this.handleChange}
+                                  />
+                                </div>
+                                <div className="form-group">
+                                  <label>Phone Number</label>
+                                  <input
+                                    className="form-control"
+                                    type="text"
+                                    name="phoneNumber"
+                                    value={updatedUserData.phoneNumber || ""}
+                                    onChange={this.handleChange}
+                                  />
+                                </div>
+                                <div className="form-group">
+                                  <label>Email</label>
+                                  <input
+                                    className="form-control"
+                                    type="email"
+                                    name="mail"
+                                    value={updatedUserData.mail || ""}
+                                    readOnly
                                   />
                                 </div>
 
                                 <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="Mail"
-                                    type="email"
-                                    value={userData.mail || ""}
-                                    readOnly
-                                  />
-                                </div>
-                               
-                                <div className="form-group">
+                                  <label>Country</label>
                                   <select className="form-control" defaultValue="VN">
                                     <option value="">-- Select Country --</option>
                                     <option value="VN">Viet Nam</option>
                                   </select>
                                 </div>
-
                               </div>
                             </div>
-                            <button className="btn btn-primary" type="button">
+                            <button className="btn btn-primary" type="button" onClick={this.handleUpdate}>
                               Update
                             </button>{" "}
                             &nbsp;&nbsp;
                             <button className="btn btn-default" type="button">
                               Cancel
                             </button>
-                          </div>
-                          <div className="body">
-                            <div className="row clearfix">
-                              <div className="col-lg-6 col-md-12">
-                                <h6>Account Data</h6>
-                                <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    disabled
-                                    placeholder="Username"
-                                    type="text"
-                                    value={userData.accounts[0].username || ""}
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="Email"
-                                    type="email"
-                                    value={userData.mail || ""}
-                                    readOnly
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="Phone Number"
-                                    type="text"
-                                    value={userData.phoneNumber || ""}
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-lg-6 col-md-12">
-                                <h6>Change Password</h6>
-                                <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="Current Password"
-                                    type="password"
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="New Password"
-                                    type="password"
-                                  />
-                                </div>
-                                <div className="form-group">
-                                  <input
-                                    className="form-control"
-                                    placeholder="Confirm New Password"
-                                    type="password"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <button className="btn btn-primary" type="button">
-                              Update
-                            </button>{" "}
-                            &nbsp;&nbsp;
-                            <button className="btn btn-default">Cancel</button>
                           </div>
                         </div>
                       </Tab>
@@ -255,8 +282,10 @@ class ProfileV1Page extends React.Component {
   }
 }
 
-const mapStateToProps = ({ ioTReducer }) => ({
-  isSecuritySystem: ioTReducer.isSecuritySystem,
-});
+const mapStateToProps = (state) => {
+  return {
+    // Dữ liệu từ redux nếu cần
+  };
+};
 
-export default connect(mapStateToProps, {})(ProfileV1Page);
+export default connect(mapStateToProps)(ProfileV1Page);

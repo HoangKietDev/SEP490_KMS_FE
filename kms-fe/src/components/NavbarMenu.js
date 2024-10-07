@@ -52,7 +52,14 @@ class NavbarMenu extends React.Component {
       activeKey === "/apptaskbar"
     ) {
       this.activeMenutabContainer("AppContainer");
-    } else if (
+    } 
+    else if (
+      activeKey === "/" ||
+      activeKey === "/viewallstudent" 
+    ) {
+      this.activeMenutabContainer("ChildrenContainer");
+    }
+    else if (
       activeKey === "/" ||
       activeKey === "/viewclass" ||
       activeKey === "/createclass" ||
@@ -94,24 +101,24 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("WidgetsContainer");
     } else if (activeKey === "/login") {
       this.activeMenutabContainer("WidgetsContainer");
-      // } else if (
-      //   activeKey === "/teamsboard" ||
-      //   activeKey === "/profilev2page" ||
-      //   activeKey === "/helperclass" ||
-      //   activeKey === "/searchresult" ||
-      //   activeKey === "/invoicesv2" ||
-      //   activeKey === "/invoices" ||
-      //   activeKey === "/pricing" ||
-      //   activeKey === "/timeline" ||
-      //   activeKey === "/profilev1page" ||
-      //   activeKey === "/blankpage" ||
-      //   activeKey === "/imagegalleryprofile" ||
-      //   activeKey === "/projectslist" ||
-      //   activeKey === "/maintanance" ||
-      //   activeKey === "/testimonials" ||
-      //   activeKey === "/faqs"
-      // ) {
-      //   this.activeMenutabContainer("PagesContainer");
+      } else if (
+        activeKey === "/teamsboard" ||
+        activeKey === "/profilev2page" ||
+        activeKey === "/helperclass" ||
+        activeKey === "/searchresult" ||
+        activeKey === "/invoicesv2" ||
+        activeKey === "/invoices" ||
+        activeKey === "/pricing" ||
+        activeKey === "/timeline" ||
+        activeKey === "/profilev1page" ||
+        activeKey === "/blankpage" ||
+        activeKey === "/imagegalleryprofile" ||
+        activeKey === "/projectslist" ||
+        activeKey === "/maintanance" ||
+        activeKey === "/testimonials" ||
+        activeKey === "/faqs"
+      ) {
+        this.activeMenutabContainer("PagesContainer");
     } else if (
       activeKey === "/formvalidation" ||
       activeKey === "/basicelements"
@@ -607,6 +614,29 @@ class NavbarMenu extends React.Component {
                         >
                           <Link to="/reateclass">Create Class</Link>
                         </li>
+
+                      </ul>
+                    </li>
+                    <li id="ChildrenContainer" className="">
+                      <a
+                        href="#!"
+                        className="has-arrow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.activeMenutabContainer("ChildrenContainer");
+                        }}
+                      >
+                        <i className="icon-grid"></i> <span>Student Management</span>
+                      </a>
+                      <ul className="collapse">
+
+                        <li
+                          className={activeKey === "classviewclass" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/viewallstudent">View All Student</Link>
+                        </li>
+                        
 
                       </ul>
                     </li>

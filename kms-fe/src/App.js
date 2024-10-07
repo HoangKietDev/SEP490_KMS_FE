@@ -58,7 +58,8 @@ import leafletmap from "./screens/Maps/GoogleMaps";
 import viewclass from "./screens/Class/ViewClass";
 import createclass from "./screens/Class/CreateClass";
 import updateclass from "./screens/Class/UpdateClass";
-
+import viewallstudent from "./screens/Children/ViewAllChildren";
+import viewstudentbyID from "./screens/Children/ViewChildrenByID"
 import Category from "./screens/CategoryService/Category";
 import CategoryCreate from "./screens/CategoryService/CategoryCreate";
 import CategoryDetail from "./screens/CategoryService/CategoryDetail";
@@ -144,6 +145,16 @@ class App extends React.Component {
                     exact
                     path={`${process.env.PUBLIC_URL}/category-detail/:categoryServiceId`}
                     component={CategoryDetail}
+                  />
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/viewallstudent`}
+                    component={viewallstudent}
+                  />
+                  <Route
+                    exact
+                    path={`${process.env.PUBLIC_URL}/viewstudentbyID/:studentID`}
+                    component={viewstudentbyID}
                   />
                   <Route
                     exact
