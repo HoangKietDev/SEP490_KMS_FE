@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Route, Switch ,withRouter} from "react-router-dom";
+import { Route, Switch, withRouter } from "react-router-dom";
 import Login from "./screens/Login";
 import dashboard from "./screens/Dashbord/Dashbord";
 import demographic from "./screens/Dashbord/Demographic";
@@ -63,8 +63,11 @@ import viewstudentbyID from "./screens/Children/ViewChildrenByID"
 import Category from "./screens/CategoryService/Category";
 import CategoryCreate from "./screens/CategoryService/CategoryCreate";
 import CategoryDetail from "./screens/CategoryService/CategoryDetail";
-
-
+import CategoryUpdate from "./screens/CategoryService/CategoryUpdate";
+import Service from "./screens/Service/Service";
+// import CategoryCreate from "./screens/CategoryService/CategoryCreate";
+import ServiceDetail from "./screens/Service/ServiceDetail";
+import ServiceUpdate from "./screens/Service/ServiceUpdate";
 
 
 window.__DEV__ = true;
@@ -89,38 +92,38 @@ class App extends React.Component {
     return (
       <div id="wrapper">
         {activeKey1 === "" ||
-        activeKey1 === "/" ||
-        activeKey1 === "login" ||
-        activeKey1 === "forgotpassword" ||
-        activeKey1 === "page404" ||
-        activeKey1 === "maintanance" ? (
-            <Switch>
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/`}
-                component={Login}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/login`}
-                component={Login}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/forgotpassword`}
-                component={forgotpassword}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/page404`}
-                component={page404}
-              />
-              <Route
-                exact
-                path={`${process.env.PUBLIC_URL}/maintanance`}
-                component={maintanance}
-              />
-            </Switch>
+          activeKey1 === "/" ||
+          activeKey1 === "login" ||
+          activeKey1 === "forgotpassword" ||
+          activeKey1 === "page404" ||
+          activeKey1 === "maintanance" ? (
+          <Switch>
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/`}
+              component={Login}
+            />
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/login`}
+              component={Login}
+            />
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/forgotpassword`}
+              component={forgotpassword}
+            />
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/page404`}
+              component={page404}
+            />
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/maintanance`}
+              component={maintanance}
+            />
+          </Switch>
         ) : (
           <>
               <NavbarMenu history={this.props.history} activeKey={activeKey1} />
@@ -146,6 +149,7 @@ class App extends React.Component {
                     path={`${process.env.PUBLIC_URL}/category-detail/:categoryServiceId`}
                     component={CategoryDetail}
                   />
+                  
                   <Route
                     exact
                     path={`${process.env.PUBLIC_URL}/viewallstudent`}

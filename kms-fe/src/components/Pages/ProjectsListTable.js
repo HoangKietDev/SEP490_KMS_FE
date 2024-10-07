@@ -2,9 +2,14 @@ import React from "react";
 import { connect } from "react-redux";
 
 class ProjectsListTable extends React.Component {
-  handleEdit = (categoryServiceId) => {
-    // Chuyển hướng đến trang cập nhật lớp học
+  handleViewDetail = (categoryServiceId) => {
+    // Chuyển hướng đến trang chi tiet category
     this.props.history.push(`/category-detail/${categoryServiceId}`);
+  };
+
+  handleEdit = (categoryServiceId) => {
+    // Chuyển hướng đến cap nhat category
+    this.props.history.push(`/category-update/${categoryServiceId}`);
   };
 
   render() {
@@ -36,7 +41,7 @@ class ProjectsListTable extends React.Component {
                         <th scope="row">{i + 1}</th>
                       </td>
                       <td>
-                        <a onClick={() => this.handleEdit(category.categoryServiceId)} >{category?.categoryName}</a>
+                        <a onClick={() => this.handleViewDetail(category.categoryServiceId)} >{category?.categoryName}</a>
                       </td>
                       <td>
                         {category?.description}
@@ -53,10 +58,10 @@ class ProjectsListTable extends React.Component {
                         ) : null}
                       </td>
                       <td className="project-actions">
-                        <a className="btn btn-outline-secondary mr-1">
+                        <a  onClick={() => this.handleViewDetail(category.categoryServiceId)}  className="btn btn-outline-secondary mr-1">
                           <i className="icon-eye"></i>
                         </a>
-                        <a className="btn btn-outline-secondary">
+                        <a onClick={() => this.handleEdit(category.categoryServiceId)} className="btn btn-outline-secondary">
                           <i className="icon-pencil"></i>
                         </a>
                       </td>

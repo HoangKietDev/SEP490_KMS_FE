@@ -13,7 +13,7 @@ class BasicValidation extends React.Component {
   handleSubmit = (event) => {
     event.preventDefault();
     if (!this.state.categoryname || !this.state.description) {
-      this.setState({ submit: true });
+      this.setState({ submeet: true });
       return;
     }
     // Gọi hàm HandelSubmit từ props
@@ -40,7 +40,7 @@ class BasicValidation extends React.Component {
                   required=""
                   onChange={(e) => {
                     this.setState({
-                      categoryname: e.target.value,
+                      [e.target.name]: e.target.value,
                       submeet: false,
                     });
                   }}
@@ -79,9 +79,7 @@ class BasicValidation extends React.Component {
                 <br />
                 <label className="fancy-radio">
                   <input
-                    data-parsley-errors-container="#error-radio"
                     name="gender"
-                    required=""
                     type="radio"
                     value="male"
                   />

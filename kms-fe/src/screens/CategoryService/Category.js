@@ -25,6 +25,10 @@ class Category extends React.Component {
     fetchData();
   }
 
+  handleCreateCategory = () => {
+    // Chuyển hướng đến cap nhat category
+    this.props.history.push(`/create-category`);
+  };
 
   render() {
 
@@ -51,7 +55,7 @@ class Category extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Category Services Manager</h2>
-                    <a href="/create-category" class="btn btn-success ">Create New Category</a>
+                    <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Category</a>
                   </div>
                 </div>
               </div>

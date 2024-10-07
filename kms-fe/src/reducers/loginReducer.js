@@ -1,21 +1,21 @@
 import {
-  UPDATE_USERNAME,
+  UPDATE_EMAIL,
   UPDATE_PASSWORD,
   ON_LOGGEDIN,
 } from "../actions/LoginAction";
 
 const initialState = {
-  username: "",
+  email: "",
   password: "",
   isLoggedin: false,
 };
 
 const loginReducer = (state = initialState, action) => {
   switch (action.type) {
-    case UPDATE_USERNAME: {
+    case UPDATE_EMAIL: {
       return {
         ...state,
-        username: action.payload,
+        email: action.payload,
       };
     }
 
