@@ -97,8 +97,7 @@ class ServiceUpdate extends React.Component {
                                                 <div className="form-group col-md-6">
                                                     <label>Service Name</label>
                                                     <input
-                                                        className={`form-control ${serviceName === "" && "parsley-error"
-                                                            }`}
+                                                        className={`form-control ${serviceName === "" && "parsley-error"}`}
                                                         value={serviceName} // Bind value from state
                                                         name="serviceName"
                                                         required=""
@@ -113,7 +112,8 @@ class ServiceUpdate extends React.Component {
                                                 <div className="form-group col-md-6">
                                                     <label>Service Price</label>
                                                     <input
-                                                        className="form-control"
+                                                        className={`form-control ${servicePrice === "" && "parsley-error"
+                                                        }`}
                                                         value={servicePrice}
                                                         name="servicePrice"
                                                         required=""
@@ -161,8 +161,9 @@ class ServiceUpdate extends React.Component {
                                             </div>
 
                                             <br />
-                                            <button type="submit" className="btn btn-primary">Update Service</button>
-                                            <a href="/service" className="btn btn-success text-center">Back to Service List</a>
+                                            <div className="text-center">
+                                                <button type="submit" className="btn btn-primary my-4">Update Service</button>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>

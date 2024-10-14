@@ -44,18 +44,40 @@ class NavbarMenu extends React.Component {
       activeKey === "/demographic"
     ) {
       this.activeMenutabContainer("dashboradContainer");
-    } else if (
-      activeKey === "/appinbox" ||
-      activeKey === "/appchat" ||
-      activeKey === "/appcalendar" ||
-      activeKey === "/appcontact" ||
-      activeKey === "/apptaskbar"
+    }
+    else if (
+      activeKey === "/category" ||
+      activeKey === "/create-category"
     ) {
-      this.activeMenutabContainer("AppContainer");
-    } 
+      this.activeMenutabContainer("categoryContainer");
+    }
+    else if (
+      activeKey === "/service" ||
+      activeKey === "/create-service"
+    ) {
+      this.activeMenutabContainer("ServiceContainer");
+    }
+    else if (
+      activeKey === "/teacher" ||
+      activeKey === "/create-teacher"
+    ) {
+      this.activeMenutabContainer("TeacherContainer");
+    }
+    else if (
+      activeKey === "/schedule" ||
+      activeKey === "/create-schedule"
+    ) {
+      this.activeMenutabContainer("scheduleContainer");
+    }
+    else if (
+      activeKey === "/menu" ||
+      activeKey === "/create-menu"
+    ) {
+      this.activeMenutabContainer("menuContainer");
+    }
     else if (
       activeKey === "/" ||
-      activeKey === "/viewallstudent" 
+      activeKey === "/viewallstudent"
     ) {
       this.activeMenutabContainer("ChildrenContainer");
     }
@@ -101,24 +123,24 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("WidgetsContainer");
     } else if (activeKey === "/login") {
       this.activeMenutabContainer("WidgetsContainer");
-      } else if (
-        activeKey === "/teamsboard" ||
-        activeKey === "/profilev2page" ||
-        activeKey === "/helperclass" ||
-        activeKey === "/searchresult" ||
-        activeKey === "/invoicesv2" ||
-        activeKey === "/invoices" ||
-        activeKey === "/pricing" ||
-        activeKey === "/timeline" ||
-        activeKey === "/profilev1page" ||
-        activeKey === "/blankpage" ||
-        activeKey === "/imagegalleryprofile" ||
-        activeKey === "/projectslist" ||
-        activeKey === "/maintanance" ||
-        activeKey === "/testimonials" ||
-        activeKey === "/faqs"
-      ) {
-        this.activeMenutabContainer("PagesContainer");
+    } else if (
+      activeKey === "/teamsboard" ||
+      activeKey === "/profilev2page" ||
+      activeKey === "/helperclass" ||
+      activeKey === "/searchresult" ||
+      activeKey === "/invoicesv2" ||
+      activeKey === "/invoices" ||
+      activeKey === "/pricing" ||
+      activeKey === "/timeline" ||
+      activeKey === "/profilev1page" ||
+      activeKey === "/blankpage" ||
+      activeKey === "/imagegalleryprofile" ||
+      activeKey === "/projectslist" ||
+      activeKey === "/maintanance" ||
+      activeKey === "/testimonials" ||
+      activeKey === "/faqs"
+    ) {
+      this.activeMenutabContainer("PagesContainer");
     } else if (
       activeKey === "/formvalidation" ||
       activeKey === "/basicelements"
@@ -192,7 +214,7 @@ class NavbarMenu extends React.Component {
             delay={5000}
           >
             <Toast.Header className="toast-info mb-0">
-              Hello, welcome to Lucid, a unique admin Template.
+              Hello, welcome to KMS
             </Toast.Header>
           </Toast>
         ) : null}
@@ -563,20 +585,20 @@ class NavbarMenu extends React.Component {
                     </li>
 
                     {/* Services */}
-                    <li id="AppContainer" className="">
+                    <li id="ServiceContainer" className="">
                       <a
                         href="#!"
                         className="has-arrow"
                         onClick={(e) => {
                           e.preventDefault();
-                          this.activeMenutabContainer("AppContainer");
+                          this.activeMenutabContainer("ServiceContainer");
                         }}
                       >
                         <i className="icon-grid"></i> <span>Services</span>
                       </a>
                       <ul className="collapse">
                         <li
-                          className={activeKey === "services" ? "active" : ""}
+                          className={activeKey === "service" ? "active" : ""}
                           onClick={() => { }}
                         >
                           <Link to="/service">List Services</Link>
@@ -636,11 +658,113 @@ class NavbarMenu extends React.Component {
                         >
                           <Link to="/viewallstudent">View All Student</Link>
                         </li>
-                        
+
 
                       </ul>
                     </li>
-                    <li id="FileManagerContainer" className="">
+                    {/* Teachers */}
+                    <li id="TeacherContainer" className="">
+                      <a
+                        href="#!"
+                        className="has-arrow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.activeMenutabContainer("TeacherContainer");
+                        }}
+                      >
+                        <i className="icon-grid"></i> <span>Teacher Manager</span>
+                      </a>
+                      <ul className="collapse">
+                        <li
+                          className={activeKey === "teacher" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/teacher">List Teachers</Link>
+                        </li>
+                        <li
+                          className={activeKey === "create-service" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/create-teacher">New Teacher </Link>
+                        </li>
+                      </ul>
+                    </li>
+                    {/* Requests */}
+                    <li id="requestContainer" className="">
+                      <a
+                        href="#!"
+                        className="has-arrow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.activeMenutabContainer("requestContainer");
+                        }}
+                      >
+                        <i className="icon-grid"></i> <span>Request Manager</span>
+                      </a>
+                      <ul className="collapse">
+                        <li
+                          className={activeKey === "request" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/request">List Requests</Link>
+                        </li>
+                      </ul>
+                    </li>
+                    {/* Daily Schedule */}
+                    <li id="scheduleContainer" className="">
+                      <a
+                        href="#!"
+                        className="has-arrow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.activeMenutabContainer("scheduleContainer");
+                        }}
+                      >
+                        <i className="icon-grid"></i> <span>Daily Schedule</span>
+                      </a>
+                      <ul className="collapse">
+                        <li
+                          className={activeKey === "schedule" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/schedule">Daily Schedule</Link>
+                        </li>
+                        <li
+                          className={activeKey === "create-schedule" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/create-schedule">New Schedule </Link>
+                        </li>
+                      </ul>
+                    </li>
+                    {/* Menu */}
+                    <li id="menuContainer" className="">
+                      <a
+                        href="#!"
+                        className="has-arrow"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          this.activeMenutabContainer("menuContainer");
+                        }}
+                      >
+                        <i className="icon-grid"></i> <span>Menu Schedule</span>
+                      </a>
+                      <ul className="collapse">
+                        <li
+                          className={activeKey === "menu" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/menu">Menu Schedule</Link>
+                        </li>
+                        <li
+                          className={activeKey === "create-menu" ? "active" : ""}
+                          onClick={() => { }}
+                        >
+                          <Link to="/create-menu">New Schedule </Link>
+                        </li>
+                      </ul>
+                    </li>
+                    {/* <li id="FileManagerContainer" className="">
                       <a
                         href="#!"
                         className="has-arrow"
@@ -1159,7 +1283,7 @@ class NavbarMenu extends React.Component {
                           <Link to="leafletmap">Leaflet Map</Link>
                         </li>
                       </ul>
-                    </li>
+                    </li> */}
                   </ul>
                 </Nav>
               </div>
