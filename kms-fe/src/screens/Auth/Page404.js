@@ -20,14 +20,14 @@ class Page404 extends React.Component {
                       <span className="clearfix title">
                         <span className="number left">404</span>
                         <span className="text">Oops! <br />Page Not Found</span>
+                        <span className="text"> <br /> <br />Or you do not have permission to access</span>
                       </span>
                     </h3>
                   </div>
                   <div className="body">
-                    <p>The page you were looking for could not be found, please <a >contact us</a> to report this issue.</p>
                     <div className="margin-top-30">
-                      <a className="btn btn-default" onClick={() => {this.props.history.push("dashboard") }}><i className="fa fa-arrow-left"></i>&nbsp;<span >Go Back</span></a>&nbsp;
-                            <a className="btn btn-primary" href="dashboard"><i className="fa fa-home"></i>&nbsp;<span >Home</span></a>
+                      <a className="btn btn-default" onClick={() => this.props.history.goBack()}><i className="fa fa-arrow-left"></i>&nbsp;<span >Go Back</span></a>&nbsp;
+                      <a className="btn btn-primary" href="dashboard"><i className="fa fa-home"></i>&nbsp;<span >Home</span></a>
                     </div>
                   </div>
                 </div>

@@ -41,6 +41,8 @@ class Service extends React.Component {
   render() {
 
     const { services } = this.state;
+    const userData = JSON.parse(localStorage.getItem("user")).user;
+    const roleId = userData.roleId
 
     return (
       <div
@@ -62,7 +64,9 @@ class Service extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Services Manager</h2>
-                    <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Service</a>
+                    {roleId === 3 ? (
+                      <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Service</a>
+                    ) : null}
                   </div>
                 </div>
               </div>

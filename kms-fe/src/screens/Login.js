@@ -11,7 +11,8 @@ class Login extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isLoad: true
+      isLoad: true,
+      showPassword: false, // State to manage password visibility
     }
   }
   componentDidMount() {
@@ -48,91 +49,109 @@ class Login extends React.Component {
         // Đăng nhập thành công
         alert("Login successful!");
         localStorage.setItem("user", JSON.stringify(accountList));
-
-        // Ví dụ: bạn có thể chuyển hướng đến dashboard
-        window.location.href = "/dashboard";
+        if(accountList.user.roleId === 2 || accountList.user.roleId === 5 || accountList.user.roleId === 3 ) {
+           window.location.href = "/viewclass";
+        }
+        if(accountList.user.roleId === 1 ) {
+          window.location.href = "/dashboard";
+        }
+        if(accountList.user.roleId === 4 ) {
+          window.location.href = "/request";
+        }
       } else {
         alert("Incorrect email or password, or your account is inactive.");
       }
-    } catch(error) {
+    } catch (error) {
       console.error("Login error:", error); // Log error details for debugging
       alert("Something went wrong. Please try again later.");
     }
-};
+  };
 
-render() {
-  const { navigation } = this.props;
-  const { email, password } = this.props;
-  return (
-    <div className="theme-cyan">
-      <div className="page-loader-wrapper" style={{ display: this.state.isLoad ? 'block' : 'none' }}>
-        <div className="loader">
-          <div className="m-t-30"><img src={require('../assets/images/logo-icon.svg')} width="48" height="48" alt="Lucid" /></div>
-          <p>Please wait...</p>
+  togglePasswordVisibility = () => {
+    this.setState(prevState => ({ showPassword: !prevState.showPassword }));
+  };
+  render() {
+    const { navigation } = this.props;
+    const { email, password } = this.props;
+    const { showPassword } = this.state;
+    return (
+      <div className="theme-cyan">
+        <div className="page-loader-wrapper" style={{ display: this.state.isLoad ? 'block' : 'none' }}>
+          <div className="loader">
+            <div className="m-t-30"><img src={require('../assets/images/logo-icon.svg')} width="48" height="48" alt="Lucid" /></div>
+            <p>Please wait...</p>
+          </div>
         </div>
-      </div>
-      <div className="hide-border">
-        <div className="vertical-align-wrap">
-          <div className="vertical-align-middle auth-main">
-            <div className="auth-box">
-              <div className="top">
-                <img src={Logo} alt="Lucid" style={{ height: "40px", margin: "10px" }} />
-              </div>
-              <div className="card">
-                <div className="header">
-                  <p className="lead">Login to your account</p>
+        <div className="hide-border">
+          <div className="vertical-align-wrap">
+            <div className="vertical-align-middle auth-main">
+              <div className="auth-box">
+                <div className="top">
+                  <img src={Logo} alt="Lucid" style={{ height: "40px", margin: "10px" }} />
                 </div>
-                <div className="body">
-                  <div className="form-auth-small">
-                    <form class="space-y-4 md:space-y-6" onSubmit={this.handleOnSubmit}>
-                      <div className="form-group">
-                        <label className="control-label sr-only">Email</label>
-                        <input
-                          className="form-control"
-                          id="signin-email"
-                          placeholder="Email"
-                          type="email"
-                          value={email}
-                          onChange={val => {
-                            this.props.updateEmail(val.target.value);
-                          }}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="control-label sr-only">
-                          Password
-                        </label>
-                        <input
-                          className="form-control"
-                          id="signin-password"
-                          placeholder="Password"
-                          type="password"
-                          value={password}
-                          onChange={val => {
-                            this.props.updatePassword(val.target.value);
-                          }}
-                        />
-                      </div>
-                      <div className="form-group clearfix">
-                        <label className="fancy-checkbox element-left">
-                          <input type="checkbox" />
-                          <span>Remember me</span>
-                        </label>
-                      </div>
-                      <Button
-                        type="submit"
-                        className="btn btn-primary btn-lg btn-block"
-                      >Login</Button>
+                <div className="card">
+                  <div className="header">
+                    <p className="lead">Login to your account</p>
+                  </div>
+                  <div className="body">
+                    <div className="form-auth-small">
+                      <form class="space-y-4 md:space-y-6" onSubmit={this.handleOnSubmit}>
+                        <div className="form-group">
+                          <label className="control-label sr-only">Email</label>
+                          <input
+                            className="form-control"
+                            id="signin-email"
+                            placeholder="Email"
+                            type="email"
+                            value={email}
+                            onChange={val => {
+                              this.props.updateEmail(val.target.value);
+                            }}
+                          />
+                        </div>
+                        <div className="form-group position-relative">
+                          <label className="control-label sr-only">
+                            Password
+                          </label>
+                          <input
+                            className="form-control "
+                            id="signin-password"
+                            placeholder="Password"
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={val => {
+                              this.props.updatePassword(val.target.value);
+                            }}
+                          />
+                          <span
+                            className="position-absolute"
+                            style={{ right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}
+                            onClick={this.togglePasswordVisibility}
+                          >
+                            <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} aria-hidden="true"></i>
+                          </span>
+                        </div>
+                        <div className="form-group clearfix">
+                          <label className="fancy-checkbox element-left">
+                            <input type="checkbox" />
+                            <span>Remember me</span>
+                          </label>
+                        </div>
+                        <Button
+                          type="submit"
+                          className="btn btn-primary btn-lg btn-block"
+                        >Login</Button>
 
-                    </form>
-                    <div className="bottom">
-                      <span className="helper-text m-b-10">
-                        <i className="fa fa-lock"></i>{" "}
-                        <a href={`${process.env.PUBLIC_URL}/forgotpassword`}
-                        >
-                          Forgot password?
-                        </a>
-                      </span>
+                      </form>
+                      <div className="bottom">
+                        <span className="helper-text m-b-10">
+                          <i className="fa fa-lock"></i>{" "}
+                          <a href={`${process.env.PUBLIC_URL}/forgotpassword`}
+                          >
+                            Forgot password?
+                          </a>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -141,9 +160,8 @@ render() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 }
 
 Login.propTypes = {
