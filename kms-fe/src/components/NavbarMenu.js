@@ -82,7 +82,8 @@ class NavbarMenu extends React.Component {
     }
     else if (
       activeKey === "/" ||
-      activeKey === "/viewallstudent"
+      activeKey === "/viewallstudent" ||
+      activeKey === "/createstudent"
     ) {
       this.activeMenutabContainer("ChildrenContainer");
     }
@@ -135,7 +136,7 @@ class NavbarMenu extends React.Component {
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId
     const username = userData.firstname + " " + userData.lastName || "User"; // Thay "User" bằng tên mặc định nếu không có
-    
+
     const {
       addClassactive,
       addClassactiveChildAuth,
@@ -183,15 +184,15 @@ class NavbarMenu extends React.Component {
 
             <div className="navbar-brand">
               {/* <a href=""> */}
-                <img
-                  src={
-                    document.body.classList.contains("full-dark")
-                      ? LogoWhite
-                      : Logo
-                  }
-                  alt="Lucid Logo"
-                  className="img-responsive logo"
-                />
+              <img
+                src={
+                  document.body.classList.contains("full-dark")
+                    ? LogoWhite
+                    : Logo
+                }
+                alt="Lucid Logo"
+                className="img-responsive logo"
+              />
               {/* </a> */}
             </div>
 
@@ -531,11 +532,11 @@ class NavbarMenu extends React.Component {
                       </li>
                     ) : null}
 
-                    
+
 
 
                     {/* Children */}
-                    { roleId === 3 ? (
+                    {roleId === 3 ? (
                       <li id="ChildrenContainer" className="">
                         <a
                           href="#!"
@@ -554,6 +555,12 @@ class NavbarMenu extends React.Component {
                             onClick={() => { }}
                           >
                             <Link to="/viewallstudent">View All Student</Link>
+                          </li>
+                          <li
+                            className={activeKey === "classviewclass" ? "active" : ""}
+                            onClick={() => { }}
+                          >
+                            <Link to="/createstudent">Create Student</Link>
                           </li>
                         </ul>
                       </li>

@@ -26,8 +26,14 @@ class ProfileV1Page extends React.Component {
 
   fetchUserData = async () => {
     try {
-      const response = await fetch("http://localhost:5124/api/User/1");
+      // Lấy user từ localStorage
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userId = storedUser.user.userId;
+  
+      // Fetch dữ liệu người dùng theo userId
+      const response = await fetch(`http://localhost:5124/api/User/${userId}`);
       const data = await response.json();
+  
       this.setState({
         userData: data,
         updatedUserData: {
@@ -45,6 +51,7 @@ class ProfileV1Page extends React.Component {
       console.error("Error fetching user data:", error);
     }
   };
+  
 
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,8 +75,9 @@ class ProfileV1Page extends React.Component {
 
   handleUpdate = async () => {
     const { updatedUserData } = this.state;
+    const storedUser = JSON.parse(localStorage.getItem("user"));
     const requestBody = {
-      userId: 1, // Cần điều chỉnh nếu userId khác
+      userId: storedUser.user.userId , 
       firstname: updatedUserData.firstname,
       lastName: updatedUserData.lastName,
       address: updatedUserData.address,

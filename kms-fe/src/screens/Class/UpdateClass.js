@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
-import axios from "axios"; // Import axios
+import axios from "axios";
 
 class UpdateClass extends React.Component {
   state = {
@@ -11,42 +11,75 @@ class UpdateClass extends React.Component {
     isActive: true,
     expireDate: "",
     schoolId: 102,
+    semesterId: 0,
+    gradeId: 0,
+    grades: [],   // Lưu danh sách grade
+    semesters: [],  // Lưu danh sách semester
     submeet: false,
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const { classId } = this.props.match.params; // Lấy classId từ URL
-    this.setState({ classId: parseInt(classId) }); // Cập nhật classId vào state
+    const { classId } = this.props.match.params;
+    this.setState({ classId: parseInt(classId) });
 
     // Gọi API để lấy thông tin lớp học
     axios.get(`http://localhost:5124/api/Class/GetClassById/${classId}`)
       .then((response) => {
         const data = response.data;
+        const formattedExpireDate = data.expireDate ? new Date(data.expireDate).toISOString().slice(0, 16) : "";
 
-        // Chuyển đổi định dạng expireDate để phù hợp với input datetime-local
-        const formattedExpireDate = new Date(data.expireDate).toISOString().slice(0, 16);
-
-        // Cập nhật state với dữ liệu lớp học
         this.setState({
           className: data.className,
-          isActive: data.isActive === 1, // Chuyển đổi sang boolean
-          expireDate: formattedExpireDate, // Sử dụng định dạng đã chuyển đổi
+          isActive: data.isActive === 1,
+          expireDate: formattedExpireDate,
           schoolId: data.schoolId,
+          semesterId: data.semesterId,
+          gradeId: data.gradeId,
         });
       })
       .catch((error) => {
         console.error("Error fetching class data: ", error);
         alert("Failed to fetch class data. Please try again.");
       });
+
+    // Gọi API lấy danh sách Grade
+    axios.get("http://localhost:5124/api/Grade")
+      .then((response) => {
+        this.setState({ grades: response.data });
+      })
+      .catch((error) => {
+        console.error("Error fetching grade data:", error);
+      });
+
+    // Gọi API lấy danh sách Semester
+    axios.get("http://localhost:5124/api/Semester")
+      .then((response) => {
+        this.setState({ semesters: response.data });
+      })
+      .catch((error) => {
+        console.error("Error fetching semester data:", error);
+      });
   }
+
+  // Hàm lấy tên grade theo gradeId
+  getGradeName = (gradeId) => {
+    const grade = this.state.grades.find(g => g.gradeId === gradeId);
+    return grade ? grade.name : "Unknown Grade";
+  };
+
+  // Hàm lấy tên semester theo semesterId
+  getSemesterName = (semesterId) => {
+    const semester = this.state.semesters.find(s => s.semesterId === semesterId);
+    return semester ? semester.name : "Unknown Semester";
+  };
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { classId, className, isActive, expireDate, schoolId } = this.state;
+    const { classId, className, isActive, expireDate, schoolId, semesterId, gradeId } = this.state;
 
     // Kiểm tra dữ liệu trước khi gửi
-    if (!className || !expireDate || schoolId === 0) {
+    if (!className || !expireDate || schoolId === 0 || semesterId === 0 || gradeId === 0) {
       this.setState({ submeet: true });
       return;
     }
@@ -55,9 +88,13 @@ class UpdateClass extends React.Component {
     const updatedClass = {
       classId,
       className,
-      isActive: isActive ? 1 : 0, // Chuyển đổi sang 1 hoặc 0
+      number: 0,
+      isActive: isActive ? 1 : 0,
       expireDate,
       schoolId,
+      semesterId,
+      gradeId,
+      status: 1
     };
 
     // Gọi API để cập nhật lớp học
@@ -67,25 +104,7 @@ class UpdateClass extends React.Component {
       },
     })
       .then((response) => {
-        console.log("Class updated successfully:", response.data);
         alert("Class has been updated successfully!");
-
-        // Gọi lại API để lấy thông tin lớp học mới nhất
-        return axios.get(`http://localhost:5124/api/Class/GetClassById/${classId}`);
-      })
-      .then((response) => {
-        const data = response.data;
-
-        // Cập nhật state với dữ liệu lớp học mới
-        const formattedExpireDate = new Date(data.expireDate).toISOString().slice(0, 10);
-        this.setState({
-          className: data.className,
-          isActive: data.isActive === 1,
-          expireDate: formattedExpireDate, // Chỉ chứa phần ngày YYYY-MM-DD
-          schoolId: data.schoolId,
-        });
-
-        // Chuyển hướng về danh sách lớp
         this.props.history.push('/viewclass');
       })
       .catch((error) => {
@@ -94,9 +113,8 @@ class UpdateClass extends React.Component {
       });
   };
 
-
   render() {
-    const { className, isActive, expireDate, schoolId, submeet } = this.state;
+    const { className, isActive, expireDate, submeet, grades, semesters, gradeId, semesterId } = this.state;
 
     return (
       <div
@@ -163,7 +181,7 @@ class UpdateClass extends React.Component {
                 <input
                   type="datetime-local"
                   className="form-control"
-                  value={expireDate} // Sử dụng giá trị expireDate đã chuyển đổi
+                  value={expireDate}
                   name="expireDate"
                   required=""
                   onChange={(e) => this.setState({ expireDate: e.target.value })}
@@ -171,6 +189,48 @@ class UpdateClass extends React.Component {
                 {expireDate === "" && submeet && (
                   <ul className="parsley-errors-list filled">
                     <li className="parsley-required">Expire date is required.</li>
+                  </ul>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Grade</label>
+                <select
+                  className="form-control"
+                  value={gradeId}
+                  onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
+                >
+                  <option value={0}>Select Grade</option>
+                  {grades.map((grade) => (
+                    <option key={grade.gradeId} value={grade.gradeId}>
+                      {grade.name}
+                    </option>
+                  ))}
+                </select>
+                {gradeId === 0 && submeet && (
+                  <ul className="parsley-errors-list filled">
+                    <li className="parsley-required">Grade is required.</li>
+                  </ul>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Semester</label>
+                <select
+                  className="form-control"
+                  value={semesterId}
+                  onChange={(e) => this.setState({ semesterId: parseInt(e.target.value) })}
+                >
+                  <option value={0}>Select Semester</option>
+                  {semesters.map((semester) => (
+                    <option key={semester.semesterId} value={semester.semesterId}>
+                      {semester.name}
+                    </option>
+                  ))}
+                </select>
+                {semesterId === 0 && submeet && (
+                  <ul className="parsley-errors-list filled">
+                    <li className="parsley-required">Semester is required.</li>
                   </ul>
                 )}
               </div>
@@ -191,5 +251,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-// Export component wrapped with withRouter to have access to history
 export default connect(mapStateToProps)(withRouter(UpdateClass));

@@ -6,6 +6,7 @@ import { withRouter } from 'react-router-dom';
 class ViewClass extends React.Component {
   state = {
     ProjectsData: [], // State để lưu trữ dữ liệu từ API
+    statusFilter: '', // State để lưu trạng thái lọc
   };
 
   componentDidMount() {
@@ -26,8 +27,19 @@ class ViewClass extends React.Component {
     this.props.history.push(`/updateclass/${classId}`);
   };
 
+  handleStatusFilterChange = (event) => {
+    this.setState({ statusFilter: event.target.value });
+  };
+
   render() {
-    const { ProjectsData } = this.state;
+    const { ProjectsData, statusFilter } = this.state;
+
+    // Lọc dữ liệu theo trạng thái
+    const filteredData = ProjectsData.filter(classData => {
+      if (statusFilter === '') return true; // Không lọc nếu không có bộ lọc
+      return (statusFilter === 'active' && classData.isActive === 1) ||
+             (statusFilter === 'inactive' && classData.isActive === 0);
+    });
 
     return (
       <div
@@ -49,6 +61,20 @@ class ViewClass extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
+                    {/* Dropdown để chọn trạng thái */}
+                    <div className="form-group">
+                      <label htmlFor="statusFilter">Filter by Status:</label>
+                      <select
+                        id="statusFilter"
+                        className="form-control"
+                        value={statusFilter}
+                        onChange={this.handleStatusFilterChange}
+                      >
+                        <option value="">All</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
                         <thead className="thead-light">
@@ -60,7 +86,7 @@ class ViewClass extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {ProjectsData.map((classData, classIndex) => (
+                          {filteredData.map((classData, classIndex) => (
                             <React.Fragment key={"class" + classIndex}>
                               <tr>
                                 <td>{classData.className}</td>
@@ -112,6 +138,5 @@ class ViewClass extends React.Component {
 const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
-
 
 export default connect(mapStateToProps)(withRouter(ViewClass));

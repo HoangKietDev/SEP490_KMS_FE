@@ -7,19 +7,38 @@ class CreateClass extends React.Component {
   state = {
     classId: 0,
     className: "",
+    number: 0,
     isActive: 1,
     expireDate: "",
-    schoolId: 102,
+    schoolId: 1,
+    semesterId: 0,
+    gradeId: 0,
+    status: 0,
     submeet: false,
+    semesters: [],  // Chứa danh sách các semester
+    grades: [],      // Chứa danh sách các grade
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
+
+    // Gọi API để lấy danh sách semester và grade
+    Promise.all([
+      fetch("http://localhost:5124/api/Semester").then((res) => res.json()),
+      fetch("http://localhost:5124/api/Grade").then((res) => res.json())
+    ])
+      .then(([semesters, grades]) => {
+        this.setState({ semesters, grades });
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        alert("Failed to fetch semesters or grades.");
+      });
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { classId, className, isActive, expireDate, schoolId } = this.state;
+    const { classId, className, number, isActive, expireDate, schoolId, semesterId, gradeId, status } = this.state;
 
     // Kiểm tra dữ liệu trước khi gửi
     if (!className || !expireDate || schoolId === 0) {
@@ -31,9 +50,13 @@ class CreateClass extends React.Component {
     const newClass = {
       classId,
       className,
+      number,
       isActive,
       expireDate,
       schoolId,
+      semesterId,
+      gradeId,
+      status,
     };
 
     // Gọi API để thêm lớp học
@@ -53,13 +76,17 @@ class CreateClass extends React.Component {
         // Chuyển hướng đến /viewclass
         this.props.history.push('/viewclass');
 
-        // Reset form hoặc thực hiện các hành động khác
+        // Reset form
         this.setState({
           classId: 0,
           className: "",
+          number: 0,
           isActive: 1,  // Đặt lại trạng thái isActive mặc định
           expireDate: "",
-          schoolId: 102,
+          schoolId: 1,
+          semesterId: 0,
+          gradeId: 0,
+          status: 1,
           submeet: false,
         });
       })
@@ -70,20 +97,17 @@ class CreateClass extends React.Component {
   };
 
   render() {
-    const { classId, className, isActive, expireDate, schoolId, submeet } = this.state;
+    const { className, number, isActive, expireDate, schoolId, semesterId, gradeId, status, semesters, grades, submeet } = this.state;
 
     return (
-      <div
-        style={{ flex: 1 }}
-        onClick={() => document.body.classList.remove("offcanvas-active")}
-      >
+      <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
         <div>
           <div className="container-fluid">
             <PageHeader
               HeaderText="Class Management"
               Breadcrumb={[
                 { name: "Class Management", navigate: "" },
-                { name: "Upadte Class", navigate: "" },
+                { name: "Create Class", navigate: "" },
               ]}
             />
             <form onSubmit={this.handleSubmit}>
@@ -103,16 +127,16 @@ class CreateClass extends React.Component {
                 )}
               </div>
 
-              {/* <div className="form-group">
-                <label>Is Active</label>
+              <div className="form-group">
+                <label>Number of Students</label>
                 <input
                   type="number"
                   className="form-control"
-                  value={isActive}
-                  name="isActive"
-                  onChange={(e) => this.setState({ isActive: parseInt(e.target.value) })}
+                  value={number}
+                  name="number"
+                  onChange={(e) => this.setState({ number: parseInt(e.target.value) })}
                 />
-              </div> */}
+              </div>
 
               <div className="form-group">
                 <label>Expire Date</label>
@@ -131,23 +155,47 @@ class CreateClass extends React.Component {
                 )}
               </div>
 
+              <div className="form-group">
+                <label>Semester</label>
+                <select
+                  className="form-control"
+                  value={semesterId}
+                  onChange={(e) => this.setState({ semesterId: parseInt(e.target.value) })}
+                >
+                  <option value={0}>Select Semester</option>
+                  {semesters.map((semester) => (
+                    <option key={semester.semesterId} value={semester.semesterId}>
+                      {semester.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              {/* <div className="form-group">
-                <label>School ID</label>
+              <div className="form-group">
+                <label>Grade</label>
+                <select
+                  className="form-control"
+                  value={gradeId}
+                  onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
+                >
+                  <option value={0}>Select Grade</option>
+                  {grades.map((grade) => (
+                    <option key={grade.gradeId} value={grade.gradeId}>
+                      {grade.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Status</label>
                 <input
                   type="number"
-                  className={`form-control ${schoolId === 0 && submeet && "parsley-error"}`}
-                  value={schoolId}
-                  name="schoolId"
-                  required=""
-                  onChange={(e) => this.setState({ schoolId: parseInt(e.target.value) })}
+                  className="form-control"
+                  value={status}
+                  onChange={(e) => this.setState({ status: parseInt(e.target.value) })}
                 />
-                {schoolId === 0 && submeet && (
-                  <ul className="parsley-errors-list filled">
-                    <li className="parsley-required">School ID is required.</li>
-                  </ul>
-                )}
-              </div> */}
+              </div>
 
               <br />
               <button type="submit" className="btn btn-primary">

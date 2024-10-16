@@ -15,6 +15,7 @@ import createclass from "./screens/Class/CreateClass";
 import updateclass from "./screens/Class/UpdateClass";
 import viewallstudent from "./screens/Children/ViewAllChildren";
 import viewstudentbyID from "./screens/Children/ViewChildrenByID"
+import createstudent from "./screens/Children/AddChildren"
 import Category from "./screens/CategoryService/Category";
 import CategoryCreate from "./screens/CategoryService/CategoryCreate";
 import CategoryDetail from "./screens/CategoryService/CategoryDetail";
@@ -177,7 +178,13 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewallstudent`}
                   component={viewallstudent}
-                  allowedRoles={[2]}
+                  allowedRoles={[2,3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/createstudent`}
+                  component={createstudent}
+                  allowedRoles={[2,3]}
                 />
                 <ProtectedRoute
                   exact

@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
 
-class UpdateChildren extends React.Component {
+class viewstudentbyId extends React.Component {
   state = {
     studentDetailId: 0,
     classId: 1, // Đặt mặc định classId là 1
@@ -31,7 +31,7 @@ class UpdateChildren extends React.Component {
     this.setState({ studentDetailId: parseInt(studentID) });
 
     // Gọi API để lấy thông tin học sinh
-    axios.get(`http://localhost:5124/api/ChildrenDetail/GetChildrenDetailsByChildrenId/${studentID}`)
+    axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentID}`)
       .then((response) => {
         const data = response.data;
 
@@ -93,7 +93,7 @@ class UpdateChildren extends React.Component {
     console.log("Updating student with data:", updatedStudent); // In dữ liệu gửi đi
 
     // Gọi API cập nhật học sinh
-    axios.put("http://localhost:5124/api/ChildrenDetail/UpdateChildrenDetails", updatedStudent, {
+    axios.put("http://localhost:5124/api/Children/UpdateChildren", updatedStudent, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -302,4 +302,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(UpdateChildren));
+export default connect(mapStateToProps)(withRouter(viewstudentbyId));
