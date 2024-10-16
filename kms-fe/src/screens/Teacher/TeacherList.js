@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
+import axios from "axios";
 
 
 class TeacherList extends React.Component {
@@ -21,7 +22,7 @@ class TeacherList extends React.Component {
       education: "string",
       experience: "string",
       avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png"
-    },{
+    }, {
       teacherId: 1,
       firstName: "Hoang1",
       lastName: "Kiet1",
@@ -41,20 +42,35 @@ class TeacherList extends React.Component {
   componentDidMount() {
     window.scrollTo(0, 0);
     // Gọi API và cập nhật state
-    // fetch("http://localhost:5124/api/ChildrenDetail/GetAllChildrenDetails")
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     this.setState({ TeacherListData: data });
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching data: ", error);
-    //   });
+    const fetchData = async () => {
+      try {
+        const TeacherResponse = await axios.get('http://localhost:5124/api/Teacher/GetAllTeachers');
+        const Teacherdata = TeacherResponse.data;
+        this.setState({ TeacherListData: Teacherdata })
+
+        // // Fetch student by ParentID
+        // const user = localStorage.getItem("user")
+        // const parentId = JSON.parse(user).user.userId
+        // const studentResponse = await axios.get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentId}`);
+        // const studentData = studentResponse.data;
+
+
+      } catch (error) {
+        console.error('Error fetching category details:', error);
+      }
+    };
+    fetchData();
   }
 
-  // handleEdit = (teacherId) => {
-  //   // // Chuyển hướng đến trang cập nhật thông tin học sinh
-  //   // this.props.history.push(`/viewstudentbyId/${studentId}`);
-  // };
+  handleEdit = (teacherId) => {
+    // Chuyển hướng đến trang cập nhật thông tin học sinh
+    this.props.history.push(`/teacher-update/${teacherId}`);
+  };
+
+  handleDetail = (teacherId) => {
+    // Chuyển hướng đến trang cập nhật thông tin học sinh
+    this.props.history.push(`/teacher-detail/${teacherId}`);
+  };
 
   render() {
     const { TeacherListData } = this.state;
@@ -71,17 +87,16 @@ class TeacherList extends React.Component {
             <PageHeader
               HeaderText="Teacher Management"
               Breadcrumb={[
-                { name: "Teacher Management", navigate: "" },
+                { name: "Teacher Management", navigate: "1" },
                 { name: "Teacher List", navigate: "" },
               ]}
             />
             <div className="row clearfix">
 
-            <div className="col-lg-12 col-md-12">
+              <div className="col-lg-12 col-md-12">
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Teacher Manager</h2>
-                    <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Add Teacher</a>
                   </div>
                 </div>
               </div>
@@ -106,9 +121,9 @@ class TeacherList extends React.Component {
                             <React.Fragment key={"teacher" + index}>
                               <tr>
                                 <td>{index + 1}</td>
-                                <td>{teacher?.firstName}</td>
+                                <td>{teacher?.firstname}</td>
                                 <td>{teacher.lastName}</td>
-                                <td>{teacher.phone}</td>
+                                <td>{teacher.phoneNumber}</td>
                                 <td>
                                   {teacher.gender === 1 ? (
                                     <span className="">
@@ -122,12 +137,14 @@ class TeacherList extends React.Component {
                                 </td>
                                 <td>{teacher.code}</td>
                                 <td className="project-actions">
-                                  <a className="btn btn-outline-secondary mr-1">
+                                  <a className="btn btn-outline-secondary mr-1"
+                                    onClick={() => this.handleDetail(teacher.teacherId)} // Gọi hàm handleEdit
+                                  >
                                     <i className="icon-eye"></i>
                                   </a>
                                   <a
                                     className="btn btn-outline-secondary"
-                                  // onClick={() => this.handleEdit(teacher.teacherId)} // Gọi hàm handleEdit
+                                    onClick={() => this.handleEdit(teacher.teacherId)} // Gọi hàm handleEdit
                                   >
                                     <i className="icon-pencil"></i>
                                   </a>
