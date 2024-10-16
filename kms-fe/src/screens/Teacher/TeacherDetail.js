@@ -6,58 +6,45 @@ import axios from "axios";
 
 class TeacherDetail extends React.Component {
   state = {
-    id: 0,
-    firstName: "Hoang",
-    lastName: "Kiet",
-    address: "Thai Binh",
-    phone: "0323241545",
-    mail: "kiet7cvl@gmail.com",
-    gender: 1,
-    status: 1,
-    dob: "21/3/2002",
-    code: "TC101",
-    education: "string",
-    experience: "string",
-    avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png",
-  };
+    TeacherData: {
+      id: 0,
+      firstName: "Hoang",
+      lastName: "Kiet",
+      address: "Thai Binh",
+      phone: "0323241545",
+      mail: "kiet7cvl@gmail.com",
+      gender: 1,
+      status: 1,
+      dob: "21/3/2002",
+      code: "TC101",
+      education: "string",
+      experience: "string",
+      avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png",
+    }
+  }
 
   componentDidMount() {
     window.scrollTo(0, 0);
     const { teacherId } = this.props.match.params;
-    this.setState({ studentDetailId: parseInt(teacherId) });
-    // Gọi API để lấy thông tin học sinh
-    // axios.get(`http://localhost:5124/api/ChildrenDetail/GetChildrenDetailsByChildrenId/${studentID}`)
-    //   .then((response) => {
-    //     const data = response.data;
+    this.setState({ teacherId: parseInt(teacherId) });
 
-    //     // Cập nhật state với dữ liệu học sinh
-    //     this.setState({
-    //       studentDetailId: data.studentDetailId,
-    //       fullName: data.fullName,
-    //       nickName: data.nickName,
-    //       grade: data.grade,
-    //       dob: data.dob ? new Date(data.dob).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
-    //       gender: data.gender,
-    //       status: data.status,
-    //       admissionDay: data.admissionDay ? new Date(data.admissionDay).toISOString().slice(0, 10) : "",
-    //       ethnicGroups: data.ethnicGroups || "string",
-    //       nationality: data.nationality || "string",
-    //       religion: data.religion || "string",
-    //       identifier: data.identifier || "string",
-    //       issueDate: data.issueDate ? new Date(data.issueDate).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
-    //       issuePlace: data.issuePlace || "string",
-    //       studentId: data.studentId || 1,
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching student data: ", error);
-    //     alert("Failed to fetch student data. Please try again.");
-    //   });
+    // Gọi API
+    const fetchData = async () => {
+      try {
+        const TeacherResponse = await axios.get(`http://localhost:5124/api/Teacher/GetTeacherById/${teacherId}`);
+        const Teacherdata = TeacherResponse.data;
+        this.setState({ Teacherdata });
+        console.log(Teacherdata);
+      } catch (error) {
+        console.error('Error fetching teacher details:', error);
+      }
+    };
+    fetchData();
   }
 
-
   render() {
-    const { firstName, lastName, address, phone, mail, gender, status, dob, code, education, experience, avatar } = this.state;
+    // Destructure fields from TeacherData object
+    const { firstName, lastName, address, phone, mail, gender, status, dob, code, education, experience, avatar } = this.state.TeacherData;
 
     return (
       <div
@@ -69,7 +56,7 @@ class TeacherDetail extends React.Component {
             <PageHeader
               HeaderText="Teacher Management"
               Breadcrumb={[
-                { name: "Teacher Management", navigate: "" },
+                { name: "Teacher Management", navigate: "teacher" },
                 { name: "Teacher Detail", navigate: "" },
               ]}
             />
@@ -80,7 +67,7 @@ class TeacherDetail extends React.Component {
                     <h4>Teacher Detail</h4>
                   </div>
                   <div className="body">
-                    <form onSubmit={this.handleSubmit} className="update-teacher-form">
+                    <form className="update-teacher-form">
                       <div className="row">
                         <div className="form-group col-md-6">
                           <label>First Name</label>
@@ -88,6 +75,7 @@ class TeacherDetail extends React.Component {
                             className={`form-control`}
                             value={firstName}
                             name="firstName"
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -96,6 +84,7 @@ class TeacherDetail extends React.Component {
                             className="form-control"
                             value={lastName}
                             name="lastName"
+                            readOnly
                           />
                         </div>
                       </div>
@@ -107,6 +96,7 @@ class TeacherDetail extends React.Component {
                             className="form-control"
                             value={address}
                             name="address"
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -115,9 +105,11 @@ class TeacherDetail extends React.Component {
                             className="form-control"
                             value={phone}
                             name="phone"
+                            readOnly
                           />
                         </div>
                       </div>
+
                       <div className="row">
                         <div className="form-group col-md-6">
                           <label>Code</label>
@@ -125,6 +117,7 @@ class TeacherDetail extends React.Component {
                             className="form-control"
                             value={code}
                             name="code"
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -133,9 +126,11 @@ class TeacherDetail extends React.Component {
                             className="form-control"
                             value={mail}
                             name="mail"
+                            readOnly
                           />
                         </div>
                       </div>
+
                       <div className="row">
                         <div className="form-group col-md-6">
                           <div className="form-group">
@@ -144,6 +139,7 @@ class TeacherDetail extends React.Component {
                               className="form-control"
                               value={gender}
                               name="gender"
+                              readOnly
                             >
                               <option value={1}>Male</option>
                               <option value={0}>Female</option>
@@ -154,8 +150,9 @@ class TeacherDetail extends React.Component {
                             <input
                               className="form-control"
                               type="date"
-                              value={dob}
+                              value={dob.split('T')[0]}
                               name="dob"
+                              readOnly
                             />
                           </div>
                           <div className="form-group">
@@ -164,6 +161,7 @@ class TeacherDetail extends React.Component {
                               className="form-control"
                               value={status}
                               name="status"
+                              readOnly
                             >
                               <option value={1}>Active</option>
                               <option value={0}>Inactive</option>
@@ -173,17 +171,18 @@ class TeacherDetail extends React.Component {
 
                         <div className="form-group col-md-6 d-grid">
                           <label>Avatar</label>
-                          <img src={avatar} className="img-thumbnail" style={{ maxWidth: "50%", marginLeft: "12%" }} ></img>
+                          <img src={avatar} className="img-thumbnail" style={{ maxWidth: "50%", marginLeft: "12%" }} alt="Teacher Avatar"></img>
                         </div>
                       </div>
 
                       <div className="row">
                         <div className="form-group col-md-6">
-                          <label>Educaiton</label>
+                          <label>Education</label>
                           <input
                             className="form-control"
                             value={education}
                             name="education"
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -192,6 +191,7 @@ class TeacherDetail extends React.Component {
                             className="form-control"
                             value={experience}
                             name="experience"
+                            readOnly
                           />
                         </div>
                       </div>

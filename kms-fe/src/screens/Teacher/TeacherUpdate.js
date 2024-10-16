@@ -23,100 +23,67 @@ class UpdateChildren extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const { studentID } = this.props.match.params;
-    this.setState({ teacherId: parseInt(studentID) });
+    const { teacherId } = this.props.match.params;
+    this.setState({ teacherId: parseInt(teacherId) });
 
     // Gọi API để lấy thông tin học sinh
-    // axios.get(`http://localhost:5124/api/ChildrenDetail/GetChildrenDetailsByChildrenId/${studentID}`)
-    //   .then((response) => {
-    //     const data = response.data;
-
-    //     // Cập nhật state với dữ liệu học sinh
-    //     this.setState({
-    //       studentDetailId: data.studentDetailId,
-    //       fullName: data.fullName,
-    //       nickName: data.nickName,
-    //       grade: data.grade,
-    //       dob: data.dob ? new Date(data.dob).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
-    //       gender: data.gender,
-    //       status: data.status,
-    //       admissionDay: data.admissionDay ? new Date(data.admissionDay).toISOString().slice(0, 10) : "",
-    //       ethnicGroups: data.ethnicGroups || "string",
-    //       nationality: data.nationality || "string",
-    //       religion: data.religion || "string",
-    //       identifier: data.identifier || "string",
-    //       issueDate: data.issueDate ? new Date(data.issueDate).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
-    //       issuePlace: data.issuePlace || "string",
-    //       studentId: data.studentId || 1,
-    //     });
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching student data: ", error);
-    //     alert("Failed to fetch student data. Please try again.");
-    //   });
+    axios.get(`http://localhost:5124/api/Teacher/GetTeacherById/${teacherId}`)
+      .then((response) => {
+        const data = response.data;
+        // Cập nhật state với dữ liệu học sinh
+        this.setState({
+          teacherId: data.teacherId,
+          firstName: data.firstname,
+          lastName: data.lastName,
+          address: data.address,
+          dob: data.dob ? new Date(data.dob).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
+          gender: data.gender,
+          status: data.status,
+          phone: data.phoneNumber || "string",
+          mail: data.mail || "string",
+          code: data.code || "string",
+          education: data.education || "string",
+          experience: data.experience || "string",
+          avatar: data.avatar || 1,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching student data: ", error);
+        alert("Failed to fetch student data. Please try again.");
+      });
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    // const { studentDetailId, classId, fullName, nickName, grade, dob, gender, status, admissionDay, ethnicGroups, nationality, religion, identifier, issueDate, issuePlace, studentId } = this.state;
+    const { teacherId, name, education, experience} = this.state;
 
-    // // Kiểm tra dữ liệu trước khi gửi
-    // if (!fullName || !dob) {
-    //   this.setState({ submeet: true });
-    //   return;
-    // }
+    // Chuẩn bị dữ liệu cập nhật học sinh
+    const updatedTeacher = {
+      teacherId,
+      name,
+      education,
+      experience,
+    };
 
-    // // Chuẩn bị dữ liệu cập nhật học sinh
-    // const updatedStudent = {
-    //   studentDetailId,
-    //   classId, // Sử dụng classId mặc định là 1
-    //   fullName,
-    //   nickName,
-    //   grade,
-    //   dob,
-    //   gender,
-    //   status,
-    //   admissionDay,
-    //   ethnicGroups,
-    //   nationality,
-    //   religion,
-    //   identifier,
-    //   issueDate,
-    //   issuePlace,
-    //   studentId,
-    // };
+    // Gọi API cập nhật học sinh
+    axios.put("http://localhost:5124/api/Teacher/StaffUpdateProfileForTeacher", updatedTeacher, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        console.log("Teacher updated successfully:", response.data);
+        alert("Teacher has been updated successfully!");
 
-    // console.log("Updating student with data:", updatedStudent); // In dữ liệu gửi đi
-
-    // // Gọi API cập nhật học sinh
-    // axios.put("http://localhost:5124/api/ChildrenDetail/UpdateChildrenDetails", updatedStudent, {
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // })
-    //   .then((response) => {
-    //     console.log("Student updated successfully:", response.data);
-    //     alert("Student has been updated successfully!");
-
-    //     // Chuyển hướng về danh sách học sinh
-    //     this.props.history.push('/viewstudents');
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error updating student:", error.response ? error.response.data : error.message); // Log thêm thông tin lỗi
-    //     alert("Failed to update student. Please try again.");
-    //   });
+        // Chuyển hướng về danh sách học sinh
+        this.props.history.push('/teacher');
+      })
+      .catch((error) => {
+        console.error("Error updating Teacher:", error.response ? error.response.data : error.message); // Log thêm thông tin lỗi
+        alert("Failed to update Teacher. Please try again.");
+      });
   };
 
-  handleAvatarChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        this.setState({ avatar: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   render() {
     const { firstName, lastName, address, phone, mail, gender, status, dob, code, education, experience, avatar } = this.state;
@@ -131,7 +98,7 @@ class UpdateChildren extends React.Component {
             <PageHeader
               HeaderText="Teacher Management"
               Breadcrumb={[
-                { name: "Teacher Management", navigate: "" },
+                { name: "Teacher Management", navigate: "teacher" },
                 { name: "Update Teacher", navigate: "" },
               ]}
             />
@@ -151,11 +118,7 @@ class UpdateChildren extends React.Component {
                             value={firstName}
                             name="firstName"
                             type="text"
-                            onChange={(e) => {
-                              this.setState({
-                                [e.target.name]: e.target.value,
-                              });
-                            }}
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -165,11 +128,7 @@ class UpdateChildren extends React.Component {
                             value={lastName}
                             name="lastName"
                             type="text"
-                            onChange={(e) => {
-                              this.setState({
-                                [e.target.name]: e.target.value,
-                              });
-                            }}
+                            readOnly
                           />
                         </div>
                       </div>
@@ -182,11 +141,7 @@ class UpdateChildren extends React.Component {
                             value={address}
                             name="address"
                             type="text"
-                            onChange={(e) => {
-                              this.setState({
-                                [e.target.name]: e.target.value,
-                              });
-                            }}
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -196,11 +151,7 @@ class UpdateChildren extends React.Component {
                             value={phone}
                             name="phone"
                             type="text"
-                            onChange={(e) => {
-                              this.setState({
-                                [e.target.name]: e.target.value,
-                              });
-                            }}
+                            readOnly
                           />
                         </div>
                       </div>
@@ -211,6 +162,7 @@ class UpdateChildren extends React.Component {
                             className="form-control"
                             value={code}
                             name="code"
+                            readOnly
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -220,11 +172,7 @@ class UpdateChildren extends React.Component {
                             value={mail}
                             name="mail"
                             type="email"
-                            onChange={(e) => {
-                              this.setState({
-                                [e.target.name]: e.target.value,
-                              });
-                            }}
+                            readOnly
                           />
                         </div>
                       </div>
@@ -236,11 +184,7 @@ class UpdateChildren extends React.Component {
                               className="form-control"
                               value={gender}
                               name="gender"
-                              onChange={(e) => {
-                                this.setState({
-                                  [e.target.name]: e.target.value,
-                                });
-                              }}
+                              readOnly
                             >
                               <option value={1}>Male</option>
                               <option value={0}>Female</option>
@@ -253,11 +197,7 @@ class UpdateChildren extends React.Component {
                               type="date"
                               value={dob}
                               name="dob"
-                              onChange={(e) => {
-                                this.setState({
-                                  [e.target.name]: e.target.value,
-                                });
-                              }}
+                              readOnly
                             />
                           </div>
                           <div className="form-group">
@@ -266,11 +206,7 @@ class UpdateChildren extends React.Component {
                               className="form-control"
                               value={status}
                               name="status"
-                              onChange={(e) => {
-                                this.setState({
-                                  [e.target.name]: e.target.value,
-                                });
-                              }}
+                              readOnly
                             >
                               <option value={1}>Active</option>
                               <option value={0}>Inactive</option>
@@ -280,16 +216,7 @@ class UpdateChildren extends React.Component {
 
                         <div className="form-group col-md-6 d-grid">
                           <label>Avatar</label>
-                          <div onClick={() => this.fileInput.click()}>
-                            <img src={avatar} className="img-thumbnail" style={{ maxWidth: "50%", marginLeft: "12%" }} alt="Avatar" />
-                          </div>
-                          <input
-                            type="file"
-                            style={{ display: 'none' }}
-                            ref={input => this.fileInput = input}
-                            onChange={this.handleAvatarChange}
-                            accept="image/*"
-                          />
+                          <img src={avatar} className="img-thumbnail" style={{ maxWidth: "50%", marginLeft: "12%" }} alt="Teacher Avatar"></img>
                         </div>
                       </div>
 
@@ -300,6 +227,11 @@ class UpdateChildren extends React.Component {
                             className="form-control"
                             value={education}
                             name="education"
+                            onChange={(e) => {
+                              this.setState({
+                                [e.target.name]: e.target.value,
+                              });
+                            }}
                           />
                         </div>
                         <div className="form-group col-md-6">
@@ -308,6 +240,11 @@ class UpdateChildren extends React.Component {
                             className="form-control"
                             value={experience}
                             name="experience"
+                            onChange={(e) => {
+                              this.setState({
+                                [e.target.name]: e.target.value,
+                              });
+                            }}
                           />
                         </div>
                       </div>
