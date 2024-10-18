@@ -112,9 +112,10 @@ class CreateChildren extends React.Component {
         <div>
           <div className="container-fluid">
             <PageHeader
+            
               HeaderText="Student Management"
               Breadcrumb={[
-                { name: "Student Management", navigate: "" },
+                { name: "Student Management", navigate: "/viewallstudent" },
                 { name: "Create Student", navigate: "" },
               ]}
             />

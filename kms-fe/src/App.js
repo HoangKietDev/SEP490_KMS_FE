@@ -31,7 +31,7 @@ import RequestList from "./screens/Request/RequestList";
 import RequestDetail from "./screens/Request/RequestDetail";
 import RequestUpdate from "./screens/Request/RequestUpdate";
 import RequestCreate from "./screens/Request/RequestCreate";
-
+import ViewMenu from "./screens/Menu/ViewMenu"
 import ProtectedRoute from "./components/Router/ProtectRouter";
 
 
@@ -92,7 +92,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/create-category`}
                   component={CategoryCreate}
-                  allowedRoles={[3]} 
+                  allowedRoles={[3]}
                 />
                 <ProtectedRoute
                   exact
@@ -111,7 +111,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/service`}
                   component={Service}
-                  allowedRoles={[2,3,4]}
+                  allowedRoles={[2, 3, 4]}
                 />
                 <ProtectedRoute
                   exact
@@ -123,13 +123,13 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/service-detail/:serviceId`}
                   component={ServiceDetail}
-                  allowedRoles={[2,3,4]}
+                  allowedRoles={[2, 3, 4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/service-update/:serviceId`}
                   component={ServiceUpdate}
-                  allowedRoles={[3,4]}
+                  allowedRoles={[3, 4]}
                 />
                 <ProtectedRoute
                   exact
@@ -141,7 +141,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/teacher-detail/:teacherId`}
                   component={TeacherDetail}
-                  allowedRoles={[2,3,5]}
+                  allowedRoles={[2, 3, 5]}
 
                 />
                 <ProtectedRoute
@@ -154,19 +154,19 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/request`}
                   component={RequestList}
-                  allowedRoles={[2,3,4]}
+                  allowedRoles={[2, 3, 4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/request-detail/:requestId`}
                   component={RequestDetail}
-                  allowedRoles={[2,3,4]}
+                  allowedRoles={[2, 3, 4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/request-update/:requestId`}
                   component={RequestUpdate}
-                  allowedRoles={[3,4]}
+                  allowedRoles={[3, 4]}
                 />
                 <ProtectedRoute
                   exact
@@ -178,13 +178,13 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewallstudent`}
                   component={viewallstudent}
-                  allowedRoles={[2,3]}
+                  allowedRoles={[2, 3]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/createstudent`}
                   component={createstudent}
-                  allowedRoles={[2,3]}
+                  allowedRoles={[2, 3]}
                 />
                 <ProtectedRoute
                   exact
@@ -195,7 +195,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewclass`}
                   component={viewclass}
-                  allowedRoles={[2,3,5]}
+                  allowedRoles={[2, 3, 5]}
                 />
                 <ProtectedRoute
                   exact
@@ -207,9 +207,14 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/updateclass/:classId`}
                   component={updateclass}
-                  allowedRoles={[3,4]}
+                  allowedRoles={[3, 4]}
                 />
-
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/viewmenu`}
+                  component={ViewMenu}
+                  allowedRoles={[2, 4]}
+                />
               </Switch>
             </div>
           </>
