@@ -73,8 +73,6 @@ class Service extends React.Component {
               {/* <ProjectsListTable data={services} history={this.props.history}/> */}
               <div className="col-lg-12">
                 <div className="card">
-                  <div className="header">
-                  </div>
                   <div className="table-responsive">
                     <table className="table m-b-0 table-hover">
                       <thead className="thead-light">

@@ -33,6 +33,7 @@ import RequestUpdate from "./screens/Request/RequestUpdate";
 import RequestCreate from "./screens/Request/RequestCreate";
 import ViewMenu from "./screens/Menu/ViewMenu"
 import ProtectedRoute from "./components/Router/ProtectRouter";
+import Schedule from "./screens/Schedule/Schedule";
 
 
 window.__DEV__ = true;
@@ -166,7 +167,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/request-update/:requestId`}
                   component={RequestUpdate}
-                  allowedRoles={[3, 4]}
+                  allowedRoles={[2, 3, 4]}
                 />
                 <ProtectedRoute
                   exact
@@ -214,6 +215,14 @@ class App extends React.Component {
                   path={`${process.env.PUBLIC_URL}/viewmenu`}
                   component={ViewMenu}
                   allowedRoles={[2, 4]}
+                />
+
+
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/schedule`}
+                  component={Schedule}
+                  allowedRoles={[2, 3, 4]}
                 />
               </Switch>
             </div>

@@ -23,13 +23,28 @@ class RequestUpdate extends React.Component {
       studentName: "name",
       createByName: "createByName"
     },
+    statusDescriptions: {
+      1: "Processing",
+      2: "Staff Approved",
+      3: "Staff Reject",
+      4: "Principal Approved",
+      5: "Principal Reject",
+      6: "Cancel",
+    },
+    filteredStatuses: ''
   };
 
   async componentDidMount() {
     window.scrollTo(0, 0);
     const { requestId } = this.props.match.params;
     this.setState({ requestId: parseInt(requestId) });
+    const userData = JSON.parse(localStorage.getItem("user")).user;
+    const roleId = userData.roleId;
+    console.log(roleId);
 
+
+    const dataRole = this.getFilteredStatusDescriptions(roleId); // Call filtering here
+    this.setState({ filteredStatuses: dataRole });
     try {
       // Fetch request details
       const response = await axios.get(`http://localhost:5124/api/Request/GetRequestById/${requestId}`);
@@ -100,9 +115,7 @@ class RequestUpdate extends React.Component {
 
   handleSubmit = async (event) => {
     event.preventDefault(); // Prevent the default form submission
-
     const { requestId, title, description, createBy, createAt, classId, studentId, classChangeId, status, ReasonReject } = this.state;
-
     try {
       // Make a PUT request to update the request
       await axios.put(`http://localhost:5124/api/Request/UpdateRequest`, {
@@ -117,25 +130,61 @@ class RequestUpdate extends React.Component {
         statusRequest: status,
         reasonReject: ReasonReject,
       });
-
-      alert("Request updated successfully!");
       // Optionally, redirect or fetch updated data here
+      // Check if the status is "Principal Approved" and make the additional API call
+      if (status === "Principal Approved") {
+        await axios.put(`http://localhost:5124/api/Request/UpdateClassIdForStudent/${studentId}`, {
+          classChangeId
+        });
+        alert("Request updated and class ID updated for the student.");
+      } else {
+        alert("Request updated successfully!");
+      }
     } catch (error) {
       console.error("Error updating request: ", error);
       alert("Failed to update the request. Please try again.");
     }
   };
+  // Function to filter the statuses based on roleId
+  getFilteredStatusDescriptions = (roleId) => {
+    let filteredStatuses = {};
+
+    // Filter logic based on roleId
+    switch (roleId) {
+      case 3: // Staff
+        filteredStatuses = {
+          1: this.state.statusDescriptions[1], // Processing
+          2: this.state.statusDescriptions[2], // Staff Approved
+          3: this.state.statusDescriptions[3], // Staff Reject
+        };
+        break;
+
+      case 2: // Parent 
+        filteredStatuses = {
+          1: this.state.statusDescriptions[1], // Processing
+          6: this.state.statusDescriptions[6], // Cancel
+        };
+        break;
+
+      case 4: // Principal 
+        filteredStatuses = {
+          2: this.state.statusDescriptions[2], // Staff Approved
+          4: this.state.statusDescriptions[4], // Principal Approved
+          5: this.state.statusDescriptions[5], // Principal Reject
+        };
+        break;
+
+      default:
+        filteredStatuses = { 1: this.state.statusDescriptions[1], 6: this.state.statusDescriptions[6] }; // Default to Cancel if no role matches
+        break;
+    }
+
+    return filteredStatuses;
+  };
+
 
   render() {
-    const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject } = this.state;
-    const statusDescriptions = {
-      1: "Processing",
-      2: "Staff Approved",
-      3: "Staff Reject",
-      4: "Principal Approved",
-      5: "Principal Reject",
-      6: "Cancel",
-    };
+    const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject, filteredStatuses, statusDescriptions } = this.state;
 
     return (
       <div
@@ -197,7 +246,7 @@ class RequestUpdate extends React.Component {
                         <label>Status</label>
                         <select className="form-control" value={status} name="status"
                           onChange={(e) => this.setState({ status: e.target.value })}>
-                          {Object.entries(statusDescriptions).map(([value, label]) => (
+                          {Object.entries(filteredStatuses).map(([value, label]) => (
                             <option key={value} value={value}>
                               {label}
                             </option>

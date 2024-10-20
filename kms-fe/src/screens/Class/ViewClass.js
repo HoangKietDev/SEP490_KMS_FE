@@ -75,6 +75,7 @@ class ViewClass extends React.Component {
                         <option value="inactive">Inactive</option>
                       </select>
                     </div>
+                    
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
                         <thead className="thead-light">

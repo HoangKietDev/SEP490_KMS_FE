@@ -6,30 +6,8 @@ import { withRouter } from 'react-router-dom';
 
 class RequestList extends React.Component {
   state = {
-    // RequestListData: [], // State để lưu trữ dữ liệu từ API
-    RequestListData: [{
-      requestId: 1,
-      title: "Change Class",
-      description: "Want to change class for my children",
-      status: 1,
-      createAt: "21/3/2002",
-      createBy: "Parent",
-      classId: 101,
-      studentId: 161307,
-      changesClassId: 103,
-      ReasonReject: "Class want to change are already full"
-    }, {
-      requestId: 1,
-      title: "Change Class",
-      description: "Want to change class for my children",
-      status: 2,
-      createAt: "21/3/2002",
-      createBy: "Parent",
-      classId: 101,
-      studentId: 161307,
-      changesClassId: 103,
-      ReasonReject: "Class want to change are already full"
-    }]
+    RequestListData: [],
+    NewRequestListData: []
   };
 
 
@@ -76,11 +54,21 @@ class RequestList extends React.Component {
     let NewRequestListData = []
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId
-    if(roleId === 2) {
-       NewRequestListData = RequestListData.filter(i => i.createBy === userData.userId)
-    } else {
-       NewRequestListData = RequestListData
+    console.log(RequestListData);
+
+    if (roleId === 3) {
+      NewRequestListData = RequestListData.filter(i => i.statusRequest === 1 || i.statusRequest === 2 || i.statusRequest === 3)
     }
+    else if (roleId === 4) {
+      NewRequestListData = RequestListData.filter(i => i.statusRequest === 2 || i.statusRequest === 4 || i.statusRequest === 5)
+      console.log(NewRequestListData);
+    }
+    else if (roleId === 2) {
+      NewRequestListData = RequestListData.filter(i => i.createBy === userData.userId)
+    } else {
+      NewRequestListData = RequestListData
+    }
+
     return (
       <div
         style={{ flex: 1 }}
@@ -137,23 +125,25 @@ class RequestList extends React.Component {
                                 <td>
                                   {statusDescriptions[request?.statusRequest] || "Unknown Status"}
                                 </td>
-                                <td className="project-actions">
-                                  <a className="btn btn-outline-secondary mr-1"
-                                    onClick={() => this.handleDetail(request.requestId)}
-                                  >
-                                    <i className="icon-eye"></i>
-                                  </a>
-
-                                  {roleId === 3 || roleId === 4 ? (
-                                    <a
-                                      className="btn btn-outline-secondary"
-                                      onClick={() => this.handleEdit(request.requestId)}
+                                {statusDescriptions[request?.statusRequest] !== 'Cancel' && statusDescriptions[request?.statusRequest] !== 'Staff Reject'
+                                  && statusDescriptions[request?.statusRequest] !== 'Principal Reject'
+                                  ? <td className="project-actions">
+                                    <a className="btn btn-outline-secondary mr-1"
+                                      onClick={() => this.handleDetail(request.requestId)}
                                     >
-                                      <i className="icon-pencil"></i>
+                                      <i className="icon-eye"></i>
                                     </a>
-                                  ) : null}
-                                </td>
 
+                                    {roleId === 2 || roleId === 3 || roleId === 4 ? (
+                                      <a
+                                        className="btn btn-outline-secondary"
+                                        onClick={() => this.handleEdit(request.requestId)}
+                                      >
+                                        <i className="icon-pencil"></i>
+                                      </a>
+                                    ) : null}
+                                  </td>
+                                  : <td></td>}
                               </tr>
                             </React.Fragment>
                           ))}

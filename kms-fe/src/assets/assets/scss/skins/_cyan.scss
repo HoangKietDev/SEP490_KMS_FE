@@ -7,6 +7,13 @@ $cyan-600: #00acc1 !default;
 
 .theme-cyan{
 
+    .schedule-head tr th {
+        color: $cyan-500;
+    }
+    .schedule-head .sticky-col strong{
+        color: $cyan-500;
+    }
+
     ::selection {
         color: $white;
         background: $cyan-500;

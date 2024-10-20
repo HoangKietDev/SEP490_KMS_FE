@@ -7,6 +7,13 @@ $blush-600: #e25985 !default;
 
 .theme-blush{
 
+    .schedule-head tr th {
+        color: $blush-500;
+    }
+    .schedule-head .sticky-col strong{
+        color: $blush-500;
+    }
+
     ::selection {
         color: $white;
         background: $blush-500;

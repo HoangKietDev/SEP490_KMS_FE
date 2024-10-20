@@ -49,9 +49,7 @@ class PageHeader extends React.Component {
             </h2>
             <ul className="breadcrumb">
               <li className="breadcrumb-item">
-                <a href="dashboard">
                   <i className="icon-home"></i>
-                </a>
               </li>
               {Breadcrumb.map((item, index) => {
                 return (
