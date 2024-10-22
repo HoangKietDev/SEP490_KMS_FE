@@ -37,6 +37,8 @@ import Schedule from "./screens/Schedule/Schedule";
 import ScheduleList from "./screens/Schedule/ScheduleList";
 
 
+import UpdateMenu from "./screens/Menu/UpdateMenu";
+import profilev1page from "./screens/Pages/ProfileV1";
 import ListMenu from "./screens/Menu/ListMenu"
 import ViewChildrenbyClassID from "./screens/Children/ViewChildrenbyClassID";
 import ViewMenuByTeacherAndParent from "./screens/Menu/ViewMenuByTeacherAndParent";
@@ -252,6 +254,12 @@ class App extends React.Component {
 
                 <ProtectedRoute
                   exact
+                  path={`${process.env.PUBLIC_URL}/updatemenu`}
+                  component={UpdateMenu}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
                   path={`${process.env.PUBLIC_URL}/schedule`}
                   component={Schedule}
                   allowedRoles={[2, 3, 4]}
@@ -275,6 +283,13 @@ class App extends React.Component {
                   component={ViewMenuByTeacherAndParent}
                   allowedRoles={[2, 5]}
                 />
+                 <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/profilev1page`}
+                  component={profilev1page}
+                  allowedRoles={[1,2,3,4,5]}
+                />
+                
               </Switch>
             </div>
           </>

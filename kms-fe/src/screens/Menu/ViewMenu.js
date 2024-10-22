@@ -33,7 +33,7 @@ class ViewMenu extends React.Component {
     const day = startOfWeek.getDay();
     const diff = (day === 0) ? 6 : day - 1;
     startOfWeek.setDate(startOfWeek.getDate() - diff);
-    
+
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
@@ -55,6 +55,8 @@ class ViewMenu extends React.Component {
   };
 
   fetchMenuData = async (startOfWeek, endOfWeek) => {
+    console.log(startOfWeek);
+    
     const startDate = this.formatDate(startOfWeek);
     const endDate = this.formatDate(endOfWeek);
     console.log(startDate, endDate);
@@ -76,6 +78,23 @@ class ViewMenu extends React.Component {
       console.error("Error fetching menu data:", error);
     }
   };
+  handleUpdate = (ageGroup) => {
+    const { selectedWeek } = this.state;
+    const startDate = this.formatDate(selectedWeek.startOfWeek);
+    const endDate = this.formatDate(selectedWeek.endOfWeek);
+    const gradeId = ageGroup === "0-3" ? 1 : 2;
+
+    // Điều hướng sang trang `/updatemenu` với các tham số gradeId, startDate và endDate
+    this.props.history.push({
+      pathname: "/updatemenu",
+      state: {
+        gradeId: gradeId,
+        startDate: startDate,
+        endDate: endDate,
+      },
+    });
+  };
+
 
   handleFileChange = (event) => {
     this.setState({ selectedFile: event.target.files[0] });
@@ -181,11 +200,21 @@ class ViewMenu extends React.Component {
                 );
               })}
             </tr>
+            {/* Thêm nút Update vào dưới bảng */}
+            <tr>
+              <td className="sticky-col" colSpan={daysOfWeek.length + 1}>
+                <button type="button" onClick={() => this.handleUpdate(ageGroup)} className="btn btn-primary mr-1">
+                  <span>Update {ageGroup === "0-3" ? "0-3" : "3-6"}</span>
+                </button>
+              </td>
+
+            </tr>
           </tbody>
         </table>
       </div>
     );
   };
+
 
   mapDayToVietnamese = (day) => {
     const dayMap = {

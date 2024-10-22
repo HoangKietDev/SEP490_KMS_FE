@@ -20,12 +20,10 @@ class ViewClass extends React.Component {
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
-
   }
 
   handleEdit = (classId) => {
     const user = JSON.parse(localStorage.getItem('user')); // Lấy thông tin user từ localStorage
-console.log(user);
 
     if (user && user.user.roleId === 3) {
       this.props.history.push(`/updateclass/${classId}`);
@@ -36,12 +34,21 @@ console.log(user);
     }
   };
 
-
   handleView = (classId) => {
     this.props.history.push(`/viewchildrenbyclassid/${classId}`);
   };
+
   handleStatusFilterChange = (event) => {
     this.setState({ statusFilter: event.target.value });
+  };
+
+  // Hàm để định dạng ngày tháng
+  formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0'); // Lấy ngày
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Lấy tháng (0-11)
+    const year = date.getFullYear(); // Lấy năm
+    return `${day}/${month}/${year}`; // Trả về định dạng dd/mm/yyyy
   };
 
   render() {
@@ -116,7 +123,7 @@ console.log(user);
                                   )}
                                 </td>
                                 <td>
-                                  {new Date(classData.expireDate).toLocaleDateString()}
+                                  {this.formatDate(classData.expireDate)} {/* Sử dụng hàm định dạng */}
                                 </td>
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"
