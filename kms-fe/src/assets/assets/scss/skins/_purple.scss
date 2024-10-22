@@ -8,6 +8,13 @@ $purple-600: #a27ce6 !default;
 
 .theme-purple{
 
+    .schedule-head tr th {
+        color: $purple-500;
+    }
+    .schedule-head .sticky-col strong{
+        color: $purple-500;
+    }
+
     ::selection {
         color: $white;
         background: $purple-500;

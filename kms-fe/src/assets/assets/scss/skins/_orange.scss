@@ -8,6 +8,13 @@ $orange-600: #fb8c00 !default;
 
 .theme-orange{
 
+    .schedule-head tr th {
+        color: $orange-500;
+    }
+    .schedule-head .sticky-col strong{
+        color: $orange-500;
+    }
+
     ::selection {
         color: $white;
         background: $orange-500;

@@ -62,6 +62,8 @@ class RequestCreate extends React.Component {
 
             // If classData is an array with a single object, set it directly; otherwise, set to null
             this.setState({ studentClasses: classData.length === 1 ? classData[0] : null });
+            this.setState({ classId: classData[0].classId});
+            
         } catch (error) {
             console.error("Error fetching class data:", error);
         }
@@ -69,12 +71,21 @@ class RequestCreate extends React.Component {
 
     handleCreateRequest = async (e) => {
         e.preventDefault(); // Prevent default form submission
-        const { studentId, classChangeId, description, studentClasses, createBy, reasonReject} = this.state;
+        const { studentId, classChangeId, description, studentClasses, createBy, reasonReject } = this.state;
+
+        // Thời gian hiện tại ở UTC
+        const nowUTC = new Date();
+
+        // Chuyển đổi sang giờ Việt Nam (UTC+7)
+        const nowVietnam = new Date(nowUTC.getTime() + (7 * 60 * 60 * 1000));
+
+        // Chuyển đổi về định dạng ISO
+        const createAt = nowVietnam.toISOString().slice(0, 19); // Kết quả là định dạng 'YYYY-MM-DDTHH:mm:ss'
 
         const newRequest = {
             studentId,
             title: "Change Class",
-            createAt: new Date().toISOString().slice(0, 19),
+            createAt,
             createBy,
             statusRequest: 1,
             classChangeId,
@@ -85,10 +96,10 @@ class RequestCreate extends React.Component {
         console.log(newRequest);
         try {
             const response = await axios.post("http://localhost:5124/api/Request/AddRequest", newRequest);
-            
+
             console.log("Request created successfully:", response.data);
             alert("Request created successfully!");
-            this.props.history.push('/request'); 
+            this.props.history.push('/request');
         } catch (error) {
             console.error("Error creating request:", error);
             alert("Error creating request!");
@@ -96,7 +107,7 @@ class RequestCreate extends React.Component {
     };
 
     render() {
-        const { studentId, childerParent, typeRequestId, classAll, classChangeId, description, studentClasses } = this.state;
+        const { studentId, childerParent, typeRequestId, classAll, classChangeId, description, studentClasses, classId } = this.state;
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -182,11 +193,12 @@ class RequestCreate extends React.Component {
                                                         onChange={(e) => this.setState({ classChangeId: e.target.value })}
                                                     >
                                                         <option value="">Choose Class Change</option>
-                                                        {classAll.map((option) => (
-                                                            <option key={option.classId} value={option.classId}>
-                                                                {option.className}
-                                                            </option>
-                                                        ))}
+                                                        {classAll.filter(option => option.classId !== classId)
+                                                            .map((option) => (
+                                                                <option key={option.classId} value={option.classId}>
+                                                                    {option.className}
+                                                                </option>
+                                                            ))}
                                                     </select>
                                                 </div>
                                             </div>

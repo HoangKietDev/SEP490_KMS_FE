@@ -7,6 +7,13 @@ $blue-600: #0d97ff !default;
 
 .theme-blue{
 
+    .schedule-head tr th {
+        color: $blue-500;
+    }
+    .schedule-head .sticky-col strong {
+        color: $blue-500;
+    }
+
     ::selection {
         color: $white;
         background: $blue-500;

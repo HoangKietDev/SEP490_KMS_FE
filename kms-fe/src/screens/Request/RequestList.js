@@ -2,51 +2,36 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
+import axios from "axios";
 
 
 class RequestList extends React.Component {
   state = {
-    // RequestListData: [], // State để lưu trữ dữ liệu từ API
-    RequestListData: [{
-      requestId: 1,
-      title: "Change Class",
-      description: "Want to change class for my children",
-      status: 1,
-      createAt: "21/3/2002",
-      createBy: "Parent",
-      classId: 101,
-      studentId: 161307,
-      changesClassId: 103,
-      ReasonReject: "Class want to change are already full"
-    }, {
-      requestId: 1,
-      title: "Change Class",
-      description: "Want to change class for my children",
-      status: 2,
-      createAt: "21/3/2002",
-      createBy: "Parent",
-      classId: 101,
-      studentId: 161307,
-      changesClassId: 103,
-      ReasonReject: "Class want to change are already full"
-    }]
+    UserListData: [],
+    RequestListData: [],
+    NewRequestListData: []
   };
-
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    // Gọi API và cập nhật state
-    fetch("http://localhost:5124/api/Request/GetAllRequests")
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState({ RequestListData: data });
+    // Gọi API và cập nhật state bằng axios
+    axios.get("http://localhost:5124/api/Request/GetAllRequests")
+      .then((response) => {
+        this.setState({ RequestListData: response.data });
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-
+    axios.get("http://localhost:5124/api/User")
+      .then((response) => {
+        this.setState({ UserListData: response.data });
+      })
+      .catch((error) => {
+        console.error("Error fetching data: ", error);
+      });
   }
+
 
   handleEdit = (requestId) => {
     this.props.history.push(`/request-update/${requestId}`);
@@ -64,23 +49,32 @@ class RequestList extends React.Component {
 
 
   render() {
-    const { RequestListData } = this.state;
+    const { RequestListData, UserListData } = this.state;
     const statusDescriptions = {
-      1: "Proccessing",
-      2: "Staff Approved",
-      3: "Staff Reject",
-      4: "Principal Approved",
-      5: "Principal Reject",
-      6: "Cancel",
+      1: "Pending",
+      2: "Processing",
+      3: "Approved",
+      4: "Rejected",
+      // 6: "Cancel",
     };
     let NewRequestListData = []
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId
-    if(roleId === 2) {
-       NewRequestListData = RequestListData.filter(i => i.createBy === userData.userId)
-    } else {
-       NewRequestListData = RequestListData
+    console.log(RequestListData);
+
+    if (roleId === 3) {
+      NewRequestListData = RequestListData.filter(i => i.statusRequest === 1 || i.statusRequest === 2 || i.statusRequest === 3)
     }
+    else if (roleId === 4) {
+      NewRequestListData = RequestListData.filter(i => i.statusRequest === 2 || i.statusRequest === 4 || i.statusRequest === 5)
+      console.log(NewRequestListData);
+    }
+    else if (roleId === 2) {
+      NewRequestListData = RequestListData.filter(i => i.createBy === userData.userId)
+    } else {
+      NewRequestListData = RequestListData
+    }
+
     return (
       <div
         style={{ flex: 1 }}
@@ -126,37 +120,56 @@ class RequestList extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {NewRequestListData?.map((request, index) => (
-                            <React.Fragment key={"teacher" + index}>
-                              <tr>
-                                <td>{index + 1}</td>
-                                <td>{request?.title}</td>
-                                <td>{request?.description}</td>
-                                <td>{request?.createBy}</td>
-                                <td> {request?.createAt ? request.createAt.slice(0, 10) : ''}</td>
-                                <td>
-                                  {statusDescriptions[request?.statusRequest] || "Unknown Status"}
-                                </td>
-                                <td className="project-actions">
-                                  <a className="btn btn-outline-secondary mr-1"
-                                    onClick={() => this.handleDetail(request.requestId)}
-                                  >
-                                    <i className="icon-eye"></i>
-                                  </a>
+                          {NewRequestListData?.map((request, index) => {
+                            // Đặt fullname ra ngoài return của map
+                            const fullname = UserListData?.find(i => i.userId === request?.createBy);
+                            return (
+                              <React.Fragment key={"teacher" + index}>
+                                <tr>
+                                  <td>{index + 1}</td>
+                                  <td>{request?.title}</td>
+                                  <td>{request?.description}</td>
+                                  {/* Kiểm tra fullname tồn tại trước khi truy cập firstname và lastName */}
+                                  <td>{fullname ? `${fullname.firstname} ${fullname.lastName}` : "Unknown User"}</td>
+                                  <td>{request?.createAt ? request.createAt.slice(0, 10) : ''}</td>
+                                  <td>
+                                    {(() => {
+                                      switch (request?.statusRequest) {
+                                        case 1:
+                                          return <span className="badge badge-default">Pending</span>;
+                                        case 2:
+                                          return <span className="badge badge-info">Processing</span>;
+                                        case 3:
+                                          return <span className="badge badge-success">Approved</span>;
+                                        default:
+                                          return <span className="badge badge-danger">Reject</span>;
+                                      }
+                                    })()}
+                                  </td>
 
-                                  {roleId === 3 || roleId === 4 ? (
-                                    <a
-                                      className="btn btn-outline-secondary"
-                                      onClick={() => this.handleEdit(request.requestId)}
-                                    >
-                                      <i className="icon-pencil"></i>
-                                    </a>
-                                  ) : null}
-                                </td>
+                                  {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 4 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 3) ? (
+                                    <td className="project-actions">
+                                      <a className="btn btn-outline-secondary mr-1"
+                                        onClick={() => this.handleDetail(request.requestId)}
+                                      >
+                                        <i className="icon-eye"></i>
+                                      </a>
 
-                              </tr>
-                            </React.Fragment>
-                          ))}
+                                      {(roleId === 3 || roleId === 4) && (
+                                        <a className="btn btn-outline-secondary"
+                                          onClick={() => this.handleEdit(request.requestId)}
+                                        >
+                                          <i className="icon-pencil"></i>
+                                        </a>
+                                      )}
+                                    </td>
+                                  ) : (
+                                    <td></td>
+                                  )}
+                                </tr>
+                              </React.Fragment>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
