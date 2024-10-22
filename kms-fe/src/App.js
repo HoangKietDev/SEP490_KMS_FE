@@ -34,6 +34,7 @@ import RequestCreate from "./screens/Request/RequestCreate";
 import ViewMenu from "./screens/Menu/ViewMenu"
 import ProtectedRoute from "./components/Router/ProtectRouter";
 import Schedule from "./screens/Schedule/Schedule";
+import ScheduleList from "./screens/Schedule/ScheduleList";
 
 
 import ListMenu from "./screens/Menu/ListMenu"
@@ -185,7 +186,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewallstudent`}
                   component={viewallstudent}
-                  allowedRoles={[1,2, 3]}
+                  allowedRoles={[1, 2, 3]}
                 />
                 <ProtectedRoute
                   exact
@@ -197,14 +198,14 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewstudentbyID/:studentID`}
                   component={viewstudentbyID}
-                  allowedRoles={[1,2,4,3]}
+                  allowedRoles={[1, 2, 4, 3]}
 
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/viewclass`}
                   component={viewclass}
-                  allowedRoles={[2, 3, 4,5]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
@@ -240,7 +241,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewchildrenbyclassid/:classId`}
                   component={ViewChildrenbyClassID}
-                  allowedRoles={[2,3,4,5]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
@@ -249,12 +250,18 @@ class App extends React.Component {
                   allowedRoles={[3]}
                 />
 
-
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/schedule`}
                   component={Schedule}
                   allowedRoles={[2, 3, 4]}
+                />
+
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/listschedule`}
+                  component={ScheduleList}
+                  allowedRoles={[3,4]}
                 />
                 <ProtectedRoute
                   exact
@@ -266,9 +273,8 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewmenu2`}
                   component={ViewMenuByTeacherAndParent}
-                  allowedRoles={[2,5]}
+                  allowedRoles={[2, 5]}
                 />
-                
               </Switch>
             </div>
           </>
