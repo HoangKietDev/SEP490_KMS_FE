@@ -54,9 +54,18 @@ class NavbarMenu extends React.Component {
     }
     else if (
       activeKey === "/classviewclass" ||
-      activeKey === "/viewclass"
+      activeKey === "/viewclass" ||
+      activeKey === "/viewclass2" ||
+      activeKey === "/viewclass3"
     ) {
       this.activeMenutabContainer("ClassContainer");
+    }
+    else if (
+      activeKey === "/viewmenu" ||
+      activeKey === "/viewmenu2" ||
+      activeKey === "/listmenu"
+    ) {
+      this.activeMenutabContainer("MenuContainer");
     }
     else if (
       activeKey === "/teacher"
@@ -436,7 +445,7 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Classes */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
                       <li id="ClassContainer" className="">
                         <a
                           href="#!"
@@ -449,14 +458,30 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>CLass Management</span>
                         </a>
                         <ul className="collapse">
-
-                          <li
-                            className={activeKey === "viewclass" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/viewclass">View Class</Link>
-                          </li>
-
+                          {roleId === 3 || roleId === 4 ? (
+                            <li
+                              className={activeKey === "viewclass" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/viewclass">View Class</Link>
+                            </li>
+                          ) : null}
+                          {roleId === 2 ? (
+                            <li
+                              className={activeKey === "viewclass2" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/viewclass2">View Class</Link>
+                            </li>
+                          ) : null}
+                          {roleId === 5 ? (
+                            <li
+                              className={activeKey === "viewclass2" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/viewclass3">View Class</Link>
+                            </li>
+                          ) : null}
                           {roleId === 3 ? (
                             <li
                               className={activeKey === "createclass" ? "active" : ""}
@@ -533,7 +558,52 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
 
+                    {/* Menu */}
+                    {roleId === 2 || roleId === 3 || roleId === 5 || roleId === 4 ? (
+                      <li id="MenuContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.activeMenutabContainer("MenuContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Menu Management</span>
+                        </a>
+                        <ul className="collapse">
 
+
+
+                          {roleId === 2 || roleId === 5 ? (
+                            <li
+                              className={activeKey === "viewmenu2" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/viewmenu2">View Menu</Link>
+                            </li>
+                          ) : null}
+
+                          {roleId === 3 ? (
+                            <li
+                              className={activeKey === "viewmenu" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/viewmenu">View Menu</Link>
+                            </li>
+                          ) : null}
+
+                          {roleId === 4 ? (
+                            <li
+                              className={activeKey === "listmenu" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/listmenu">List Menu</Link>
+                            </li>
+                          ) : null}
+                        </ul>
+                      </li>
+                    ) : null}
 
                     {/* Children */}
                     {roleId === 3 ? (

@@ -36,6 +36,12 @@ import ProtectedRoute from "./components/Router/ProtectRouter";
 import Schedule from "./screens/Schedule/Schedule";
 
 
+import ListMenu from "./screens/Menu/ListMenu"
+import ViewChildrenbyClassID from "./screens/Children/ViewChildrenbyClassID";
+import ViewMenuByTeacherAndParent from "./screens/Menu/ViewMenuByTeacherAndParent";
+import UpdateClassByPrincipal from "./screens/Class/UpdateClassByPrincipal";
+import ViewClassByParentAndTeacher from "./screens/Class/ViewClassByParent";
+import ViewClassByTeacher from "./screens/Class/ViewClassByTeacher";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -179,7 +185,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewallstudent`}
                   component={viewallstudent}
-                  allowedRoles={[2, 3]}
+                  allowedRoles={[1,2, 3]}
                 />
                 <ProtectedRoute
                   exact
@@ -191,12 +197,26 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewstudentbyID/:studentID`}
                   component={viewstudentbyID}
+                  allowedRoles={[1,2,4,3]}
+
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/viewclass`}
                   component={viewclass}
-                  allowedRoles={[2, 3, 5]}
+                  allowedRoles={[2, 3, 4,5]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/viewclass2`}
+                  component={ViewClassByParentAndTeacher}
+                  allowedRoles={[2]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/viewclass3`}
+                  component={ViewClassByTeacher}
+                  allowedRoles={[5]}
                 />
                 <ProtectedRoute
                   exact
@@ -208,13 +228,25 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/updateclass/:classId`}
                   component={updateclass}
-                  allowedRoles={[3, 4]}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/updateclass2/:classId`}
+                  component={UpdateClassByPrincipal}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/viewchildrenbyclassid/:classId`}
+                  component={ViewChildrenbyClassID}
+                  allowedRoles={[2,3,4,5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/viewmenu`}
                   component={ViewMenu}
-                  allowedRoles={[2, 4]}
+                  allowedRoles={[3]}
                 />
 
 
@@ -224,6 +256,19 @@ class App extends React.Component {
                   component={Schedule}
                   allowedRoles={[2, 3, 4]}
                 />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/listmenu`}
+                  component={ListMenu}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/viewmenu2`}
+                  component={ViewMenuByTeacherAndParent}
+                  allowedRoles={[2,5]}
+                />
+                
               </Switch>
             </div>
           </>

@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
 
-class UpdateClass extends React.Component {
+class UpdateClassByPrincipal extends React.Component {
   state = {
     classId: 0,
     className: "",
@@ -96,7 +96,7 @@ class UpdateClass extends React.Component {
       schoolId,
       semesterId,
       gradeId,
-      status: 0
+      status: status ? 1 : 0,
     };
 
     // Gọi API để cập nhật lớp học
@@ -149,7 +149,7 @@ class UpdateClass extends React.Component {
                 )}
               </div>
 
-              {/* <div className="form-group">
+              <div className="form-group">
                 <label>Status</label>
                 <br />
                 <label className="fancy-radio">
@@ -176,7 +176,7 @@ class UpdateClass extends React.Component {
                     <i></i>Inactive
                   </span>
                 </label>
-              </div> */}
+              </div>
 
               <div className="form-group">
                 <label>Expire Date</label>
@@ -253,4 +253,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(UpdateClass));
+export default connect(mapStateToProps)(withRouter(UpdateClassByPrincipal));

@@ -15,40 +15,43 @@ class CreateClass extends React.Component {
     gradeId: 0,
     status: 0,
     submeet: false,
-    semesters: [],  // Chứa danh sách các semester
-    grades: [],      // Chứa danh sách các grade
+    semesters: [],      // Chứa danh sách các semester
+    grades: [],         // Chứa danh sách các grade
+    teachers: [],       // Chứa danh sách các giáo viên
+    selectedTeachers: [] // Chứa danh sách giáo viên được chọn
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
 
-    // Gọi API để lấy danh sách semester và grade
+    // Gọi API để lấy danh sách semester, grade và teachers
     Promise.all([
       fetch("http://localhost:5124/api/Semester").then((res) => res.json()),
-      fetch("http://localhost:5124/api/Grade").then((res) => res.json())
+      fetch("http://localhost:5124/api/Grade").then((res) => res.json()),
+      fetch("http://localhost:5124/api/Teacher/GetAllTeachers").then((res) => res.json())
     ])
-      .then(([semesters, grades]) => {
-        this.setState({ semesters, grades });
+      .then(([semesters, grades, teachers]) => {
+        this.setState({ semesters, grades, teachers });
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        alert("Failed to fetch semesters or grades.");
+        alert("Failed to fetch data.");
       });
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { classId, className, number, isActive, expireDate, schoolId, semesterId, gradeId, status } = this.state;
-
+    const { className, number, isActive, expireDate, schoolId, semesterId, gradeId, selectedTeachers } = this.state;
+  
     // Kiểm tra dữ liệu trước khi gửi
     if (!className || !expireDate || schoolId === 0) {
       this.setState({ submeet: true });
       return;
     }
-
-    // Chuẩn bị dữ liệu theo schema
+  
+    // Chuẩn bị dữ liệu để gửi lên API
     const newClass = {
-      classId,
+      classId: 0,  // Không cần gửi classId, vì API sẽ tự tạo và trả về
       className,
       number,
       isActive,
@@ -56,9 +59,9 @@ class CreateClass extends React.Component {
       schoolId,
       semesterId,
       gradeId,
-      status,
+      status: 0,  // Đặt mặc định là 0 khi gửi lên API
     };
-
+  
     // Gọi API để thêm lớp học
     fetch("http://localhost:5124/api/Class/AddClass", {
       method: "POST",
@@ -69,25 +72,45 @@ class CreateClass extends React.Component {
     })
       .then((response) => response.json())
       .then((data) => {
+        const classId = data.classId;  // Lấy classId từ phản hồi API sau khi tạo lớp
+  
         console.log("Class added successfully:", data);
-        // Hiển thị thông báo thành công
         alert("Class has been added successfully!");
-
-        // Chuyển hướng đến /viewclass
+  
+        // Gọi API để thêm từng giáo viên vào lớp
+        selectedTeachers.forEach((teacherId) => {
+          fetch(`http://localhost:5124/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ classId, teacherId }),  // Sử dụng classId vừa tạo
+          })
+            .then((res) => res.json())
+            .then((result) => {
+              console.log(`Teacher ${teacherId} added to class successfully`, result);
+            })
+            .catch((error) => {
+              console.error("Error adding teacher to class:", error);
+            });
+        });
+  
+        // Chuyển hướng đến trang viewclass sau khi tạo lớp và thêm giáo viên xong
         this.props.history.push('/viewclass');
-
-        // Reset form
+  
+        // Reset form sau khi thêm thành công
         this.setState({
           classId: 0,
           className: "",
           number: 0,
-          isActive: 1,  // Đặt lại trạng thái isActive mặc định
+          isActive: 1,
           expireDate: "",
           schoolId: 1,
           semesterId: 0,
           gradeId: 0,
-          status: 1,
+          status: 0,
           submeet: false,
+          selectedTeachers: []  // Reset lựa chọn giáo viên
         });
       })
       .catch((error) => {
@@ -95,9 +118,21 @@ class CreateClass extends React.Component {
         alert("Failed to add class. Please try again.");
       });
   };
+  
+
+
+
+  handleTeacherSelection = (teacherId) => {
+    const { selectedTeachers } = this.state;
+    if (selectedTeachers.includes(teacherId)) {
+      this.setState({ selectedTeachers: selectedTeachers.filter(id => id !== teacherId) });
+    } else {
+      this.setState({ selectedTeachers: [...selectedTeachers, teacherId] });
+    }
+  };
 
   render() {
-    const { className, number, isActive, expireDate, schoolId, semesterId, gradeId, status, semesters, grades, submeet } = this.state;
+    const { className, number, expireDate, semesterId, gradeId, semesters, grades, teachers, selectedTeachers, submeet } = this.state;
 
     return (
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -188,13 +223,17 @@ class CreateClass extends React.Component {
               </div>
 
               <div className="form-group">
-                <label>Status</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={status}
-                  onChange={(e) => this.setState({ status: parseInt(e.target.value) })}
-                />
+                <label>Select Teachers</label>
+                {teachers.map((teacher) => (
+                  <div key={teacher.teacherId}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTeachers.includes(teacher.teacherId)}
+                      onChange={() => this.handleTeacherSelection(teacher.teacherId)}
+                    />
+                    <label>{teacher.name}</label>
+                  </div>
+                ))}
               </div>
 
               <br />
@@ -213,5 +252,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-// Export component wrapped with withRouter to have access to history
 export default connect(mapStateToProps)(withRouter(CreateClass));

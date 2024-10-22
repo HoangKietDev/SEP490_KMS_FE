@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 
-class ViewClass extends React.Component {
+class ViewClassByTeacher extends React.Component {
   state = {
     ProjectsData: [], // State để lưu trữ dữ liệu từ API
     statusFilter: '', // State để lưu trạng thái lọc
@@ -11,22 +11,28 @@ class ViewClass extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    // Gọi API và cập nhật state
-    fetch("http://localhost:5124/api/Class/GetAllClass")
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState({ ProjectsData: data });
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
+    const user = JSON.parse(localStorage.getItem('user'));
+    const teacherId = user ? user.user.userId : null; // Lấy teacherId từ localStorage
 
+    if (teacherId) {
+      // Gọi API và cập nhật state
+      fetch(`http://localhost:5124/api/Class/GetClassesByTeacherId/${teacherId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          // Lọc các lớp có status là 1
+          const activeClasses = data.filter(classData => classData.status === 1);
+          this.setState({ ProjectsData: activeClasses });
+        })
+        .catch((error) => {
+          console.error("Error fetching data: ", error);
+        });
+    } else {
+      console.error("Teacher ID không tồn tại trong localStorage.");
+    }
   }
 
   handleEdit = (classId) => {
-    const user = JSON.parse(localStorage.getItem('user')); // Lấy thông tin user từ localStorage
-console.log(user);
-
+    const user = JSON.parse(localStorage.getItem('user'));
     if (user && user.user.roleId === 3) {
       this.props.history.push(`/updateclass/${classId}`);
     } else if (user && user.user.roleId === 4) {
@@ -36,10 +42,10 @@ console.log(user);
     }
   };
 
-
   handleView = (classId) => {
     this.props.history.push(`/viewchildrenbyclassid/${classId}`);
   };
+
   handleStatusFilterChange = (event) => {
     this.setState({ statusFilter: event.target.value });
   };
@@ -88,7 +94,6 @@ console.log(user);
                         <option value="inactive">Inactive</option>
                       </select>
                     </div>
-                    
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
                         <thead className="thead-light">
@@ -106,13 +111,9 @@ console.log(user);
                                 <td>{classData.className}</td>
                                 <td>
                                   {classData.status === 1 ? (
-                                    <span className="badge badge-success">
-                                      Active
-                                    </span>
+                                    <span className="badge badge-success">Active</span>
                                   ) : (
-                                    <span className="badge badge-default">
-                                      Inactive
-                                    </span>
+                                    <span className="badge badge-default">Inactive</span>
                                   )}
                                 </td>
                                 <td>
@@ -120,16 +121,11 @@ console.log(user);
                                 </td>
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"
-                                    onClick={() => this.handleView(classData.classId)} // Gọi hàm handleView
+                                    onClick={() => this.handleView(classData.classId)}
                                   >
                                     <i className="icon-eye"></i>
                                   </a>
-                                  <a
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => this.handleEdit(classData.classId)} // Gọi hàm handleEdit
-                                  >
-                                    <i className="icon-pencil"></i>
-                                  </a>
+                                  
                                   <a className="btn btn-outline-secondary">
                                     <i className="icon-trash"></i>
                                   </a>
@@ -155,4 +151,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(ViewClass));
+export default connect(mapStateToProps)(withRouter(ViewClassByTeacher));
