@@ -100,12 +100,10 @@ class RequestDetail extends React.Component {
   render() {
     const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject } = this.state;
     const statusDescriptions = {
-      1: "Processing",
-      2: "Staff Approved",
-      3: "Staff Reject",
-      4: "Principal Approved",
-      5: "Principal Reject",
-      6: "Cancel",
+      1: "Pending",
+      2: "Processing",
+      3: "Approved ",
+      4: "Rejected",
     };
 
     return (

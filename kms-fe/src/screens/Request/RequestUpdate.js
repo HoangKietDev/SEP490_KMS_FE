@@ -24,12 +24,11 @@ class RequestUpdate extends React.Component {
       createByName: "createByName"
     },
     statusDescriptions: {
-      1: "Processing",
-      2: "Staff Approved",
-      3: "Staff Reject",
-      4: "Principal Approved",
-      5: "Principal Reject",
-      6: "Cancel",
+      1: "Pending",
+      2: "Processing",
+      3: "Approved",
+      4: "Rejected",
+      // 4: "Cancel",
     },
     filteredStatuses: ''
   };
@@ -131,11 +130,16 @@ class RequestUpdate extends React.Component {
         reasonReject: ReasonReject,
       });
       // Optionally, redirect or fetch updated data here
-      // Check if the status is "Principal Approved" and make the additional API call
-      if (status === "Principal Approved") {
-        await axios.put(`http://localhost:5124/api/Request/UpdateClassIdForStudent/${studentId}`, {
-          classChangeId
-        });
+      if (status === '3') {
+        await axios.put(
+          `http://localhost:5124/api/Request/UpdateClassIdForStudent/${studentId}`,
+          JSON.stringify(classChangeId), // Chuyển số thành chuỗi JSON
+          {
+            headers: {
+              'Content-Type': 'application/json;odata.metadata=minimal;odata.streaming=true' // Đúng header như yêu cầu
+            }
+          }
+        );
         alert("Request updated and class ID updated for the student.");
       } else {
         alert("Request updated successfully!");
@@ -144,6 +148,7 @@ class RequestUpdate extends React.Component {
       console.error("Error updating request: ", error);
       alert("Failed to update the request. Please try again.");
     }
+    this.props.history.push('/request');
   };
   // Function to filter the statuses based on roleId
   getFilteredStatusDescriptions = (roleId) => {
@@ -153,24 +158,23 @@ class RequestUpdate extends React.Component {
     switch (roleId) {
       case 3: // Staff
         filteredStatuses = {
-          1: this.state.statusDescriptions[1], // Processing
-          2: this.state.statusDescriptions[2], // Staff Approved
-          3: this.state.statusDescriptions[3], // Staff Reject
+          1: this.state.statusDescriptions[1], // Pending
+          2: this.state.statusDescriptions[2], // Processing
+          4: this.state.statusDescriptions[4], // Rejected
         };
         break;
 
       case 2: // Parent 
         filteredStatuses = {
-          1: this.state.statusDescriptions[1], // Processing
-          6: this.state.statusDescriptions[6], // Cancel
+          1: this.state.statusDescriptions[1], // Pending
         };
         break;
 
       case 4: // Principal 
         filteredStatuses = {
-          2: this.state.statusDescriptions[2], // Staff Approved
-          4: this.state.statusDescriptions[4], // Principal Approved
-          5: this.state.statusDescriptions[5], // Principal Reject
+          2: this.state.statusDescriptions[2], // Processing
+          3: this.state.statusDescriptions[3], // Approved
+          4: this.state.statusDescriptions[4], // Rejected
         };
         break;
 
