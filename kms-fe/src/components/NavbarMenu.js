@@ -79,15 +79,10 @@ class NavbarMenu extends React.Component {
     }
     else if (
       activeKey === "/schedule" ||
+      activeKey === "/listschedule"||
       activeKey === "/create-schedule"
     ) {
       this.activeMenutabContainer("scheduleContainer");
-    }
-    else if (
-      activeKey === "/menu" ||
-      activeKey === "/create-menu"
-    ) {
-      this.activeMenutabContainer("menuContainer");
     }
     else if (
       activeKey === "/" ||
@@ -572,9 +567,6 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Menu Management</span>
                         </a>
                         <ul className="collapse">
-
-
-
                           {roleId === 2 || roleId === 5 ? (
                             <li
                               className={activeKey === "viewmenu2" ? "active" : ""}
@@ -720,7 +712,7 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Daily Schedule */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
                       <li id="scheduleContainer" className="">
                         <a
                           href="#!"
@@ -749,39 +741,14 @@ class NavbarMenu extends React.Component {
                             </li>
                           ) : null}
 
-                        </ul>
-                      </li>
-                    ) : null}
-
-                    {/* Menu */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 ? (
-                      <li id="menuContainer" className="">
-                        <a
-                          href="#!"
-                          className="has-arrow"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            this.activeMenutabContainer("menuContainer");
-                          }}
-                        >
-                          <i className="icon-grid"></i> <span>Menu Schedule</span>
-                        </a>
-                        <ul className="collapse">
-                          <li
-                            className={activeKey === "menu" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/menu">Menu Schedule</Link>
-                          </li>
-                          {roleId === 3 ? (
+                          {roleId === 4 ? (
                             <li
-                              className={activeKey === "create-menu" ? "active" : ""}
+                              className={activeKey === "listschedule" ? "active" : ""}
                               onClick={() => { }}
                             >
-                              <Link to="/create-menu">New Schedule </Link>
+                              <Link to="/listschedule">List Schedule </Link>
                             </li>
                           ) : null}
-
                         </ul>
                       </li>
                     ) : null}

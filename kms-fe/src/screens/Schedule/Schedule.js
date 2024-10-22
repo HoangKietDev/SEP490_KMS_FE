@@ -20,16 +20,24 @@ class Schedule extends React.Component {
     const [year, week] = selectedWeek?.split('-W');
     const firstDayOfYear = new Date(year, 0, 1);
     const days = (week - 1) * 7;
-    const startDate = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + days - firstDayOfYear.getDay() + 1));
+    const startDate = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + days - firstDayOfYear.getDay() + 2));
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + 6); // Ngày kết thúc tuần
 
+    // Tạo một mảng chứa các ngày trong tuần từ thứ 2 đến chủ nhật
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      weekDates.push(day);
+    }
     // Function to format the date to 'YYYY-MM-DD'
     const formatDate = (date) => date.toISOString().split('T')[0];
 
     return {
       startDate: formatDate(startDate),
-      endDate: formatDate(endDate)
+      endDate: formatDate(endDate),
+      weekDates: weekDates.map(formatDate) // Mảng chứa tất cả các ngày trong tuần
     };
   };
 
@@ -39,9 +47,9 @@ class Schedule extends React.Component {
 
     classData: [],
     daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    timeslots: ['07:00 - 08:00', '08:00 - 08:30', '08:30 - 10:30', '10:30 - 11:00',
-      '11:00 - 11:30', '11:30 - 13:30', '13:30 - 14:00', '14:00 - 14:30',
-      '14:30 - 15:30', '15:30 - 16:00', '16:00 - 17:00'],
+    timeslots: ['07:00 - 08:00', '08:00 - 08:30', '08:30 - 10:30',
+      '10:30 - 11:30', '11:30 - 13:30', '13:30 - 14:00', '14:00 - 14:30',
+      '14:30 - 15:00', '15:00 - 15:30', '15:30 - 16:00', '16:00 - 17:00'],
 
     selectedWeek: this.getCurrentWeek(), // Lấy tuần hiện tại làm mặc định
     selectId: '',
@@ -58,9 +66,15 @@ class Schedule extends React.Component {
         const response = await axios.get(`http://localhost:5124/api/Class/GetAllClass`);
         const data = response.data;
         const defaultClassId = data.length > 0 ? data[0].classId : '';
+
+        // Update state with the default class and then fetch schedule data
         this.setState({
           classData: data,
           selectId: defaultClassId
+        }, async () => {
+          // Fetch schedule data only after state update
+          const { startDate, endDate, selectId } = this.state;
+          await this.fetchScheduleData(startDate, endDate, selectId);
         });
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -69,42 +83,26 @@ class Schedule extends React.Component {
     fetchData();
   }
 
-  handleChange = async (type, event) => {
-    let { startDate, endDate, selectId } = this.state;
-
-    const weekDatesDefault = this.getWeekStartEnd(this.state.selectedWeek);
-    console.log(weekDatesDefault);
-
-    this.setState({ startDate: weekDatesDefault.startDate, endDate: weekDatesDefault.endDate });
-
-    if (type === "class") {
-      selectId = event.target.value;
-      this.setState({ selectId });
-    } else if (type === "week") {
-      const selectedWeek = event.target.value;
-      this.setState({ selectedWeek });
-      const weekDates = this.getWeekStartEnd(selectedWeek);
-      startDate = weekDates.startDate;
-      endDate = weekDates.endDate;
-      this.setState({ startDate, endDate });
-    }
-
-    // Clear previous schedule data before fetching new data
-    this.setState({
-      scheduleData: [],    // Reset scheduleData
-      scheduleDetails: [], // Reset scheduleDetails
-    });
-
-    console.log(startDate, endDate, selectId);
-
+  fetchScheduleData = async (startDate, endDate, selectId) => {
     try {
       const response = await axios.get(
         `http://localhost:5124/api/Schedule/GetSchedulesByDateAndClass?startDate=${startDate}&endDate=${endDate}&classId=${selectId}`
       );
       const scheduleData = response.data;
+      const userData = JSON.parse(localStorage.getItem("user")).user;
+      const roleId = userData.roleId;
 
       if (scheduleData.length > 0) {
         const scheduleId = scheduleData[0].scheduleId;
+
+        if (roleId === 2 && scheduleData[0].status !== 2) {
+          this.setState({
+            scheduleData: scheduleData,
+            scheduleDetails: [], // No details for status 0
+          });
+          return;
+        }
+
         const detailResponse = await axios.get(
           `http://localhost:5124/api/Schedule/GetAllScheduleDetailsByScheduleId/${scheduleId}`
         );
@@ -138,12 +136,46 @@ class Schedule extends React.Component {
     }
   };
 
+
+  handleChange = async (type, event) => {
+    let { startDate, endDate, selectId } = this.state;
+
+    const weekDatesDefault = this.getWeekStartEnd(this.state.selectedWeek);
+    console.log(weekDatesDefault);
+
+    this.setState({ startDate: weekDatesDefault.startDate, endDate: weekDatesDefault.endDate });
+
+    if (type === "class") {
+      selectId = event.target.value;
+      this.setState({ selectId });
+    } else if (type === "week") {
+      const selectedWeek = event.target.value;
+      this.setState({ selectedWeek });
+      const weekDates = this.getWeekStartEnd(selectedWeek);
+      startDate = weekDates.startDate;
+      endDate = weekDates.endDate;
+      this.setState({ startDate, endDate });
+    }
+    // Clear previous schedule data before fetching new data
+    this.setState({
+      scheduleData: [],    // Reset scheduleData
+      scheduleDetails: [], // Reset scheduleDetails
+    });
+    console.log(startDate, endDate, selectId);
+    // Call the separated API function
+    await this.fetchScheduleData(startDate, endDate, selectId);
+  };
+
+
   handleImportSchedule = async (event) => {
     // Ngăn chặn hành vi mặc định của form nếu bạn đang dùng trong một form
     event.preventDefault();
+    const file = this.fileInput.files[0]; // Lấy file từ ref
 
-    const fileInput = document.getElementById('file-input'); // Lấy input file từ DOM
-    const file = fileInput?.files[0]; // Lấy file được chọn
+    if (!file) {
+      alert("Please select a file to import."); // Kiểm tra nếu không có file được chọn
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', file); // Thêm file vào FormData
@@ -151,8 +183,7 @@ class Schedule extends React.Component {
     try {
       const response = await axios.post('http://localhost:5124/api/Schedule/Import', formData, {
         headers: {
-          'accept': '*/*',
-          'Content-Type': 'multipart/form-data', // Đặt Content-Type cho multipart
+          'accept': '*/*', // Chỉ để header này
         },
       });
 
@@ -160,6 +191,9 @@ class Schedule extends React.Component {
       if (response.status === 200) {
         alert("Import successful!");
         // Có thể làm thêm các thao tác khác như refresh data...
+        const { startDate, endDate, selectId } = this.state; // Lấy các giá trị cần thiết
+        await this.fetchScheduleData(startDate, endDate, selectId); // Gọi lại hàm fetch dữ liệu
+
       }
     } catch (error) {
       console.error("Error importing schedule: ", error);
@@ -171,9 +205,13 @@ class Schedule extends React.Component {
 
 
   renderTable = () => {
-    const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails } = this.state;
+    const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek } = this.state;
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId;
+
+    // Lấy các ngày của tuần hiện tại
+    const { weekDates } = this.getWeekStartEnd(selectedWeek);
+
     return (
       <div
         style={{ flex: 1 }}
@@ -191,7 +229,7 @@ class Schedule extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
-                    <div className="week-selector d-inline-flex">
+                    <div className=" d-inline-flex">
                       <input
                         type="week"
                         value={this.state.selectedWeek}
@@ -249,8 +287,11 @@ class Schedule extends React.Component {
                         <thead className="thead-light schedule-head">
                           <tr>
                             <th style={{ width: '150px' }} className="text-center">Thời gian</th>
+                            {/* Hiển thị các ngày tương ứng với thứ trong tuần */}
                             {daysOfWeek.map((day, index) => (
-                              <th key={index}>{day}</th>
+                              <th key={index}>
+                                {day}  {"( " + weekDates[index] + " )"} {/* Ngày tương ứng với thứ */}
+                              </th>
                             ))}
                           </tr>
                         </thead>
@@ -258,7 +299,7 @@ class Schedule extends React.Component {
                           {timeslots.map((timeslot, timeslotIndex) => (
                             <tr key={timeslotIndex}>
                               {/* Display the time slot */}
-                              <td className="sticky-col">
+                              <td className="thead-light sticky-col">
                                 <strong>{timeslot}</strong>
                               </td>
                               {/* Loop through each day of the week */}
