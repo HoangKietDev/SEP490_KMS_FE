@@ -6,6 +6,7 @@ import Logo from "../assets/images/logo-white.svg";
 import { updateEmail, updatePassword, onLoggedin } from "../actions";
 import { Button } from "react-bootstrap";
 import axios from 'axios';
+import { setSession } from "../components/Auth/Auth";
 
 class Login extends React.Component {
   constructor(props) {
@@ -49,13 +50,14 @@ class Login extends React.Component {
         // Đăng nhập thành công
         alert("Login successful!");
         localStorage.setItem("user", JSON.stringify(accountList));
-        if(accountList.user.roleId === 2 || accountList.user.roleId === 5 || accountList.user.roleId === 3 ) {
-           window.location.href = "/viewclass";
+        setSession('user', accountList)
+        if (accountList.user.roleId === 2 || accountList.user.roleId === 5 || accountList.user.roleId === 3) {
+          window.location.href = "/viewclass";
         }
-        if(accountList.user.roleId === 1 ) {
+        if (accountList.user.roleId === 1) {
           window.location.href = "/dashboard";
         }
-        if(accountList.user.roleId === 4 ) {
+        if (accountList.user.roleId === 4) {
           window.location.href = "/request";
         }
       } else {
