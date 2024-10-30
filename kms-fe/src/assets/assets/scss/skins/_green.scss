@@ -15,6 +15,9 @@ $green-600: #43a047 !default;
     .schedule-head .sticky-col strong{
         color: $green-500;
     }
+    .theme-color {
+        color: $green-500;
+    }
 
     ::selection {
         color: $white;
