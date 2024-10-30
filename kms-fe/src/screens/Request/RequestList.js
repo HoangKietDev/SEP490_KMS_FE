@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import { withRouter } from 'react-router-dom';
+// import { withRouter } from 'react-router-dom';
 import axios from "axios";
 
 
@@ -41,7 +41,7 @@ class RequestList extends React.Component {
     this.props.history.push(`/request-detail/${requestId}`);
   };
 
-  handleCreateCategory = () => {
+  handleCreateRequest = () => {
     // Chuyển hướng đến trang add teacher
     this.props.history.push(`/create-request`);
   };
@@ -55,18 +55,17 @@ class RequestList extends React.Component {
       2: "Processing",
       3: "Approved",
       4: "Rejected",
-      // 6: "Cancel",
     };
     let NewRequestListData = []
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId
     console.log(RequestListData);
 
-    if (roleId === 3) {
-      NewRequestListData = RequestListData.filter(i => i.statusRequest === 1 || i.statusRequest === 2 || i.statusRequest === 3)
+    if (roleId === 5) {
+      NewRequestListData = RequestListData
     }
-    else if (roleId === 4) {
-      NewRequestListData = RequestListData.filter(i => i.statusRequest === 2 || i.statusRequest === 4 || i.statusRequest === 5)
+    else if (roleId === 3) {
+      NewRequestListData = RequestListData.filter(i => i.statusRequest === 2 || i.statusRequest === 3 || i.statusRequest === 4)
       console.log(NewRequestListData);
     }
     else if (roleId === 2) {
@@ -98,7 +97,7 @@ class RequestList extends React.Component {
                   <div className="header d-flex justify-content-between">
                     <h2>Request Manager</h2>
                     {roleId === 2 ? (
-                      <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Request</a>
+                      <a onClick={() => this.handleCreateRequest()} class="btn btn-success text-white">Create New Request</a>
                     ) : null}
                   </div>
                 </div>
@@ -115,6 +114,7 @@ class RequestList extends React.Component {
                             <th>Description Name</th>
                             <th>Create By</th>
                             <th>Create At</th>
+                            <th>Process Note</th>
                             <th>Status</th>
                             <th>Action</th>
                           </tr>
@@ -128,10 +128,11 @@ class RequestList extends React.Component {
                                 <tr>
                                   <td>{index + 1}</td>
                                   <td>{request?.title}</td>
-                                  <td>{request?.description}</td>
+                                  <td className="text-truncate" style={{ maxWidth: "150px" }}>{request?.description}</td>
                                   {/* Kiểm tra fullname tồn tại trước khi truy cập firstname và lastName */}
                                   <td>{fullname ? `${fullname.firstname} ${fullname.lastName}` : "Unknown User"}</td>
                                   <td>{request?.createAt ? request.createAt.slice(0, 10) : ''}</td>
+                                  <td className="text-truncate" style={{ maxWidth: "150px" }}>{request?.processNote}</td>
                                   <td>
                                     {(() => {
                                       switch (request?.statusRequest) {
@@ -147,7 +148,7 @@ class RequestList extends React.Component {
                                     })()}
                                   </td>
 
-                                  {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 4 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 3) ? (
+                                  {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 3 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 5) ? (
                                     <td className="project-actions">
                                       <a className="btn btn-outline-secondary mr-1"
                                         onClick={() => this.handleDetail(request.requestId)}
@@ -155,7 +156,7 @@ class RequestList extends React.Component {
                                         <i className="icon-eye"></i>
                                       </a>
 
-                                      {(roleId === 3 || roleId === 4) && (
+                                      {(roleId === 3 || roleId === 5) && (
                                         <a className="btn btn-outline-secondary"
                                           onClick={() => this.handleEdit(request.requestId)}
                                         >
@@ -188,4 +189,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(RequestList));
+export default connect(mapStateToProps)((RequestList));
