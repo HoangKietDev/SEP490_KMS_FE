@@ -7,6 +7,7 @@ import { updateEmail, updatePassword, onLoggedin } from "../actions";
 import { Button } from "react-bootstrap";
 import axios from 'axios';
 import { setSession } from "../components/Auth/Auth";
+import Notification from "../components/Notification";
 
 class Login extends React.Component {
   constructor(props) {
@@ -14,6 +15,10 @@ class Login extends React.Component {
     this.state = {
       isLoad: true,
       showPassword: false, // State to manage password visibility
+
+      showNotification: false, // State to control notification visibility
+      notificationText: "", // Text for the notification
+      notificationType: "success" // Type of notification (success or error)
     }
   }
   componentDidMount() {
@@ -42,13 +47,11 @@ class Login extends React.Component {
       if (response.status !== 200) {
         throw new Error("Failed to fetch accounts");
       }
-
       const accountList = response.data; // Adjust according to your API response structure
       console.log(accountList);
 
       if (accountList) {
         // Đăng nhập thành công
-        alert("Login successful!");
         localStorage.setItem("user", JSON.stringify(accountList));
         setSession('user', accountList)
         if (accountList.user.roleId === 2 || accountList.user.roleId === 5 || accountList.user.roleId === 3) {
@@ -61,11 +64,19 @@ class Login extends React.Component {
           window.location.href = "/request";
         }
       } else {
-        alert("Incorrect email or password, or your account is inactive.");
+        this.setState({
+          notificationText: "Incorrect email or password, or your account is inactive.",
+          notificationType: "error",
+          showNotification: true
+        });
       }
     } catch (error) {
       console.error("Login error:", error); // Log error details for debugging
-      alert("Something went wrong. Please try again later.");
+      this.setState({
+        notificationText: error.response.data,
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -76,8 +87,20 @@ class Login extends React.Component {
     const { navigation } = this.props;
     const { email, password } = this.props;
     const { showPassword } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     return (
+
       <div className="theme-cyan">
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div className="page-loader-wrapper" style={{ display: this.state.isLoad ? 'block' : 'none' }}>
           <div className="loader">
             <div className="m-t-30"><img src={require('../assets/images/logo-icon.svg')} width="48" height="48" alt="Lucid" /></div>
@@ -130,6 +153,7 @@ class Login extends React.Component {
                             style={{ right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}
                             onClick={this.togglePasswordVisibility}
                           >
+
                             <i className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`} aria-hidden="true"></i>
                           </span>
                         </div>
