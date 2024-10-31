@@ -17,10 +17,14 @@ class Albumlist extends React.Component {
     NewAlbumListData: [],
     filteredAlbumListData: [],
 
+    filteredChildrenData: [],
+
     classId: null,
     currentPage: 1,
     itemsPerPage: 10,
 
+    selectedChildren: '',
+    selectedClassId: '',
     selectedStatusId: "", // Duy trì giá trị chọn trạng thái
     searchTerm: "", // Thêm trường tìm kiếm
 
@@ -29,70 +33,86 @@ class Albumlist extends React.Component {
     currentAlbumId: null // Lưu albumId của album đang cập nhật
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     window.scrollTo(0, 0);
 
     const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
 
-    // Gọi API và cập nhật state bằng axios
-    axios.get("http://localhost:5124/api/Album/GetAllAlbums")
-      .then((response) => {
-        const albumData = response.data;
+    try {
+      // Gọi API lấy album
+      const albumResponse = await axios.get("http://localhost:5124/api/Album/GetAllAlbums");
+      const albumData = albumResponse.data;
 
-        if (roleId === 5) {
-          axios.get(`http://localhost:5124/api/Class/GetClassesByTeacherId/${userData?.userId}`)
-            .then((classResponse) => {
-              const teacherClassId = classResponse.data[0]?.classId; // classId của lớp mà giáo viên phụ trách
+      if (roleId === 5) {
+        // Gọi API lấy lớp học theo teacherId
+        const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByTeacherId/${userData?.userId}`);
+        const teacherClassId = classResponse.data[0]?.classId;
 
-              // Lọc danh sách album theo teacherClassId
-              const teacherFilteredAlbums = albumData.filter(album => album.classId === teacherClassId);
-              console.log(teacherFilteredAlbums);
+        // Lọc danh sách album theo classId của giáo viên
+        const teacherFilteredAlbums = albumData.filter(album => album.classId === teacherClassId);
 
-              // Cập nhật state với dữ liệu lọc
-              this.setState({
-                AlbumListData: albumData,
-                filteredAlbumListData: teacherFilteredAlbums,
-                classId: teacherClassId,
-                selectedClassId: teacherClassId
-              });
-            })
-            .catch((error) => {
-              console.error("Error fetching teacher's classId:", error);
-            });
-        } else if (roleId === 2) {
-          // Nếu là giáo viên, chỉ lấy các album có status = 1
-          const approvedAlbums = albumData.filter(album => album.status === 1);
-          this.setState({
-            AlbumListData: approvedAlbums,
-            filteredAlbumListData: approvedAlbums // Chỉ hiển thị album đã phê duyệt
-          });
-        } else {
-          this.setState({
-            AlbumListData: albumData,
-            filteredAlbumListData: albumData // Hiển thị tất cả album cho các vai trò khác
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
+        this.setState({
+          AlbumListData: albumData,
+          filteredAlbumListData: teacherFilteredAlbums,
+          classId: teacherClassId,
+          selectedClassId: teacherClassId
+        });
+
+      } else if (roleId === 2) {
+
+        // Gọi API lấy danh sách children
+        const childrenResponse = await axios.get("http://localhost:5124/api/Children/GetAllChildren");
+        const allChildren = childrenResponse.data;
+        console.log(allChildren);
+
+        // Lọc children theo ParentId hiện tại
+        const filteredChildren = allChildren.filter(children => children.parentId === userData?.userId);
+
+        // Lấy ra danh sách classIds từ filteredChildren
+        const classIds = await Promise.all(
+          filteredChildren.map(async (child) => {
+            // Gọi API lấy class theo children id
+            const classchildrenResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${child.studentId}`);
+            const classChildren = classchildrenResponse?.data;
+            return classChildren[0]?.classId; // Trả về classId từ API
+          })
+        );
+
+
+        // Lọc album chỉ với những album có classId nằm trong mảng classIds
+        const approvedStudentAlbums = albumData.filter(
+          album => album.status === 1 && classIds.includes(album.classId)
+        );
+
+        // Cập nhật state với dữ liệu children đã lọc và danh sách album đã lọc
+        this.setState({
+          filteredChildrenData: filteredChildren,
+          AlbumListData: approvedStudentAlbums,
+          filteredAlbumListData: approvedStudentAlbums
+        });
+      } else {
+        // Hiển thị tất cả album cho các vai trò khác
+        this.setState({
+          AlbumListData: albumData,
+          filteredAlbumListData: albumData
+        });
+      }
+
+      // Gọi API lấy danh sách giáo viên và lớp học
+      const [teacherResponse, classResponse] = await Promise.all([
+        axios.get(`http://localhost:5124/api/Teacher/GetAllTeachers`),
+        axios.get(`http://localhost:5124/api/Class/GetAllClass`)
+      ]);
+
+      this.setState({
+        teacherListData: teacherResponse.data,
+        classListData: classResponse.data
       });
 
-    axios.get(`http://localhost:5124/api/Teacher/GetAllTeachers`)
-      .then((response) => {
-        this.setState({ teacherListData: response.data });
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
-
-    axios.get(`http://localhost:5124/api/Class/GetAllClass`)
-      .then((response) => {
-        this.setState({ classListData: response.data });
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   }
 
 
@@ -121,6 +141,30 @@ class Albumlist extends React.Component {
       );
       this.setState({ filteredAlbumListData });
     } else {
+      this.setState({ filteredAlbumListData: this.state.AlbumListData });
+    }
+  };
+
+  handleChildrenFilterChange = async (e) => {
+    const selectedStudentId = e.target.value;
+
+    if (selectedStudentId) {
+      // Gọi API lấy class theo  children id
+      const classchildrenResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${selectedStudentId}`);
+      const classChildren = classchildrenResponse?.data;
+      const classId = classChildren[0]?.classId;
+
+      const childrenResponse = await axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${selectedStudentId}`);
+
+      // Lọc Album theo classId Student đã chọn
+      if (classId) {
+        const filteredAlbumListData = this.state.AlbumListData.filter(
+          (album) => album.classId === parseInt(classId)
+        );
+        this.setState({ filteredAlbumListData, selectedChildren: childrenResponse?.fullName });
+      }
+    }
+    else {
       this.setState({ filteredAlbumListData: this.state.AlbumListData });
     }
   };
@@ -273,7 +317,7 @@ class Albumlist extends React.Component {
   };
 
   render() {
-    const { AlbumListData, classListData, teacherListData, selectedClassId, filteredAlbumListData, showModal, reason } = this.state;
+    const { AlbumListData, selectedChildren, classListData, teacherListData, selectedClassId, filteredAlbumListData, filteredChildrenData, showModal, reason } = this.state;
     const statusOptions = [
       { value: 1, label: "Aprroved", className: "badge-success" },
       { value: 2, label: "Reject", className: "badge-danger" },
@@ -285,7 +329,8 @@ class Albumlist extends React.Component {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredAlbumListData.slice(indexOfFirstItem, indexOfLastItem);
-
+    console.log(filteredAlbumListData);
+    
     // Get user data from cookie
     const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
@@ -317,23 +362,43 @@ class Albumlist extends React.Component {
                     ) : null}
                   </div>
                   <div className="form-group row pl-3">
-                    <div className="col-md-3">
-                      <label htmlFor="classFilter">Filter by Class</label>
-                      <select
-                        id="classFilter"
-                        className="form-control"
-                        value={selectedClassId}
-                        onChange={this.handleClassFilterChange}
-                        disabled={roleId === 5} // Vô hiệu hóa khi roleId = 5
-                      >
-                        <option value="">All Classes</option>
-                        {classListData.map((classItem) => (
-                          <option key={classItem.classId} value={classItem.classId}>
-                            {classItem.className}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    {roleId === 2 &&
+                      <div className="col-md-3">
+                        <label htmlFor="classFilter">Filter by Children</label>
+                        <select
+                          id="childrenFilter"
+                          className="form-control"
+                          value={selectedChildren}
+                          onChange={this.handleChildrenFilterChange}
+                        >
+                          <option value="">Your Children</option>
+                          {filteredChildrenData.map((childrenItem) => (
+                            <option key={childrenItem.studentId} value={childrenItem.studentId}>
+                              {childrenItem?.fullName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    }
+                    {roleId === 3 &&
+                      <div className="col-md-3">
+                        <label htmlFor="classFilter">Filter by Class</label>
+                        <select
+                          id="classFilter"
+                          className="form-control"
+                          value={selectedClassId}
+                          onChange={this.handleClassFilterChange}
+                        >
+                          <option value="">All Classes</option>
+                          {classListData.map((classItem) => (
+                            <option key={classItem.classId} value={classItem.classId}>
+                              {classItem.className}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    }
+
                     <div className=" col-md-3">
                       <label htmlFor="statusFilter">Filter by Status</label>
                       <select
@@ -424,7 +489,7 @@ class Albumlist extends React.Component {
                                       </select>
                                     </td>
                                   )}
-                                  {(roleId === 5 || roleId === 2) && ( // Nếu roleId = 5, chỉ hiển thị trạng thái mà không có select
+                                  {(roleId === 5 || roleId === 2) && ( // Nếu roleId = 5,2 chỉ hiển thị trạng thái mà không có select
                                     <td>
                                       <span className={`badge ${album?.status === 1 ? 'badge-success' : album?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
                                         {statusOptions.find(option => option.value === album?.status)?.label} {/* Hiển thị trạng thái */}
