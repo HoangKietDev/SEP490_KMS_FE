@@ -118,7 +118,6 @@ class ScheduleList extends React.Component {
                             <th>End Date</th>
                             <th>Create By</th>
                             <th>Teaching</th>
-                            <th>Semester</th>
                             <th>Status</th>
                           </tr>
                         </thead>
@@ -133,7 +132,6 @@ class ScheduleList extends React.Component {
                                   <td>{request?.endDate}</td>
                                   <td>{request?.createBy || 'Staff'}</td>
                                   <td>{request?.teacherName}</td>
-                                  <td>{request?.semester || ''}</td>
                                   <td>
                                     {request.status === 1 ? (
                                       <select

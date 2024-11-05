@@ -35,8 +35,8 @@ import ViewMenu from "./screens/Menu/ViewMenu"
 import ProtectedRoute from "./components/Router/ProtectRouter";
 import Schedule from "./screens/Schedule/Schedule";
 import ScheduleList from "./screens/Schedule/ScheduleList";
-
-
+import Checkin from "./screens/Attendance/Checkin";
+import ListClass from "./screens/Attendance/ListClass";
 import UpdateMenu from "./screens/Menu/UpdateMenu";
 import profilev1page from "./screens/Pages/ProfileV1";
 import ListMenu from "./screens/Menu/ListMenu"
@@ -45,6 +45,7 @@ import ViewMenuByTeacherAndParent from "./screens/Menu/ViewMenuByTeacherAndParen
 import UpdateClassByPrincipal from "./screens/Class/UpdateClassByPrincipal";
 import ViewClassByParentAndTeacher from "./screens/Class/ViewClassByParent";
 import ViewClassByTeacher from "./screens/Class/ViewClassByTeacher";
+import ViewAttendByParent from "./screens/Attendance/ViewAttendByParent";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -289,7 +290,24 @@ class App extends React.Component {
                   component={profilev1page}
                   allowedRoles={[1,2,3,4,5]}
                 />
-                
+                 <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/checkin/:classId`}
+                  component={Checkin}
+                  allowedRoles={[5]}
+                />
+                 <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/listclass`}
+                  component={ListClass}
+                  allowedRoles={[5]}
+                />
+                 <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/viewattendparent`}
+                  component={ViewAttendByParent}
+                  allowedRoles={[2]}
+                />
               </Switch>
             </div>
           </>

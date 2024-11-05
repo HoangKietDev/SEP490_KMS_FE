@@ -85,6 +85,16 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("scheduleContainer");
     }
     else if (
+      activeKey === "/listclassattendance" 
+    ) {
+      this.activeMenutabContainer("attendanceContainer");
+    }
+    else if (
+      activeKey === "/checkattendparent"
+    ) {
+      this.activeMenutabContainer("AttendParentContainer");
+    }
+    else if (
       activeKey === "/" ||
       activeKey === "/viewallstudent" ||
       activeKey === "/createstudent"
@@ -785,33 +795,52 @@ class NavbarMenu extends React.Component {
 
                     {/* Check in/out */}
                     {roleId === 5 ? (
-                      <li id="scheduleContainer" className="">
+                      <li id="attendanceContainer" className="">
                         <a
                           href="#!"
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
-                            this.activeMenutabContainer("scheduleContainer");
+                            this.activeMenutabContainer("attendanceContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Check In/Out</span>
+                          <i className="icon-grid"></i> <span>Attendance</span>
                         </a>
                         <ul className="collapse">
-                          <li
-                            className={activeKey === "schedule" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/schedule">Daily Schedule</Link>
-                          </li>
-                          <li
-                            className={activeKey === "create-schedule" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/create-schedule">New Schedule </Link>
-                          </li>
+                            <li
+                              className={activeKey === "listclassattendance" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/listclass">Attendance</Link>
+                            </li>
                         </ul>
                       </li>
                     ) : null}
+                      {/* Payment */}
+                      {roleId === 2  ? (
+                      <li id="AttendParentContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.activeMenutabContainer("AttendParentContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Attend</span>
+                        </a>
+                        <ul className="collapse">
+                          <li
+                            className={activeKey === "checkattendparent" ? "active" : ""}
+                            onClick={() => { }}
+                          >
+                            <Link to="/viewattendparent">Attend</Link>
+                          </li>
+                          
+                        </ul>
+                      </li>
+                    ) : null}
+
 
                   </ul>
                 </Nav>
