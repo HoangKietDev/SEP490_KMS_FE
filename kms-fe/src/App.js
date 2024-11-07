@@ -46,6 +46,8 @@ import ScheduleCreate from "./screens/Schedule/ScheduleCreate";
 import AlbumList from "./screens/Album/AlbumList";
 import AlbumDetail from "./screens/Album/AlbumDetail";
 import AlbumCreate from "./screens/Album/AlbumCreate";
+import PaymentList from "./screens/Payment/PaymentList";
+import PaymentHistory from "./screens/Payment/PaymentHistory";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -277,13 +279,13 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/album`}
                   component={AlbumList}
-                  allowedRoles={[2, 3, 4, 5 ]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/create-album`}
                   component={AlbumCreate}
-                  allowedRoles={[3,5]}
+                  allowedRoles={[3, 5]}
                 />
                 <ProtectedRoute
                   exact
@@ -309,6 +311,18 @@ class App extends React.Component {
                   path={`${process.env.PUBLIC_URL}/viewmenu2`}
                   component={ViewMenuByTeacherAndParent}
                   allowedRoles={[2, 5]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/payment`}
+                  component={PaymentList}
+                  allowedRoles={[2]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/payment-history`}
+                  component={PaymentHistory}
+                  allowedRoles={[2]}
                 />
               </Switch>
             </div>

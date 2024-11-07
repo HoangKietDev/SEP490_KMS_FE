@@ -79,7 +79,7 @@ class AlbumDetail extends React.Component {
 
   // Đóng modal
   handleClose = () => {
-    this.setState({ showModal: false, newTitle: "", newDescription: "", newImages: [] });
+    this.setState({ showModal: false, caption: "", newImages: [] });
   };
 
   // Mở modal
@@ -94,11 +94,11 @@ class AlbumDetail extends React.Component {
 
   // Xử lý khi người dùng nhấn nút "Lưu Album"
   handleSaveAlbum = async () => {
-    const { albumId, newImages, newTitle, newDescription } = this.state;
+    const { albumId, newImages, caption } = this.state;
 
     const formData = new FormData();
     formData.append("albumId", albumId); // Thêm albumId vào FormData
-    formData.append("caption", newTitle); // Hoặc có thể truyền một caption khác nếu cần
+    formData.append("caption", caption); // Hoặc có thể truyền một caption khác nếu cần
 
     // Thêm từng ảnh vào FormData
     newImages.forEach((image) => {
@@ -141,10 +141,40 @@ class AlbumDetail extends React.Component {
     return `${hours}:${minutes} ${day}-${month}-${year}`;
   };
 
+  groupImagesByPostedAt(images) {
+    return images.reduce((groups, image) => {
+      // Lấy giờ và phút từ postedAt để làm id
+      const date = new Date(image.postedAt);
+      const timeKey = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      if (!groups[timeKey]) {
+        groups[timeKey] = [];
+      }
+      groups[timeKey].push(image);
+      return groups;
+    }, {});
+  }
+
+  formatTime(date) {
+    return new Date(date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+  }
+
+  scrollToTime(id) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      console.error(`Element with id ${id} not found`);
+    }
+  }
+
   render() {
     const { title, description, imageData, timePost, teacherListData, createBy, showModal, caption } = this.state;
     const userData = getSession('user')?.user;
     const roleId = userData?.roleId
+    const groupedImages = this.groupImagesByPostedAt(imageData);
+    const timeKeys = Object.keys(groupedImages);
+
 
     return (
       <div
@@ -172,7 +202,7 @@ class AlbumDetail extends React.Component {
                         </div>
                         <div className="row">
                           <div className="col-md-6">
-                            <p>Số ảnh: </p> <span className="font-weight-bold">{imageData && imageData.length}</span>
+                            <p>Số ảnh: </p> <span className="font-weight-bold">{imageData && imageData.length || 0}</span>
                           </div>
                           <div className="col-md-6">
                             <p>Ngày đăng: </p> <span className="font-weight-bold">{this.formatDate(timePost)}</span>
@@ -180,31 +210,64 @@ class AlbumDetail extends React.Component {
                         </div>
                       </div>
                       <div className="form-group col-md-6 d-flex justify-content-end align-items-start">
-                        {roleId === 5 ? (
-                          <a onClick={this.handleShow} class="btn btn-success text-white">Đăng Album Ảnh</a>
-                        ) : null}
+                        {roleId === 5 && (
+                          <button onClick={(e) => {
+                            e.preventDefault(); // Ngăn hành động mặc định
+                            this.handleShow();
+                          }} className="btn btn-success text-white">Đăng Album Ảnh</button>
+                        )}
                       </div>
                     </div>
 
-                    <div className="row mt-2">
-                      {imageData.length !== 0
-                        ? imageData.map((image) => (
-                          <div key={image.id} className="col-md-3 mb-4">
-                            <div className="card">
-                              <img src={image.imgUrl} alt={`Image ${image.caption}`} className="card-img-top" />
-                              <div className="card-body text-center">
-                                <p className="card-text">Đã thêm bởi: {teacherListData && teacherListData?.find(item => item.teacherId === createBy)?.name}</p>
-                                <p className="card-text">Vào lúc: {this.formatDateTime(timePost)}</p>
-                              </div>
+                    {/* List of time links */}
+                    <ul className="list-inline">
+                      <span className="pr-3">Timeline:</span>
+                      {timeKeys.map((time) => (
+                        <li key={time} className="list-inline-item">
+                          <button
+                            className="btn btn-outline-primary"
+                            onClick={(e) => {
+                              e.preventDefault(); // Ngăn hành động mặc định
+                              this.scrollToTime(time);
+                            }}
+                          >
+                            {time}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="container">
+                      {(!imageData || imageData.length === 0) ? (
+                        <div>
+                          <strong className="font-weight-bold pl-3" style={{ fontSize: '20px' }}>Album hiện đang chưa có ảnh</strong>
+                        </div>
+                      ) : (
+                        Object.entries(groupedImages).map(([postedAt, imagesAtPostedTime]) => (
+                          <div key={postedAt} id={postedAt.split(' ')[0]} className="timeline-item">
+                            <div className="timeline-time d-flex align-items-center mb-3">
+                              <h5 className="bg-primary text-white p-2 rounded">{postedAt}</h5>
+                              <h5 className="pl-4">{imagesAtPostedTime[0].caption}</h5>
+                            </div>
+                            <div className="row">
+                              {imagesAtPostedTime.map((image) => (
+                                <div key={image.id} className="col-md-3 mb-4">
+                                  <div className="card shadow-sm">
+                                    <img src={image.imgUrl} alt={`Image ${image.caption}`} className="card-img-top" />
+                                    <div className="card-body text-center">
+                                      <p className="card-text">
+                                        Đã thêm bởi: {teacherListData && teacherListData.find(item => item.teacherId === createBy)?.name}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ))
-                        :
-                        <div className="">
-                          <strong className="font-weight-bold pl-3" style={{ fontSize: '20px' }}>Album hiện đang chưa có ảnh </strong>
-                        </div>
-                      }
+                      )}
                     </div>
+
                     <br />
                   </form>
                 </div>

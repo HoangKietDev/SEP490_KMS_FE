@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
+import Notification from "../../components/Notification";
 
 class AlbumCreate extends React.Component {
     state = {
@@ -18,6 +19,10 @@ class AlbumCreate extends React.Component {
 
         classData: [],
         classId: null, // Initialize classId state
+
+        showNotification: false, // State to control notification visibility
+        notificationText: "", // Text for the notification
+        notificationType: "success" // Type of notification (success or error)
     };
 
     componentDidMount() {
@@ -67,19 +72,38 @@ class AlbumCreate extends React.Component {
             const response = await axios.post("http://localhost:5124/api/Album/CreateAlbum", newRequest);
 
             console.log("Album created successfully:", response.data);
-            alert("Album created successfully!");
+            this.setState({
+                notificationText: "Album created successfully!",
+                notificationType: "success",
+                showNotification: true
+            });
             this.props.history.push('/album');
         } catch (error) {
             console.error("Error creating Album:", error);
-            alert("Error creating Album!");
+            this.setState({
+                notificationText: "Error creating Album!",
+                notificationType: "error",
+                showNotification: true
+            });
         }
     };
 
     render() {
         const { title, description, classData, classId } = this.state;
+        const { showNotification, notificationText, notificationType } = this.state;
+
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div className="container-fluid">
                     <PageHeader
                         HeaderText="New Album"

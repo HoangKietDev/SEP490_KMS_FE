@@ -99,7 +99,15 @@ class NavbarMenu extends React.Component {
       activeKey === "/updateclass"
     ) {
       this.activeMenutabContainer("ClassContainer");
-    } else if (
+    }
+    else if (
+      activeKey === "/" ||
+      activeKey === "/payment" ||
+      activeKey === "/history-payment"
+    ) {
+      this.activeMenutabContainer("PaymentContainer");
+    }
+    else if (
       activeKey === "/formvalidation" ||
       activeKey === "/basicelements"
     ) {
@@ -735,7 +743,7 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Daily Schedule</span>
                         </a>
                         <ul className="collapse">
-                          {roleId === 3 || roleId === 4 ? (
+                          {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
                             <li
                               className={activeKey === "listschedule" ? "active" : ""}
                               onClick={() => { }}
@@ -773,13 +781,13 @@ class NavbarMenu extends React.Component {
                             className={activeKey === "payment" ? "active" : ""}
                             onClick={() => { }}
                           >
-                            <Link to="/payment">Hisory</Link>
+                            <Link to="/payment">Payment</Link>
                           </li>
                           <li
-                            className={activeKey === "create-service" ? "active" : ""}
+                            className={activeKey === "payment-history" ? "active" : ""}
                             onClick={() => { }}
                           >
-                            <Link to="/create-service">Payment</Link>
+                            <Link to="/payment-history">History</Link>
                           </li>
                         </ul>
                       </li>
