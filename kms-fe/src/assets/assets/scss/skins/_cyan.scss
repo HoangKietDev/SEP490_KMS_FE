@@ -13,6 +13,9 @@ $cyan-600: #00acc1 !default;
     .schedule-head .sticky-col strong{
         color: $cyan-500;
     }
+    .theme-color {
+        color: $cyan-500;
+    }
 
     ::selection {
         color: $white;

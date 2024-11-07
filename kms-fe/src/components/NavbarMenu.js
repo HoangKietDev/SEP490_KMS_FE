@@ -19,6 +19,7 @@ import {
 import Logo from "../assets/images/logo.svg";
 import LogoWhite from "../assets/images/logo-white.svg";
 import UserImage from "../assets/images/user.png";
+import { clearSession, getSession } from "./Auth/Auth";
 
 class NavbarMenu extends React.Component {
   state = {
@@ -83,7 +84,7 @@ class NavbarMenu extends React.Component {
     }
     else if (
       activeKey === "/schedule" ||
-      activeKey === "/listschedule"||
+      activeKey === "/listschedule" ||
       activeKey === "/create-schedule"
     ) {
       this.activeMenutabContainer("scheduleContainer");
@@ -112,7 +113,15 @@ class NavbarMenu extends React.Component {
       activeKey === "/updateclass"
     ) {
       this.activeMenutabContainer("ClassContainer");
-    } else if (
+    }
+    else if (
+      activeKey === "/" ||
+      activeKey === "/payment" ||
+      activeKey === "/history-payment"
+    ) {
+      this.activeMenutabContainer("PaymentContainer");
+    }
+    else if (
       activeKey === "/formvalidation" ||
       activeKey === "/basicelements"
     ) {
@@ -145,13 +154,14 @@ class NavbarMenu extends React.Component {
   handleLogOut = async (evt) => {
     evt.preventDefault();
     localStorage.removeItem('user')
+    clearSession('user')
     window.location.href = "/";
   };
 
 
 
   render() {
-    const userData = JSON.parse(localStorage.getItem("user")).user;
+    const userData = getSession('user')?.user;
     const roleId = userData.roleId
     const username = userData.firstname + " " + userData.lastName || "User"; // Thay "User" bằng tên mặc định nếu không có
 
@@ -677,7 +687,7 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Requests */}
-                    {roleId === 2 || roleId === 3 || roleId === 4 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
                       <li id="RequestContainer" className="">
                         <a
                           href="#!"
@@ -729,6 +739,14 @@ class NavbarMenu extends React.Component {
                           >
                             <Link to="/album">View Album</Link>
                           </li>
+                          {roleId === 5 ? (
+                            <li
+                              className={activeKey === "create-album" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/create-album">New Album </Link>
+                            </li>
+                          ) : null}
                         </ul>
                       </li>
                     ) : null}
@@ -747,13 +765,14 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Daily Schedule</span>
                         </a>
                         <ul className="collapse">
-                          <li
-                            className={activeKey === "schedule" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/schedule">Daily Schedule</Link>
-                          </li>
-
+                          {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
+                            <li
+                              className={activeKey === "listschedule" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/listschedule">List Schedule </Link>
+                            </li>
+                          ) : null}
                           {roleId === 3 ? (
                             <li
                               className={activeKey === "create-schedule" ? "active" : ""}
@@ -793,13 +812,13 @@ class NavbarMenu extends React.Component {
                             className={activeKey === "payment" ? "active" : ""}
                             onClick={() => { }}
                           >
-                            <Link to="/payment">Hisory</Link>
+                            <Link to="/payment">Payment</Link>
                           </li>
                           <li
-                            className={activeKey === "create-service" ? "active" : ""}
+                            className={activeKey === "payment-history" ? "active" : ""}
                             onClick={() => { }}
                           >
-                            <Link to="/create-service">Payment</Link>
+                            <Link to="/payment-history">History</Link>
                           </li>
                         </ul>
                       </li>

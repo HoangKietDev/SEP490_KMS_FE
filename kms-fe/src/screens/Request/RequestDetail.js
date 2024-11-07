@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import { withRouter } from 'react-router-dom';
+// import { withRouter } from 'react-router-dom';
 import axios from "axios";
 
 class RequestDetail extends React.Component {
@@ -12,16 +12,11 @@ class RequestDetail extends React.Component {
     status: 1,
     createAt: "21/3/2002",
     createBy: "Parent",
-    classId: 101,
-    studentId: 161307,
-    classChangeId: 103,
+    studentId: null,
     ReasonReject: "Class want to change are already full",
-    ClassRequestChangeInfor: {
-      className: "classname",
-      classChangeName: "classchangename",
-      studentName: "name",
-      createByName: "createByName"
-    },
+    studentName: "name",
+    createByName: "createByName"
+
   };
 
   async componentDidMount() {
@@ -41,55 +36,20 @@ class RequestDetail extends React.Component {
         description: data.description,
         createBy: data.createBy,
         createAt: data.createAt ? new Date(data.createAt).toISOString().slice(0, 10) : "",
-        classId: data.classId,
         status: data.statusRequest,
         studentId: data.studentId,
-        classChangeId: data.classChangeId,
-        ReasonReject: data.reasonReject || "",
+        ReasonReject: data.processNote || "",
       });
-      
+
       // Fetch student information
       const studentResponse = await axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${data.studentId}`);
       const studentData = studentResponse.data;
-
-      this.setState(prevState => ({
-        ClassRequestChangeInfor: {
-          ...prevState.ClassRequestChangeInfor,
-          studentName: studentData?.nickName,
-        }
-      }));
+      this.setState({ studentName: studentData?.nickName });
 
       // Fetch user information
       const userResponse = await axios.get(`http://localhost:5124/api/User/${data.createBy}`);
       const userData = userResponse.data;
-
-      this.setState(prevState => ({
-        ClassRequestChangeInfor: {
-          ...prevState.ClassRequestChangeInfor,
-          createByName: `${userData?.firstname} ${userData?.lastName}`,
-        }
-      }));
-
-      // Fetch class information
-      const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassById/${data.classId}`);
-      const classData = classResponse.data;
-      this.setState(prevState => ({
-        ClassRequestChangeInfor: {
-          ...prevState.ClassRequestChangeInfor,
-          className: classData?.className,
-        }
-      }));
-
-      // Fetch change class information
-      const classChangeResponse = await axios.get(`http://localhost:5124/api/Class/GetClassById/${data.classChangeId}`);
-      const classChangeData = classChangeResponse.data;
-
-      this.setState(prevState => ({
-        ClassRequestChangeInfor: {
-          ...prevState.ClassRequestChangeInfor,
-          classChangeName: classChangeData?.className,
-        }
-      }));
+      this.setState({ createByName: `${userData?.firstname} ${userData?.lastName}` });
 
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -98,7 +58,7 @@ class RequestDetail extends React.Component {
   }
 
   render() {
-    const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject } = this.state;
+    const { title, description, status, createAt, studentName, createByName, ReasonReject } = this.state;
     const statusDescriptions = {
       1: "Pending",
       2: "Processing",
@@ -141,11 +101,11 @@ class RequestDetail extends React.Component {
                     <div className="row">
                       <div className="form-group col-md-6">
                         <label>Student</label>
-                        <input className="form-control" value={ClassRequestChangeInfor?.studentName} name="studentId" readOnly />
+                        <input className="form-control" value={studentName} name="studentId" readOnly />
                       </div>
                       <div className="form-group col-md-6">
                         <label>Created by</label>
-                        <input className="form-control" value={ClassRequestChangeInfor?.createByName} name="createBy" readOnly />
+                        <input className="form-control" value={createByName} name="createBy" readOnly />
                       </div>
                     </div>
 
@@ -155,7 +115,7 @@ class RequestDetail extends React.Component {
                         <textarea className="form" rows="6" value={description} name="description" readOnly />
                       </div>
                       <div className="form-group col-md-6 d-flex flex-column">
-                        <label>Reason Reject</label>
+                        <label>Process Note</label>
                         <textarea className="form" rows="6" value={ReasonReject} name="ReasonReject" readOnly />
                       </div>
                     </div>
@@ -170,17 +130,6 @@ class RequestDetail extends React.Component {
                             </option>
                           ))}
                         </select>
-                      </div>
-
-                      <div className="form-group col-md-6 row">
-                        <div className="form-group col-md-6">
-                          <label>Class Studying</label>
-                          <input className="form-control" value={ClassRequestChangeInfor?.className} name="classId" readOnly />
-                        </div>
-                        <div className="form-group col-md-6">
-                          <label>Class Change</label>
-                          <input className="form-control" value={ClassRequestChangeInfor?.classChangeName} name="changesClassId" readOnly />
-                        </div>
                       </div>
                     </div>
                     <br />
@@ -199,4 +148,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(RequestDetail));
+export default connect(mapStateToProps)((RequestDetail));

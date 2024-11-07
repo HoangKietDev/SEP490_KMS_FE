@@ -2,7 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import { withRouter } from 'react-router-dom';
+// import { withRouter } from 'react-router-dom';
 import axios from "axios";
 
 class RequestUpdate extends React.Component {
@@ -13,16 +13,11 @@ class RequestUpdate extends React.Component {
     status: 1,
     createAt: "21/3/2002",
     createBy: "Parent",
-    classId: 101,
     studentId: 161307,
-    classChangeId: 103,
     ReasonReject: "Class want to change are already full",
-    ClassRequestChangeInfor: {
-      className: "classname",
-      classChangeName: "classchangename",
-      studentName: "name",
-      createByName: "createByName"
-    },
+    className: "classname",
+    studentName: "name",
+    createByName: "createByName",
     statusDescriptions: {
       1: "Pending",
       2: "Processing",
@@ -60,7 +55,7 @@ class RequestUpdate extends React.Component {
         status: data.statusRequest,
         studentId: data.studentId,
         classChangeId: data.classChangeId,
-        ReasonReject: data.reasonReject || "",
+        ReasonReject: data.processNote || "",
       });
 
       // Fetch student information
@@ -85,26 +80,6 @@ class RequestUpdate extends React.Component {
         }
       }));
 
-      // Fetch class information
-      const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassById/${data.classId}`);
-      const classData = classResponse.data;
-      this.setState(prevState => ({
-        ClassRequestChangeInfor: {
-          ...prevState.ClassRequestChangeInfor,
-          className: classData?.className,
-        }
-      }));
-
-      // Fetch change class information
-      const classChangeResponse = await axios.get(`http://localhost:5124/api/Class/GetClassById/${data.classChangeId}`);
-      const classChangeData = classChangeResponse.data;
-
-      this.setState(prevState => ({
-        ClassRequestChangeInfor: {
-          ...prevState.ClassRequestChangeInfor,
-          classChangeName: classChangeData?.className,
-        }
-      }));
 
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -127,23 +102,9 @@ class RequestUpdate extends React.Component {
         studentId,
         classChangeId,
         statusRequest: status,
-        reasonReject: ReasonReject,
+        processNote: ReasonReject,
       });
-      // Optionally, redirect or fetch updated data here
-      if (status === '3') {
-        await axios.put(
-          `http://localhost:5124/api/Request/UpdateClassIdForStudent/${studentId}`,
-          JSON.stringify(classChangeId), // Chuyển số thành chuỗi JSON
-          {
-            headers: {
-              'Content-Type': 'application/json;odata.metadata=minimal;odata.streaming=true' // Đúng header như yêu cầu
-            }
-          }
-        );
-        alert("Request updated and class ID updated for the student.");
-      } else {
-        alert("Request updated successfully!");
-      }
+      alert("Request updated successfully!");
     } catch (error) {
       console.error("Error updating request: ", error);
       alert("Failed to update the request. Please try again.");
@@ -156,10 +117,11 @@ class RequestUpdate extends React.Component {
 
     // Filter logic based on roleId
     switch (roleId) {
-      case 3: // Staff
+      case 5: // teacher
         filteredStatuses = {
           1: this.state.statusDescriptions[1], // Pending
           2: this.state.statusDescriptions[2], // Processing
+          3: this.state.statusDescriptions[3], // Approved
           4: this.state.statusDescriptions[4], // Rejected
         };
         break;
@@ -170,7 +132,7 @@ class RequestUpdate extends React.Component {
         };
         break;
 
-      case 4: // Principal 
+      case 3: // Staff 
         filteredStatuses = {
           2: this.state.statusDescriptions[2], // Processing
           3: this.state.statusDescriptions[3], // Approved
@@ -200,14 +162,14 @@ class RequestUpdate extends React.Component {
             HeaderText="Request Management"
             Breadcrumb={[
               { name: "Request Management", navigate: "request" },
-              { name: "Request Detail", navigate: "" },
+              { name: "Request Update", navigate: "" },
             ]}
           />
           <div className="row clearfix">
             <div className="col-md-12">
               <div className="card">
                 <div className="header text-center">
-                  <h4>Request Detail</h4>
+                  <h4>Request Update</h4>
                 </div>
                 <div className="body">
                   <form className="update-teacher-form" onSubmit={this.handleSubmit}>
@@ -239,7 +201,7 @@ class RequestUpdate extends React.Component {
                         <textarea className="form" rows="6" value={description} name="description" readOnly />
                       </div>
                       <div className="form-group col-md-6 d-flex flex-column">
-                        <label>Reason Reject</label>
+                        <label>Process Note</label>
                         <textarea className="form" rows="6" value={ReasonReject} name="ReasonReject"
                           onChange={(e) => this.setState({ ReasonReject: e.target.value })} />
                       </div>
@@ -258,16 +220,6 @@ class RequestUpdate extends React.Component {
                         </select>
                       </div>
 
-                      <div className="form-group col-md-6 row">
-                        <div className="form-group col-md-6">
-                          <label>Class Studying</label>
-                          <input className="form-control" value={ClassRequestChangeInfor?.className} name="classId" readOnly />
-                        </div>
-                        <div className="form-group col-md-6">
-                          <label>Class Change</label>
-                          <input className="form-control" value={ClassRequestChangeInfor?.classChangeName} name="changesClassId" readOnly />
-                        </div>
-                      </div>
                     </div>
                     <div className="text-center">
                       <button type="submit" className="btn btn-primary my-4 text-center">Update Request</button>
@@ -288,4 +240,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(RequestUpdate));
+export default connect(mapStateToProps)((RequestUpdate));

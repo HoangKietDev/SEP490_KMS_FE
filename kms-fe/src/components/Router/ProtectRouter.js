@@ -1,12 +1,12 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
+import { getSession } from "../Auth/Auth";
 
 // Utility function to get token and roleId
 const getAuthDetails = () => {
-    const user = localStorage.getItem("user"); // Assuming the user details (like roleId) are stored here
+    const user = getSession('user'); // Assuming the user details (like roleId) are stored here
     if (user) {
-        const parsedUser = JSON.parse(user); // Parse user to get roleId
-        return { user, roleId: parsedUser.user.roleId }; // Returns roleId if available
+        return { user, roleId: user.user.roleId }; // Returns roleId if available
     }
     return { user:null, roleId: null }; // Returns null if not logged in
 };

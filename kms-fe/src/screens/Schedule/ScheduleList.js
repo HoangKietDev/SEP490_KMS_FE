@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import { withRouter } from 'react-router-dom';
+// import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Login from "../Login";
+import { getSession } from "../../components/Auth/Auth";
 
 
 class ScheduleList extends React.Component {
@@ -13,9 +14,12 @@ class ScheduleList extends React.Component {
   };
 
   componentDidMount() {
+    const userData = getSession('user')?.user;
+    if (!userData) {
+      this.props.history.push("/login");  // Nếu cookie không tồn tại hoặc không hợp lệ, chuyển hướng về login
+      return;
+    }
     window.scrollTo(0, 0);
-    // Gọi API và cập nhật state bằng axios
-
 
     const fetchData = async () => {
       try {
@@ -68,17 +72,24 @@ class ScheduleList extends React.Component {
     }
   };
 
+  handleDetailSchedule = (classId) => {
+    this.props.history.push(`/schedule?classId=${classId}`);
+  }
+
+  handleCreateSchedule = () => {
+    this.props.history.push(`/create-schedule`);
+  }
+
   render() {
     const { ScheduleListData, classData } = this.state;
     const statusOptions = [
-      { value: 1, label: "Processing", className: "badge-info" },
-      { value: 2, label: "Approved", className: "badge-success" },
-      { value: 3, label: "Rejected", className: "badge-danger" },
+      { value: 1, label: "Active", className: "badge-success" },
+      { value: 2, label: "Inactive", className: "badge-danger" },
+      { value: 0, label: "Pending", className: "badge-default" },
     ];
-    // let NewRequestListData = []
-    // const userData = JSON.parse(localStorage.getItem("user")).user;
-    // const roleId = userData.roleId
-    // console.log(RequestListData);
+
+    const userData = getSession('user')?.user;
+    const roleId = userData?.roleId
 
     return (
       <div
@@ -92,7 +103,6 @@ class ScheduleList extends React.Component {
             <PageHeader
               HeaderText="Request Management"
               Breadcrumb={[
-                { name: "Schedule Management", navigate: "request" },
                 { name: "Schedule List", navigate: "" },
               ]}
             />
@@ -101,7 +111,10 @@ class ScheduleList extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
-                    <h2>Schedule Manager</h2>
+                    <h2>Schedule List</h2>
+                    {roleId === 3 ? (
+                      <a onClick={() => this.handleCreateSchedule()} class="btn btn-success text-white">Create New Schedule</a>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -110,14 +123,14 @@ class ScheduleList extends React.Component {
                   <div className="body project_report">
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
-                        <thead className="thead-light">
+                        <thead className="theme-color">
                           <tr>
                             <th>#</th>
                             <th>Class</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Create By</th>
-                            <th>Teaching</th>
+                            {/* <th>Processing</th> */}
                             <th>Status</th>
                           </tr>
                         </thead>
@@ -127,30 +140,33 @@ class ScheduleList extends React.Component {
                               <React.Fragment key={"schedule" + index}>
                                 <tr>
                                   <td>{index + 1}</td>
-                                  <td>{classData?.find(i => i.classId === request?.classId)?.className}</td>
+                                  <td
+                                    onClick={() => this.handleDetailSchedule(request?.classId)}
+                                    style={{ cursor: 'pointer' }}
+                                    className="theme-color"
+                                  >{classData?.find(i => i.classId === request?.classId)?.className}</td>
                                   <td>{request?.startDate}</td>
                                   <td>{request?.endDate}</td>
                                   <td>{request?.createBy || 'Staff'}</td>
-                                  <td>{request?.teacherName}</td>
-                                  <td>
-                                    {request.status === 1 ? (
+                                  {/* <td>{request?.teacherName}</td> */}
+                                  {/* <td>{request?.processing || ''}</td> */}
+
+                                  {(roleId === 3 || roleId === 4) && (
+                                    <td>
                                       <select
                                         value={request.status}
                                         onChange={(e) => this.handleStatusChange(request, request.scheduleId, parseInt(e.target.value))}
-                                        className={`form-control`}
+                                        className={`form-control ${request?.status === 1 ? 'badge-success' : request?.status === 2 ? 'badge-danger' : 'badge-default'}`}
                                       >
                                         {statusOptions.map(option => (
-                                          <option key={option.value} value={option.value}>
+                                          <option key={option.value} value={option.value} className={option.className}>
                                             {option.label}
                                           </option>
                                         ))}
                                       </select>
-                                    ) : (
-                                      <span className={`badge ${request.status === 2 ? 'badge-success' : 'badge-danger'}`}>
-                                        {statusOptions.find(option => option.value === request.status)?.label}
-                                      </span>
-                                    )}
-                                  </td>
+                                    </td>
+                                  )}
+
                                 </tr>
                               </React.Fragment>
                             );
@@ -173,4 +189,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(ScheduleList));
+export default connect(mapStateToProps)((ScheduleList));
