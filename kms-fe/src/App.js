@@ -46,6 +46,7 @@ import UpdateClassByPrincipal from "./screens/Class/UpdateClassByPrincipal";
 import ViewClassByParentAndTeacher from "./screens/Class/ViewClassByParent";
 import ViewClassByTeacher from "./screens/Class/ViewClassByTeacher";
 import ViewAttendByParent from "./screens/Attendance/ViewAttendByParent";
+import ChooseService from "./screens/Service/ChooseService";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -306,6 +307,12 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewattendparent`}
                   component={ViewAttendByParent}
+                  allowedRoles={[2]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/chooseservice`}
+                  component={ChooseService}
                   allowedRoles={[2]}
                 />
               </Switch>

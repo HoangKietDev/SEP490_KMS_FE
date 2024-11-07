@@ -174,23 +174,6 @@ class CreateClass extends React.Component {
               </div>
 
               <div className="form-group">
-                <label>Expire Date</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={expireDate}
-                  name="expireDate"
-                  required=""
-                  onChange={(e) => this.setState({ expireDate: e.target.value })}
-                />
-                {expireDate === "" && submeet && (
-                  <ul className="parsley-errors-list filled">
-                    <li className="parsley-required">Expire date is required.</li>
-                  </ul>
-                )}
-              </div>
-
-              <div className="form-group">
                 <label>Semester</label>
                 <select
                   className="form-control"

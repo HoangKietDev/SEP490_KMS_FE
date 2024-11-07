@@ -16,48 +16,114 @@ class Checkin extends React.Component {
     attendanceDataCheckout: {}, // Dữ liệu điểm danh cho Check Out
     attendanceDetailsCheckin: [], // Chi tiết điểm danh cho Check In
     attendanceDetailsCheckout: [], // Chi tiết điểm danh cho Check Out
+    serviceData: [], // Dữ liệu dịch vụ
+    selectedServices: {}, // Dịch vụ được chọn cho mỗi học sinh
     attendanceId: 0,
     createdAt: "",
     classId: this.props.match.params.classId, // Nhận classID từ URL
-    // classId: 2,
     activeTab: "checkin", // State để theo dõi tab hiện tại
     selectedDate: new Date(), // Khởi tạo ngày hiện tại
+    showModal: false, // State để hiển thị modal
+    recipientPhoneNumber: "+84365551401", // Số điện thoại mặc định
+    messageBody: "", // Nội dung lời nhắn
   };
 
   componentDidMount() {
     this.fetchAttendanceData(); // Gọi fetchAttendanceData trước
+    this.fetchServiceData(); // Gọi fetchServiceData để lấy dữ liệu dịch vụ
   }
+
+  fetchServiceData = () => {
+    axios
+      .get("http://localhost:5124/api/Service/GetAllServices")
+      .then((response) => {
+        this.setState({ serviceData: response.data });
+      })
+      .catch((error) => {
+        console.error("Error fetching service data: ", error);
+      });
+  };
 
   // Hàm để định dạng ngày thành "YYYY-MM-DD"
   formatDate = (date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-  
     return `${year}-${month}-${day}`;
   };
-  
+
+  toggleModal = () => {
+    this.setState((prevState) => ({ showModal: !prevState.showModal }));
+  };
+
+  handleSendSms = () => {
+    const { recipientPhoneNumber, messageBody } = this.state;
+    const body = {
+      recipientPhoneNumber: recipientPhoneNumber,
+      body: messageBody,
+    };
+
+    axios.post("http://localhost:5124/api/Sms/SendSms", body)
+      .then((response) => {
+        console.log("SMS sent successfully:", response.data);
+        alert("Tin nhắn đã được gửi thành công!");
+        this.toggleModal(); // Đóng modal sau khi gửi
+      })
+      .catch((error) => {
+        console.error("Error sending SMS:", error);
+        alert("Có lỗi xảy ra khi gửi tin nhắn.");
+      });
+  };
+
+  fetchCheckedServices = (studentId, date) => {
+    return axios.get(`http://localhost:5124/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`)
+      .then((response) => {
+        // Lọc chỉ những dịch vụ có status là 1
+        const checkedServices = response.data
+          .filter(service => service.status === 1)
+          .map(service => service.serviceId);
+        return checkedServices;
+      })
+      .catch((error) => {
+        console.error(`Error fetching checked services for student ${studentId}:`, error);
+        return [];
+      });
+  };
+
 
   fetchStudentData = (studentIds, isCheckin = true) => {
-    // Nếu không có studentIds, không cần gọi API
     if (!studentIds.length) {
       return;
     }
 
-    // Sử dụng Promise.all để lấy thông tin học sinh cho từng studentId
     const studentPromises = studentIds.map(studentId =>
       axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentId}`)
     );
 
-    // Chờ tất cả các promise hoàn thành
     Promise.all(studentPromises)
       .then((responses) => {
         const studentData = responses.map(response => response.data);
-        if (isCheckin) {
-          this.setState({ studentDataCheckin: studentData });
-        } else {
-          this.setState({ studentDataCheckout: studentData });
-        }
+
+        // Lấy các dịch vụ đã được tick cho mỗi học sinh
+        const date = this.formatDate(this.state.selectedDate);
+        const servicePromises = studentData.map(student =>
+          this.fetchCheckedServices(student.studentId, date).then(checkedServices => {
+            return { studentId: student.studentId, checkedServices };
+          })
+        );
+
+        Promise.all(servicePromises).then((serviceResults) => {
+          const selectedServices = {};
+          serviceResults.forEach(({ studentId, checkedServices }) => {
+            selectedServices[studentId] = checkedServices;
+          });
+
+          this.setState(
+            isCheckin
+              ? { studentDataCheckin: studentData, selectedServices }
+              : { studentDataCheckout: studentData, selectedServices }
+          );
+        });
       })
       .catch((error) => {
         console.error("Error fetching student data: ", error);
@@ -67,24 +133,22 @@ class Checkin extends React.Component {
   fetchAttendanceData = () => {
     const { activeTab, selectedDate, classId } = this.state;
     const type = activeTab === "checkin" ? "Checkin" : "Checkout";
-    const formattedDate = this.formatDate(selectedDate); // Định dạng ngày đã chọn
-    console.log(formattedDate, "test format date");
-    
+    const formattedDate = this.formatDate(selectedDate);
+
     axios
       .get(`http://localhost:5124/api/Attendance/GetAttendanceByDate?classId=${classId}&type=${type}&date=${formattedDate}`)
       .then((response) => {
         const attendanceData = response.data;
-        console.log(attendanceData,"test log");
-        
+
         if (attendanceData.length > 0) {
           const details = attendanceData[0].attendanceDetail;
           const attendanceMap = {};
           details.forEach((detail) => {
             attendanceMap[detail.studentId] = detail.status;
           });
-  
-          const studentIds = details.map(detail => detail.studentId); // Lấy danh sách studentId từ attendanceDetails
-  
+
+          const studentIds = details.map(detail => detail.studentId);
+
           if (activeTab === "checkin") {
             this.setState({
               attendanceDataCheckin: attendanceMap,
@@ -92,7 +156,7 @@ class Checkin extends React.Component {
               attendanceId: attendanceData[0].attendanceId,
               createdAt: new Date().toISOString(),
             }, () => {
-              this.fetchStudentData(studentIds, true); // Gọi fetchStudentData với danh sách studentId cho Check In
+              this.fetchStudentData(studentIds, true);
             });
           } else {
             this.setState({
@@ -101,11 +165,10 @@ class Checkin extends React.Component {
               attendanceId: attendanceData[0].attendanceId,
               createdAt: new Date().toISOString(),
             }, () => {
-              this.fetchStudentData(studentIds, false); // Gọi fetchStudentData với danh sách studentId cho Check Out
+              this.fetchStudentData(studentIds, false);
             });
           }
         } else {
-          // Nếu không có dữ liệu, cập nhật attendanceDetails và attendanceData
           if (activeTab === "checkin") {
             this.setState({ attendanceDetailsCheckin: [], attendanceDataCheckin: {} });
           } else {
@@ -117,16 +180,13 @@ class Checkin extends React.Component {
         console.error("Error fetching attendance data: ", error);
       });
   };
-  
 
   handleDateChange = (date) => {
-    // Loại bỏ phần giờ để tránh ảnh hưởng bởi múi giờ
     const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     this.setState({ selectedDate: localDate }, () => {
-      this.fetchAttendanceData(); // Gọi lại API khi ngày thay đổi, đảm bảo dữ liệu được cập nhật cho ngày đã chọn
+      this.fetchAttendanceData();
     });
   };
-  
 
   handleAttendance = (studentId, status) => {
     this.setState((prevState) => {
@@ -148,6 +208,140 @@ class Checkin extends React.Component {
     });
   };
 
+  handleServiceSelection = (studentId, serviceId) => {
+    this.setState((prevState) => {
+      const selectedServices = { ...prevState.selectedServices };
+      if (!selectedServices[studentId]) {
+        selectedServices[studentId] = [];
+      }
+
+      if (selectedServices[studentId].includes(serviceId)) {
+        selectedServices[studentId] = selectedServices[studentId].filter(id => id !== serviceId);
+      } else {
+        selectedServices[studentId].push(serviceId);
+      }
+
+      return { selectedServices };
+    });
+  };
+
+  handleConfirmService = () => {
+    const { selectedServices, selectedDate, studentDataCheckin } = this.state;
+    const formattedDate = this.formatDate(selectedDate);
+
+    studentDataCheckin.forEach((student) => {
+      const studentId = student.studentId;
+
+      // Gọi API để lấy các dịch vụ đã có trong DB cho học sinh và ngày hiện tại
+      axios.get(`http://localhost:5124/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${formattedDate}`)
+        .then((response) => {
+          const existingServices = response.data.map(service => ({
+            serviceId: service.serviceId,
+            checkServiceId: service.checkServiceId,
+            status: service.status
+          }));
+
+          const previouslySelectedServices = existingServices.filter(service => service.status === 1).map(service => service.serviceId);
+          const newlySelectedServices = selectedServices[studentId] || [];
+
+          // Dịch vụ mới được tick thêm (chưa có trong DB hoặc có nhưng status là 0)
+          const servicesToAdd = newlySelectedServices.filter(serviceId =>
+            !previouslySelectedServices.includes(serviceId) &&
+            !existingServices.some(service => service.serviceId === serviceId && service.status === 1)
+          );
+
+          // Dịch vụ bị bỏ tick (đã có trong DB và cần cập nhật status thành 0)
+          const servicesToRemove = previouslySelectedServices.filter(serviceId => !newlySelectedServices.includes(serviceId));
+
+          // Thêm các dịch vụ mới hoặc cập nhật status từ 0 lên 1
+          servicesToAdd.forEach((serviceId) => {
+            const existingService = existingServices.find(service => service.serviceId === serviceId && service.status === 0);
+
+            if (existingService) {
+              // Cập nhật dịch vụ nếu status là 0
+              const body = {
+                checkServiceId: existingService.checkServiceId,
+                serviceId: serviceId,
+                date: formattedDate,
+                studentId: studentId,
+                status: 1, // Trạng thái tick lại
+              };
+
+              console.log('Updating service status to 1:', body);
+
+              axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
+                .then((response) => {
+                  console.log(`Service ${serviceId} status updated to 1 for student ${studentId}:`, response.data);
+                })
+                .catch((error) => {
+                  console.error("Error updating service:", error);
+                  alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                });
+            } else {
+              // Thêm mới nếu chưa có trong DB
+              const body = {
+                checkServiceId: 0,
+                serviceId: serviceId,
+                date: formattedDate,
+                studentId: studentId,
+                status: 1,
+              };
+
+              console.log('Adding service:', body);
+
+              axios.post("http://localhost:5124/api/Service/AddCheckService", body)
+                .then((response) => {
+                  console.log(`Service ${serviceId} added for student ${studentId}:`, response.data);
+                })
+                .catch((error) => {
+                  console.error("Error adding service:", error);
+                  alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
+                });
+            }
+          });
+
+          // Cập nhật các dịch vụ bị bỏ tick
+          servicesToRemove.forEach((serviceId) => {
+            const serviceToUpdate = existingServices.find(service => service.serviceId === serviceId);
+            if (serviceToUpdate) {
+              const body = {
+                checkServiceId: serviceToUpdate.checkServiceId,
+                serviceId: serviceId,
+                date: formattedDate,
+                studentId: studentId,
+                status: 0,
+              };
+
+              console.log('Updating service status to 0:', body);
+
+              axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
+                .then((response) => {
+                  console.log(`Service ${serviceId} status updated to 0 for student ${studentId}:`, response.data);
+                })
+                .catch((error) => {
+                  console.error("Error updating service:", error);
+                  alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                });
+            }
+          });
+        })
+        .catch((error) => {
+          console.error(`Error fetching existing services for student ${studentId}:`, error);
+        });
+    });
+  };
+
+
+
+
+  toggleTab = (tab) => {
+    this.setState({ activeTab: tab }, () => {
+      if (tab !== "checkService") {
+        this.fetchAttendanceData();
+      }
+    });
+  };
+
   updateAttendance = () => {
     const {
       attendanceDataCheckin,
@@ -164,8 +358,8 @@ class Checkin extends React.Component {
           ? attendanceDetailsCheckin[0].attendanceId
           : 115
         : attendanceDetailsCheckout.length > 0
-        ? attendanceDetailsCheckout[0].attendanceId
-        : 115;
+          ? attendanceDetailsCheckout[0].attendanceId
+          : 115;
   
     const createdAt = new Date().toISOString();
     const attendanceUpdate = [
@@ -181,6 +375,22 @@ class Checkin extends React.Component {
             activeTab === "checkin"
               ? attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId))
               : attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
+          
+          // Gửi tin nhắn nếu trạng thái là "Vắng"
+          if (
+            (activeTab === "checkin" && attendanceDataCheckin[studentId] === "Vắng") ||
+            (activeTab === "checkout" && attendanceDataCheckout[studentId] === "Vắng")
+          ) {
+            const student = (activeTab === "checkin"
+              ? this.state.studentDataCheckin
+              : this.state.studentDataCheckout
+            ).find((s) => s.studentId === Number(studentId));
+            if (student) {
+              const messageBody = `${student.fullName} hôm nay vắng mặt.`;
+              this.sendAbsentNotification(studentId, messageBody);
+            }
+          }
+  
           return {
             attendanceDetailId: detail ? detail.attendanceDetailId : 0,
             attendanceId: attendanceId,
@@ -196,8 +406,7 @@ class Checkin extends React.Component {
     console.log(data);
   
     fetch(
-      `http://localhost:5124/api/Attendance/UpdateAttendance?classId=${classId}&type=${
-        activeTab === "checkin" ? "Checkin" : "Checkout"
+      `http://localhost:5124/api/Attendance/UpdateAttendance?classId=${classId}&type=${activeTab === "checkin" ? "Checkin" : "Checkout"
       }`,
       {
         method: "PUT",
@@ -220,45 +429,46 @@ class Checkin extends React.Component {
       .catch((error) => {
         console.error("Error updating attendance: ", error);
         alert("Có lỗi xảy ra khi cập nhật điểm danh.");
+      });
+  };
+  
+  // Hàm để gửi tin nhắn khi học sinh vắng mặt
+  sendAbsentNotification = (studentId, messageBody) => {
+    const body = {
+      recipientPhoneNumber: "+84365551401", // Số điện thoại mặc định hoặc cập nhật nếu cần
+      body: messageBody,
+    };
+  
+    axios.post("http://localhost:5124/api/Sms/SendSms", body)
+      .then((response) => {
+        console.log(`SMS sent for student ${studentId}:`, response.data);
+        alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
       })
-      .finally(() => {
-        // Luôn luôn gọi CreateDailyCheckout bất kể kết quả của UpdateAttendance
-        fetch("http://localhost:5124/api/Attendance/CreateDailyCheckout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            classId: classId,
-            date: this.formatDate(this.state.selectedDate),
-          }),
-        })
-          .then((response) => {
-            if (!response.ok) {
-              console.warn("Warning: CreateDailyCheckout returned a non-200 status:", response.statusText);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            console.log("CreateDailyCheckout called successfully:", data);
-          })
-          .catch((error) => {
-            console.error("Error in CreateDailyCheckout:", error);
-          });
+      .catch((error) => {
+        console.error("Error sending SMS:", error);
+        alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
       });
   };
   
 
-  toggleTab = (tab) => {
-    this.setState({ activeTab: tab }, () => {
-      this.fetchAttendanceData(); // Fetch attendance data mỗi khi đổi tab
-    });
-  };
-
   render() {
-    const { studentDataCheckin, studentDataCheckout, teacherName, attendanceDataCheckin, attendanceDataCheckout, activeTab, selectedDate, attendanceDetailsCheckin, attendanceDetailsCheckout } = this.state;
+    const {
+      studentDataCheckin,
+      studentDataCheckout,
+      teacherName,
+      attendanceDataCheckin,
+      attendanceDataCheckout,
+      activeTab,
+      selectedDate,
+      attendanceDetailsCheckin,
+      attendanceDetailsCheckout,
+      serviceData,
+      selectedServices,
+      showModal,
+      recipientPhoneNumber,
+      messageBody,
+    } = this.state;
 
-    // Kiểm tra xem ngày đã chọn có phải là ngày hôm nay không
     const isToday = this.formatDate(new Date()) === this.formatDate(selectedDate);
 
     return (
@@ -272,13 +482,12 @@ class Checkin extends React.Component {
           ]}
         />
 
-        {/* Chọn lịch */}
         <div className="form-group">
           <label>Chọn Ngày:</label>
           <DatePicker
             selected={selectedDate}
             onChange={this.handleDateChange}
-            dateFormat="yyyy-MM-dd" // Định dạng ngày
+            dateFormat="yyyy-MM-dd"
             className="form-control"
           />
         </div>
@@ -289,7 +498,7 @@ class Checkin extends React.Component {
               <li className="nav-item">
                 <a
                   className={`nav-link ${activeTab === "checkin" ? "active" : ""}`}
-                  onClick={() => this.setState({ activeTab: "checkin" }, this.fetchAttendanceData)}
+                  onClick={() => this.toggleTab("checkin")}
                 >
                   Check In
                 </a>
@@ -297,130 +506,256 @@ class Checkin extends React.Component {
               <li className="nav-item">
                 <a
                   className={`nav-link ${activeTab === "checkout" ? "active" : ""}`}
-                  onClick={() => this.setState({ activeTab: "checkout" }, this.fetchAttendanceData)}
+                  onClick={() => this.toggleTab("checkout")}
                 >
                   Check Out
+                </a>
+              </li>
+              <li className="nav-item">
+                <a
+                  className={`nav-link ${activeTab === "checkService" ? "active" : ""}`}
+                  onClick={() => this.toggleTab("checkService")}
+                >
+                  Check Service
                 </a>
               </li>
             </ul>
 
             <div className="table-responsive">
               {activeTab === "checkin" && (
-                <table className="table table-hover mt-3">
-                  <thead className="thead-light">
-                    <tr>
-                      <th>Tên học sinh</th>
-                      <th>Xe buýt</th>
-                      <th>Thông tin khác</th>
-                      <th>Thời gian đến</th>
-                      <th>Người đưa đón</th>
-                      <th>Liên hệ</th>
-                      <th>Điểm danh</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendanceDetailsCheckin.length > 0 ? (
-                      studentDataCheckin.map((student, index) => (
-                        <tr key={index}>
-                          <td>{student.fullName}</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>
-                            <button
-                              className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Có" ? "btn-success" : ""}`}
-                              onClick={() => isToday && this.handleAttendance(student.studentId, "Có")}
-                              disabled={!isToday} // Disable nút nếu ngày không phải hôm nay
-                            >
-                              Có
-                            </button>
-                            <button
-                              className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Muộn" ? "btn-warning" : ""}`}
-                              onClick={() => isToday && this.handleAttendance(student.studentId, "Muộn")}
-                              disabled={!isToday} // Disable nút nếu ngày không phải hôm nay
-                            >
-                              Muộn
-                            </button>
-                            <button
-                              className={`btn ${attendanceDataCheckin[student.studentId] === "Vắng" ? "btn-danger" : ""}`}
-                              onClick={() => isToday && this.handleAttendance(student.studentId, "Vắng")}
-                              disabled={!isToday} // Disable nút nếu ngày không phải hôm nay
-                            >
-                              Vắng
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
+                <>
+                  <table className="table table-hover mt-3">
+                    <thead className="thead-light">
                       <tr>
-                        <td colSpan="7" className="text-center">Không có dữ liệu</td>
+                        <th>Tên học sinh</th>
+                        <th>Thông tin khác</th>
+                        <th>Thời gian đến</th>
+                        <th>Người đưa đón</th>
+                        <th>Liên hệ</th>
+                        <th>Điểm danh</th>
+                        <th>Gửi Tin Nhắn</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {attendanceDetailsCheckin.length > 0 ? (
+                        studentDataCheckin.map((student, index) => (
+                          <tr key={index}>
+                            <td><div className="d-flex align-items-center">
+                              <img
+                                src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                                alt="Profile"
+                                className="img-fluid rounded-circle mr-2"
+                                style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                              />
+                              <span>{student.fullName}</span>
+                            </div></td>
+                            <td>n/a</td>
+                            <td>n/a</td>
+                            <td>n/a</td>
+                            <td>n/a</td>
+                            <td>
+                              <button
+                                className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Có" ? "btn-success" : ""}`}
+                                onClick={() => isToday && this.handleAttendance(student.studentId, "Có")}
+                                disabled={!isToday}
+                              >
+                                Có
+                              </button>
+                              <button
+                                className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Muộn" ? "btn-warning" : ""}`}
+                                onClick={() => isToday && this.handleAttendance(student.studentId, "Muộn")}
+                                disabled={!isToday}
+                              >
+                                Muộn
+                              </button>
+                              <button
+                                className={`btn ${attendanceDataCheckin[student.studentId] === "Vắng" ? "btn-danger" : ""}`}
+                                onClick={() => isToday && this.handleAttendance(student.studentId, "Vắng")}
+                                disabled={!isToday}
+                              >
+                                Vắng
+                              </button>
+                            </td>
+                            <td>
+                              <button onClick={this.toggleModal}>
+                                <i className="icon-speech"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="7" className="text-center">Không có dữ liệu</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+
+                  <div className="text-right mt-3">
+                    <button className="btn btn-primary" onClick={this.updateAttendance} disabled={!isToday}>
+                      Xác Nhận Điểm Danh
+                    </button>
+                  </div>
+                </>
               )}
               {activeTab === "checkout" && (
-                <table className="table table-hover mt-3">
-                  <thead className="thead-light">
-                    <tr>
-                      <th>Tên học sinh</th>
-                      <th>Thông tin khác</th>
-                      <th>Thời gian đến</th>
-                      <th>Người đưa đón</th>
-                      <th>Liên hệ</th>
-                      <th>Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {studentDataCheckout.length > 0 ? (
-                      studentDataCheckout.map((student, index) => (
-                        <tr key={index}>
-                          <td>{student.fullName}</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>n/a</td>
-                          <td>
-                            <button
-                              className="btn btn-primary mr-1"
-                              onClick={() => this.handleAttendance(student.studentId, "Đã về")}
-                            >
-                              Đã về
-                            </button>
-                            <button
-                              className="btn btn-secondary"
-                              onClick={() => this.handleAttendance(student.studentId, "Chưa về")}
-                            >
-                              Chưa về
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
+                <>
+                  <table className="table table-hover mt-3">
+                    <thead className="thead-light">
                       <tr>
-                        <td colSpan="7" className="text-center">Không có dữ liệu</td>
+                        <th>Tên học sinh</th>
+                        <th>Thông tin khác</th>
+                        <th>Thời gian đến</th>
+                        <th>Người đưa đón</th>
+                        <th>Liên hệ</th>
+                        <th>Trạng thái</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {studentDataCheckout.length > 0 ? (
+                        studentDataCheckout.map((student, index) => (
+                          <tr key={index}>
+                            <td><div className="d-flex align-items-center">
+                              <img
+                                src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                                alt="Profile"
+                                className="img-fluid rounded-circle mr-2"
+                                style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                              />
+                              <span>{student.fullName}</span>
+                            </div></td>
+                            <td>n/a</td>
+                            <td>n/a</td>
+                            <td>n/a</td>
+                            <td>n/a</td>
+                            <td>
+                              <button
+                                className="btn btn-primary mr-1"
+                                onClick={() => this.handleAttendance(student.studentId, "Đã về")}
+                              >
+                                Đã về
+                              </button>
+                              <button
+                                className="btn btn-secondary"
+                                onClick={() => this.handleAttendance(student.studentId, "Chưa về")}
+                              >
+                                Chưa về
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="text-center">Không có dữ liệu</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+
+                  <div className="text-right mt-3">
+                    <button className="btn btn-primary" onClick={this.updateAttendance} disabled={!isToday}>
+                      Xác Nhận Điểm Danh
+                    </button>
+                  </div>
+                </>
               )}
+
+              {activeTab === "checkService" && (
+                <>
+                  <table className="table table-hover mt-3">
+                    <thead className="thead-light">
+                      <tr>
+                        <th>Tên học sinh</th>
+                        {serviceData.map((service) => (
+                          <th key={service.serviceId}>{service.serviceName}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentDataCheckin.map((student) => (
+                        <tr key={student.studentId}>
+                          <td><div className="d-flex align-items-center">
+                            <img
+                              src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                              alt="Profile"
+                              className="img-fluid rounded-circle mr-2"
+                              style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                            />
+                            <span>{student.fullName}</span>
+                          </div></td>
+                          {serviceData.map((service) => (
+                            <td key={service.serviceId}>
+                              <div className="fancy-checkbox d-inline-block">
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    name="checkbox"
+                                    checked={
+                                      selectedServices[student.studentId]?.includes(service.serviceId) || false
+                                    }
+                                    onChange={() => this.handleServiceSelection(student.studentId, service.serviceId)}
+                                  />
+                                  <span></span>
+                                </label>
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="text-right mt-3">
+                    <button className="btn btn-primary" onClick={this.handleConfirmService}>
+                      Xác Nhận Dịch Vụ
+                    </button>
+                  </div>
+                </>
+              )}
+
+
+
             </div>
+          </div>
+        </div>
 
-            {activeTab === "checkin" && ( // Chỉ hiển thị thống kê điểm danh trong tab "Check In"
-              <div className="attendance-summary mt-3">
-                <span>Thông tin điểm danh: </span>
-                <span className="badge badge-success mr-2">{Object.values(attendanceDataCheckin).filter(status => status === "Có").length} Có</span>
-                <span className="badge badge-warning mr-2">{Object.values(attendanceDataCheckin).filter(status => status === "Muộn").length} Muộn</span>
-                <span className="badge badge-danger mr-2">{Object.values(attendanceDataCheckin).filter(status => status === "Vắng").length} Vắng</span>
+        <div className="modal" tabIndex="-1" role="dialog" style={{ display: showModal ? 'block' : 'none' }}>
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Gửi Tin Nhắn</h5>
+                <button type="button" className="close" onClick={this.toggleModal}>
+                  <span>&times;</span>
+                </button>
               </div>
-            )}
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Số điện thoại</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={this.state.recipientPhoneNumber}
+                    onChange={(e) => this.setState({ recipientPhoneNumber: e.target.value })}
+                  />
+                </div>
 
-            <div className="text-right mt-3">
-              <button className="btn btn-primary" onClick={this.updateAttendance} disabled={!isToday}>
-                Xác Nhận Điểm Danh
-              </button>
+                <div className="form-group">
+                  <label>Lời nhắn</label>
+                  <textarea
+                    className="form-control"
+                    rows="3"
+                    value={messageBody}
+                    onChange={(e) => this.setState({ messageBody: e.target.value })}
+                  ></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={this.toggleModal}>
+                  Đóng
+                </button>
+                <button type="button" className="btn btn-primary" onClick={this.handleSendSms}>
+                  Gửi
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -430,3 +765,4 @@ class Checkin extends React.Component {
 }
 
 export default connect()(withRouter(Checkin));
+

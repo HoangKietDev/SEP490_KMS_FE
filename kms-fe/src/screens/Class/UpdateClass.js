@@ -178,22 +178,7 @@ class UpdateClass extends React.Component {
                 </label>
               </div> */}
 
-              <div className="form-group">
-                <label>Expire Date</label>
-                <input
-                  type="datetime-local"
-                  className="form-control"
-                  value={expireDate}
-                  name="expireDate"
-                  required=""
-                  onChange={(e) => this.setState({ expireDate: e.target.value })}
-                />
-                {expireDate === "" && submeet && (
-                  <ul className="parsley-errors-list filled">
-                    <li className="parsley-required">Expire date is required.</li>
-                  </ul>
-                )}
-              </div>
+           
 
               <div className="form-group">
                 <label>Grade</label>

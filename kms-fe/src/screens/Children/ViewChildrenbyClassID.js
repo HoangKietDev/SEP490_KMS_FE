@@ -106,7 +106,18 @@ class ViewChildrenByClassID extends React.Component {
                           {filteredStudents.map((student, index) => (
                             <React.Fragment key={"student" + index}>
                               <tr>
-                                <td>{student.fullName}</td>
+                                <td>
+                                  {/* Ảnh nằm cạnh tên */}
+                                  <div className="d-flex align-items-center">
+                                    <img
+                                      src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                                      alt="Profile"
+                                      className="img-fluid rounded-circle mr-2"
+                                      style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                    />
+                                    <span>{student.fullName}</span>
+                                  </div>
+                                </td>
                                 <td>{student.nickName}</td>
                                 <td>{getGradeName(student.grade)}</td> {/* Hiển thị tên grade */}
                                 <td>

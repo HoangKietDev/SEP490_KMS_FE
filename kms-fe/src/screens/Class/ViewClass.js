@@ -102,7 +102,6 @@ class ViewClass extends React.Component {
                           <tr>
                             <th>Class Name</th>
                             <th>Status</th>
-                            <th>Expire Date</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -122,9 +121,7 @@ class ViewClass extends React.Component {
                                     </span>
                                   )}
                                 </td>
-                                <td>
-                                  {this.formatDate(classData.expireDate)} {/* Sử dụng hàm định dạng */}
-                                </td>
+                                
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"
                                     onClick={() => this.handleView(classData.classId)} // Gọi hàm handleView

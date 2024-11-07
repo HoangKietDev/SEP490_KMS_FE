@@ -48,7 +48,10 @@ class NavbarMenu extends React.Component {
     }
     else if (
       activeKey === "/service" ||
-      activeKey === "/create-service"
+      activeKey === "/create-service" ||
+      activeKey === "/chooservice"
+
+
     ) {
       this.activeMenutabContainer("ServiceContainer");
     }
@@ -60,6 +63,7 @@ class NavbarMenu extends React.Component {
     ) {
       this.activeMenutabContainer("ClassContainer");
     }
+   
     else if (
       activeKey === "/viewmenu" ||
       activeKey === "/viewmenu2" ||
@@ -555,6 +559,14 @@ class NavbarMenu extends React.Component {
                               onClick={() => { }}
                             >
                               <Link to="/create-service">New Service </Link>
+                            </li>
+                          ) : null}
+                          {roleId === 2 ? (
+                            <li
+                              className={activeKey === "chooseservice" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/chooseservice">Choose Service </Link>
                             </li>
                           ) : null}
 
