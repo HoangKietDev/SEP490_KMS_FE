@@ -5,6 +5,8 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Login from "../Login";
 import { getSession } from "../../components/Auth/Auth";
+import { addNotificationByRoleId, addNotificationByUserId } from "../../components/Common/Notification";
+
 
 
 class ScheduleList extends React.Component {
@@ -57,7 +59,10 @@ class ScheduleList extends React.Component {
         teacherName: data?.teacherName
       }
       await axios.put(`http://localhost:5124/api/Schedule/UpdateSchedule`, formdata);
-      console.log(data);
+
+      // tao thong bao moi
+      // addNotificationByUserId('UserId', 'content', 22);
+      // addNotificationByRoleId('RoleId', 'content', 3);
 
       // Update the state locally after a successful API call
       this.setState((prevState) => ({
@@ -101,7 +106,7 @@ class ScheduleList extends React.Component {
         <div>
           <div className="container-fluid">
             <PageHeader
-              HeaderText="Request Management"
+              HeaderText="Schedule List"
               Breadcrumb={[
                 { name: "Schedule List", navigate: "" },
               ]}
@@ -151,7 +156,7 @@ class ScheduleList extends React.Component {
                                   {/* <td>{request?.teacherName}</td> */}
                                   {/* <td>{request?.processing || ''}</td> */}
 
-                                  {(roleId === 3 || roleId === 4) && (
+                                  {(roleId === 5) ? (
                                     <td>
                                       <select
                                         value={request.status}
@@ -165,7 +170,14 @@ class ScheduleList extends React.Component {
                                         ))}
                                       </select>
                                     </td>
+                                  ) : (roleId === 2 || roleId === 3 || roleId === 4) && (
+                                    <td>
+                                      <span className={`badge ${request?.status === 1 ? 'badge-success' : request?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
+                                        {statusOptions.find(option => option.value === request.status)?.label || 'Unknown'}
+                                      </span>
+                                    </td>
                                   )}
+
 
                                 </tr>
                               </React.Fragment>

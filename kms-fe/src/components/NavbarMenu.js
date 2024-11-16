@@ -20,10 +20,13 @@ import Logo from "../assets/images/logo.svg";
 import LogoWhite from "../assets/images/logo-white.svg";
 import UserImage from "../assets/images/user.png";
 import { clearSession, getSession } from "./Auth/Auth";
+import axios from "axios";
+
 
 class NavbarMenu extends React.Component {
   state = {
     linkupdate: false,
+    notiData: []
   };
   componentDidMount() {
     this.props.tostMessageLoad(true);
@@ -32,6 +35,95 @@ class NavbarMenu extends React.Component {
     res = res.length > 4 ? res[4] : "/";
     const { activeKey } = this.props;
     this.activeMenutabwhenNavigate("/" + activeKey);
+
+    const user = getSession('user')?.user
+    this.getNotifications(user?.userId);
+  }
+
+  // GET all noti by userId
+  async getNotifications(userId) {
+    try {
+      const response = await axios.get(`http://localhost:5124/api/Notification/GetNotificationByUserId`, {
+        params: { userId: userId }
+      });
+      // Cập nhật state với dữ liệu thông báo nhận được
+      this.setState({
+        notiData: response.data // Thay `notifications` bằng tên state bạn muốn dùng
+      });
+      console.log(this.state.notiData);
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+    }
+  }
+
+  // Update status when user readed noti
+  // async handleNoti(myNoti) {
+  //   for (let index = 0; index < myNoti.length; index++) {
+  //     try {
+  //       // Lấy userNotificationId từ usernotifications của thông báo hiện tại
+  //       const userNotificationId = myNoti[index]?.usernotifications[0]?.userNotificationId;
+
+  //       // Kiểm tra nếu userNotificationId tồn tại trước khi gọi API
+  //       if (userNotificationId) {
+  //         await axios.get(`http://localhost:5124/api/Notification/UpdateNotificationStatus`, {
+  //           params: { UserNotificationID: userNotificationId }
+  //         });
+  //       } else {
+  //         console.warn(`UserNotificationID không tồn tại ở chỉ mục ${index}`);
+  //       }
+  //     } catch (error) {
+  //       console.error('There was a problem with the fetch operation:', error);
+  //     }
+  //   }
+  // }
+
+  // Update status when user readed noti
+  async handleNoti(myNoti) {
+    for (let index = 0; index < myNoti.length; index++) {
+      try {
+        const userNotificationId = myNoti[index]?.usernotifications[0]?.userNotificationId;
+        if (userNotificationId) {
+          await axios.get(`http://localhost:5124/api/Notification/UpdateNotificationStatus`, {
+            params: { UserNotificationID: userNotificationId }
+          });
+        }
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    }
+  }
+
+  // Chỉ cập nhật khi toggleNotification chuyển từ mở sang đóng
+  componentDidUpdate(prevProps) {
+    if (prevProps.toggleNotification && !this.props.toggleNotification) {
+      // Khi toggleNotification chuyển từ mở sang đóng, cập nhật trạng thái thông báo
+      this.setState((prevState) => ({
+        notiData: prevState.notiData.map(noti => {
+          if (noti.usernotifications[0]?.status === 'Unread') {
+            noti.usernotifications[0].status = 'Read';
+          }
+          return noti;
+        })
+      }));
+    }
+  }
+
+
+  formatDateTime(datetimeStr) {
+    // Tạo đối tượng Date từ chuỗi datetime
+    const dateObj = new Date(datetimeStr);
+
+    // Lấy giờ và phút
+    const hours = dateObj.getHours().toString().padStart(2, '0');
+    const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+
+    // Lấy ngày, tháng, năm
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0'); // Tháng tính từ 0-11 nên cần +1
+    const year = dateObj.getFullYear();
+
+    // Trả về chuỗi định dạng mới
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
   }
 
   activeMenutabwhenNavigate(activeKey) {
@@ -64,13 +156,13 @@ class NavbarMenu extends React.Component {
     ) {
       this.activeMenutabContainer("ClassContainer");
     }
-   
+
     else if (
       activeKey === "/viewmenu" ||
       activeKey === "/viewmenu2" ||
       activeKey === "/listmenu"
     ) {
-      this.activeMenutabContainer("MenuContainer");
+      this.activeMenutabContainer("ScheduleContainer");
     }
     else if (
       activeKey === "/teacher"
@@ -83,6 +175,11 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("RequestContainer");
     }
     else if (
+      activeKey === "/locationActivity" 
+    ) {
+      this.activeMenutabContainer("LocationActivityContainer");
+    }
+    else if (
       activeKey === "/schedule" ||
       activeKey === "/listschedule" ||
       activeKey === "/create-schedule"
@@ -90,7 +187,7 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("scheduleContainer");
     }
     else if (
-      activeKey === "/listclassattendance" 
+      activeKey === "/listclassattendance"
     ) {
       this.activeMenutabContainer("attendanceContainer");
     }
@@ -179,6 +276,9 @@ class NavbarMenu extends React.Component {
     var path = window.location.pathname;
     document.body.classList.add(themeColor);
 
+    const { notiData } = this.state;
+    const myNoti = notiData.filter(i => i?.usernotifications[0]?.status === 'Unread')
+
     return (
       <div>
         {isToastMessage ? (
@@ -246,12 +346,7 @@ class NavbarMenu extends React.Component {
                       <i className="icon-calendar"></i>
                     </a>
                   </li>
-                  <li>
-                    <a href="appinbox" className="icon-menu d-none d-sm-block">
-                      <i className="icon-envelope"></i>
-                      <span className="notification-dot"></span>
-                    </a>
-                  </li>
+                  {/* Notification */}
                   <li
                     className={
                       toggleNotification ? "show dropdown" : "dropdown"
@@ -264,10 +359,11 @@ class NavbarMenu extends React.Component {
                       onClick={(e) => {
                         e.preventDefault();
                         this.props.onPressNotification();
+                        this.handleNoti(myNoti);
                       }}
                     >
                       <i className="icon-bell"></i>
-                      <span className="notification-dot"></span>
+                      <span className={myNoti.length !== 0 ? `notification-dot` : 'd-none'}></span>
                     </a>
                     <ul
                       className={
@@ -276,72 +372,31 @@ class NavbarMenu extends React.Component {
                           : "dropdown-menu notifications"
                       }
                     >
-                      <li className="header">
-                        <strong>You have 4 new Notifications</strong>
+                      <li className="header text-light">
+                        <strong>You have {myNoti.length} new Notifications</strong>
                       </li>
-                      <li>
-                        <a>
-                          <div className="media">
-                            <div className="media-left">
-                              <i className="icon-info text-warning"></i>
-                            </div>
-                            <div className="media-body">
-                              <p className="text">
-                                Campaign <strong>Holiday Sale</strong> is nearly
-                                reach budget limit.
-                              </p>
-                              <span className="timestamp">10:00 AM Today</span>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                      <li>
-                        <a>
-                          <div className="media">
-                            <div className="media-left">
-                              <i className="icon-like text-success"></i>
-                            </div>
-                            <div className="media-body">
-                              <p className="text">
-                                Your New Campaign <strong>Holiday Sale</strong>{" "}
-                                is approved.
-                              </p>
-                              <span className="timestamp">11:30 AM Today</span>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                      <li>
-                        <a>
-                          <div className="media">
-                            <div className="media-left">
-                              <i className="icon-pie-chart text-info"></i>
-                            </div>
-                            <div className="media-body">
-                              <p className="text">
-                                Website visits from Twitter is 27% higher than
-                                last week.
-                              </p>
-                              <span className="timestamp">04:00 PM Today</span>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                      <li>
-                        <a>
-                          <div className="media">
-                            <div className="media-left">
-                              <i className="icon-info text-danger"></i>
-                            </div>
-                            <div className="media-body">
-                              <p className="text">
-                                Error on website analytics configurations
-                              </p>
-                              <span className="timestamp">Yesterday</span>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
+                      {myNoti && myNoti.map(item => {
+                        return (
+                          <li>
+                            <a>
+                              <div className="media">
+                                <div className="media-left">
+                                  <i className="icon-info text-info"></i>
+                                </div>
+                                <div className="media-body text-light">
+                                  <p className="text">
+                                    <strong>{item?.title}</strong>
+                                  </p>
+                                  <p className="text">
+                                    {item?.message}
+                                  </p>
+                                  <span className="timestamp text-light">{this.formatDateTime(item?.createdAt)}</span>
+                                </div>
+                              </div>
+                            </a>
+                          </li>
+                        );
+                      })}
                       <li className="footer">
                         <a className="more">See all notifications</a>
                       </li>
@@ -719,6 +774,39 @@ class NavbarMenu extends React.Component {
                       </li>
                     ) : null}
 
+                    {/* Location Activity */}
+                    {roleId === 3 ? (
+                      <li id="LocationActivityContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.activeMenutabContainer("LocationActivityContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Location and Activity</span>
+                        </a>
+                        <ul className="collapse">
+                          <li
+                            className={activeKey === "locationAcivity" ? "active" : ""}
+                            onClick={() => { }}
+                          >
+                            <Link to="/locationActivity">List items</Link>
+                          </li>
+                          {/* 
+                          {roleId === 2 ? (
+                            <li
+                              className={activeKey === "createrequest" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/create-request">Create Request</Link>
+                            </li>
+                          ) : null} */}
+                        </ul>
+                      </li>
+                    ) : null}
+
                     {/* Albums */}
                     {roleId === 2 || roleId === 3 || roleId === 5 ? (
                       <li id="AlbumContainer" className="">
@@ -838,17 +926,17 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Attendance</span>
                         </a>
                         <ul className="collapse">
-                            <li
-                              className={activeKey === "listclassattendance" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/listclass">Attendance</Link>
-                            </li>
+                          <li
+                            className={activeKey === "listclassattendance" ? "active" : ""}
+                            onClick={() => { }}
+                          >
+                            <Link to="/listclass">Attendance</Link>
+                          </li>
                         </ul>
                       </li>
                     ) : null}
-                      {/* Payment */}
-                      {roleId === 2  ? (
+                    {/* Payment */}
+                    {roleId === 2 ? (
                       <li id="AttendParentContainer" className="">
                         <a
                           href="#!"
@@ -867,7 +955,7 @@ class NavbarMenu extends React.Component {
                           >
                             <Link to="/viewattendparent">Attend</Link>
                           </li>
-                          
+
                         </ul>
                       </li>
                     ) : null}

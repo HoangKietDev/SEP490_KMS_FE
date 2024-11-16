@@ -5,6 +5,11 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
     const maxPageButtons = 5; // Số trang tối đa sẽ hiển thị (bao gồm các trang ở đầu, cuối và trang hiện tại)
     const pageNumbers = [];
 
+    // Nếu chỉ có 1 trang, không hiển thị gì cả
+    if (totalPages <= 1) {
+        return null;
+    }
+    
     // Tạo logic hiển thị trang
     if (totalPages <= maxPageButtons) {
         for (let i = 1; i <= totalPages; i++) {

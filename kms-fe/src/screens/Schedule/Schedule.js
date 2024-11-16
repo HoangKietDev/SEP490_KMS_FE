@@ -9,21 +9,44 @@ import { getSession } from "../../components/Auth/Auth";
 
 class Schedule extends React.Component {
 
+  // getCurrentWeek = () => {
+  //   const today = new Date();
+  //   const startYear = new Date(today.getFullYear(), 0, 1);
+  //   const days = Math.floor((today - startYear) / (24 * 60 * 60 * 1000));
+  //   const currentWeek = Math.ceil((days + startYear.getDay() + 1) / 7);
+  //   const year = today.getFullYear();
+  //   return `${year}-W${currentWeek.toString().padStart(2, '0')}`;
+  // };
   getCurrentWeek = () => {
     const today = new Date();
-    const startYear = new Date(today.getFullYear(), 0, 1);
-    const days = Math.floor((today - startYear) / (24 * 60 * 60 * 1000));
+    const vietnamTimezoneOffset = 7 * 60; // GMT+7 offset in minutes
+    today.setMinutes(today.getMinutes() + today.getTimezoneOffset() + vietnamTimezoneOffset);
+
+    // Tính ngày đầu tuần (Thứ Hai)
+    const dayOfWeek = today.getDay(); // 0 = Chủ nhật, 1 = Thứ Hai, ..., 6 = Thứ Bảy
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Điều chỉnh về Thứ Hai
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + mondayOffset);
+
+    // Tính tuần dựa trên ngày đầu tuần
+    const startYear = new Date(startOfWeek.getFullYear(), 0, 1);
+    const days = Math.floor((startOfWeek - startYear) / (24 * 60 * 60 * 1000));
     const currentWeek = Math.ceil((days + startYear.getDay() + 1) / 7);
-    const year = today.getFullYear();
+    const year = startOfWeek.getFullYear();
+
     return `${year}-W${currentWeek.toString().padStart(2, '0')}`;
   };
+
+
+
+
 
   // get Start date and end date
   getWeekStartEnd = (selectedWeek) => {
     const [year, week] = selectedWeek?.split('-W');
     const firstDayOfYear = new Date(year, 0, 1);
     const days = (week - 1) * 7;
-    const startDate = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + days - firstDayOfYear.getDay() + 2));
+    const startDate = new Date(firstDayOfYear.setDate(firstDayOfYear.getDate() + days - firstDayOfYear.getDay() + 1));
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + 6); // Ngày kết thúc tuần
 
@@ -116,17 +139,16 @@ class Schedule extends React.Component {
       const roleId = userData.roleId;
 
       console.log(scheduleData);
-      
       if (scheduleData.length > 0) {
         const scheduleId = scheduleData[0].scheduleId;
 
-        if (roleId === 2 && scheduleData[0].status !== 2) {
-          this.setState({
-            scheduleData: scheduleData,
-            scheduleDetails: [], // No details for status 0
-          });
-          return;
-        }
+        // if (roleId === 2 && scheduleData[0].status !== 2) {
+        this.setState({
+          scheduleData: scheduleData,
+          scheduleDetails: [], // No details for status 0
+        });
+        //   return;
+        // }
 
         const detailResponse = await axios.get(
           `http://localhost:5124/api/ScheduleDetail/GetAllScheduleDetailsByScheduleId/${scheduleId}`
@@ -136,7 +158,7 @@ class Schedule extends React.Component {
         let newscheduleData = scheduleDetails.filter(i => i.weekdate === weekdate)
         console.log(newscheduleData);
         console.log(weekdate);
-        
+
         // Set both scheduleData and scheduleDetails into state
         this.setState({
           scheduleDetails: newscheduleData,
@@ -245,6 +267,11 @@ class Schedule extends React.Component {
     if (type === "class") {
       selectId = event.target.value;
       this.setState({ selectId });
+      // Cập nhật URL với classId mới
+      this.props.history.push({
+        pathname: '/schedule', // Đặt tên đường dẫn hiện tại
+        search: `?classId=${selectId}` // Thêm query parameter với classId mới
+      });
     } else if (type === "week") {
       const selectedWeek = event.target.value;
       this.setState({ selectedWeek });
@@ -299,8 +326,8 @@ class Schedule extends React.Component {
     }
   };
 
-  handleCreateSchedule = async (event) => {
-
+  handleCreateSchedule = async (selectId) => {
+    this.props.history.push(`/create-scheduledetail?classId=${selectId}`);
   }
 
 
@@ -323,7 +350,7 @@ class Schedule extends React.Component {
         <div>
           <div className="container-fluid">
             <PageHeader
-              HeaderText="Schedule"
+              HeaderText="Schedule Detail"
               Breadcrumb={[{ name: "Schedule", navigate: "listschedule" },
               { name: "Schedule Detail", navigate: "" }
               ]}
@@ -371,7 +398,9 @@ class Schedule extends React.Component {
                         />
 
                         <a
-                          onClick={() => this.handleCreateSchedule()}
+                          onClick={() => {
+                            this.handleCreateSchedule(selectId)
+                          }}
                           className="btn btn-success text-white"
                         >
                           <i className="icon-plus mr-2"></i>Add Schedule Detail

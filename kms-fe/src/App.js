@@ -49,11 +49,14 @@ import ViewClassByTeacher from "./screens/Class/ViewClassByTeacher";
 import ViewAttendByParent from "./screens/Attendance/ViewAttendByParent";
 import ChooseService from "./screens/Service/ChooseService";
 import ScheduleCreate from "./screens/Schedule/ScheduleCreate";
+import ScheduleDetailCreate from "./screens/Schedule/ScheduleDetailCreate";
+
 import AlbumList from "./screens/Album/AlbumList";
 import AlbumDetail from "./screens/Album/AlbumDetail";
 import AlbumCreate from "./screens/Album/AlbumCreate";
 import PaymentList from "./screens/Payment/PaymentList";
 import PaymentHistory from "./screens/Payment/PaymentHistory";
+import LocationActivityList from "./screens/LocatonActivity/LocationActivityList";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -169,6 +172,7 @@ class App extends React.Component {
                   component={TeacherUpdate}
                   allowedRoles={[3]}
                 />
+
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/request`}
@@ -193,6 +197,15 @@ class App extends React.Component {
                   component={RequestCreate}
                   allowedRoles={[2]}
                 />
+
+
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/locationActivity`}
+                  component={LocationActivityList}
+                  allowedRoles={[3]}
+                />
+
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/viewallstudent`}
@@ -278,12 +291,18 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/listschedule`}
                   component={ScheduleList}
-                  allowedRoles={[3, 4]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/create-schedule`}
                   component={ScheduleCreate}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/create-scheduledetail`}
+                  component={ScheduleDetailCreate}
                   allowedRoles={[3]}
                 />
 

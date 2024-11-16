@@ -120,12 +120,12 @@
 
 		.notification-dot {
 			@include border-radius(50%);
-			width: 8px;
-			height: 8px;
+			width: 10px;
+			height: 10px;
 			position: absolute;
 			top: 12px;
 			right: 7px;
-			background-color: $col-dark;
+			background-color: $col-blue;
 		}
 	}
 
@@ -143,7 +143,7 @@
 
 	ul.notifications {
         background:  $col-dark;
-		width: 500px;
+		width: 400px;
 
 		@include max-screen($break-small) {
 			width: calc(100% - 20px);
