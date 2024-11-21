@@ -31,6 +31,21 @@ class PaymentList extends React.Component {
     selectedQuantity: 1,
 
     showModal: false, // State để kiểm soát hiển thị modal
+
+    "servicesUsed": [
+      {
+        serviceMonth: {
+          name: 'Service Month: 10/2024',
+          total: 15000000,
+        },
+        services: {
+          "service": 1,
+          "serviceName": "Ăn sáng",
+          "price": 20000,
+          "quantity": 2
+        }
+      },
+    ]
   };
 
 
@@ -50,13 +65,12 @@ class PaymentList extends React.Component {
     // Cập nhật lại state với paymentName mới
     this.setState({
       tuition: {
-        ...this.state.tuition,
         paymentName: paymentName,  // Cập nhật paymentName
       },
     });
 
     // Gọi API và cập nhật state bằng axios
-    axios.get(`http://localhost:5124/api/Tuition/parent/${parentId}/year/${year}/month/${month}`)
+    axios.get(`http://localhost:5124/api/Tuition/parent/${parentId}`)
       .then((response) => {
         this.setState({ Payment: response.data });
       })
@@ -140,7 +154,6 @@ class PaymentList extends React.Component {
         ...this.state.tuition,
         quantity: 1,
         price: myPayment?.tuition[0]?.tuitionFee,
-        // paymentName: ,  // Cập nhật paymentName
       },
       ChildrenPayment: myPayment,
 
@@ -231,12 +244,27 @@ class PaymentList extends React.Component {
   handlePayment = () => {
     const { selectedChild, selectedTuition, tuition, selectedServices, totalPayment, ChildrenPayment, selectedDiscount } = this.state;
 
+    // Lấy năm và tháng hiện tại
+    const currentDate = new Date();
+    const year = currentDate.getFullYear(); // Lấy năm hiện tại
+    const month = currentDate.getMonth() + 1; // Lấy tháng hiện tại (tháng trả về từ 0 -> 11, cộng 1 để có tháng đúng)
+
+    // Cập nhật paymentName động dựa trên tháng và năm
+    const paymentName = `Payment fee ${month < 10 ? `0${month}` : month}/${year}`;
+
     const paymentData = {
       amount: totalPayment,
       childId: selectedChild,
       tuitionId: selectedTuition ? ChildrenPayment?.tuition[0]?.tuitionId : null,
       serviceId: selectedServices ? selectedServices.map(service => (service.service)) : [],
-      paymentName: "Tuition fee and Services months",
+
+      paymentName: selectedTuition
+        ? tuition?.paymentName // Nếu có selectedTuition thì lấy paymentName từ tuition
+        : (selectedServices && selectedServices.length > 0)
+          ? `Service fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu có selectedServices và nó có phần tử, trả về "Service"
+          : `Payment fee ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có selectedTuition và selectedServices rỗng, trả về giá trị mặc định
+
+
       tuitionAmount: ChildrenPayment?.tuition[0]?.tuitionFee,
       month: selectedDiscount?.number - 1 || 0,
       discount: selectedDiscount?.discountId || 1,
@@ -271,7 +299,7 @@ class PaymentList extends React.Component {
     const { ServiceListData, UserListData, tuition, showServices, Children, Class, selectedChild, Payment, ChildrenPayment } = this.state;
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId
-    const parentId = userData?.userId; // Giá trị thực tế của parentId
+    const parentId = userData?.userId; 
 
 
     // Tính tổng chi phí của tất cả các dịch vụ
@@ -284,10 +312,9 @@ class PaymentList extends React.Component {
     const year = currentDate.getFullYear(); // Lấy năm hiện tại
     const month = currentDate.getMonth() + 1; // Lấy tháng hiện tại (tháng trả về từ 0 -> 11, cộng 1 để có tháng đúng)
 
-
-    // Tính tổng thanh toán = học phí + tổng chi phí dịch vụ
-    const totalPayment = (tuition.quantity * tuition.price) + totalServicesCost;
     console.log(ChildrenPayment);
+
+
 
     return (
       <div
@@ -350,7 +377,8 @@ class PaymentList extends React.Component {
                         :
                         <div className="col-md-9">
                           <h4 className="pb-4"> Tuiton Fee Payable</h4>
-                          {ChildrenPayment ?
+                          {!(ChildrenPayment && (ChildrenPayment?.tuition?.length > 0 || ChildrenPayment?.servicesUsed?.length > 0)) ?
+                            <h5>No payment required yet</h5> :
                             <div className="table-responsive">
                               <table className="table m-b-0 table-hover">
                                 <thead className="">
@@ -395,8 +423,6 @@ class PaymentList extends React.Component {
                                       <td className="text-danger">{(tuition?.quantity * tuition?.price)?.toLocaleString('vi-VN')} VNĐ</td>
                                     </tr>
                                   }
-
-
 
                                   {ServiceListData.length !== 0 && (
                                     <React.Fragment>
@@ -450,13 +476,12 @@ class PaymentList extends React.Component {
                                 </tbody>
                               </table>
                             </div>
-                            :
-                            <h5>No payment required yet</h5>
                           }
                           <hr></hr>
 
 
-                          {ChildrenPayment &&
+                          {!(ChildrenPayment && (ChildrenPayment?.tuition?.length > 0 || ChildrenPayment?.servicesUsed?.length > 0)) ?
+                            <></> :
                             <div className="d-flex justify-content-end">
                               <h4 className="py-4 "> Total Payment: </h4>
                               <h4 className="text-danger p-4 " >{this.state.totalPayment?.toLocaleString('vi-VN')} VNĐ</h4>
@@ -464,7 +489,6 @@ class PaymentList extends React.Component {
                                 <button type="button " onClick={this.handlePayment} class="btn btn-primary btn-lg">Payment</button>
                               </div>
                             </div>
-
                           }
 
                         </div>}

@@ -57,6 +57,15 @@ import AlbumCreate from "./screens/Album/AlbumCreate";
 import PaymentList from "./screens/Payment/PaymentList";
 import PaymentHistory from "./screens/Payment/PaymentHistory";
 import LocationActivityList from "./screens/LocatonActivity/LocationActivityList";
+import Grade from "./screens/Grade/Grade";
+import GradeCreate from "./screens/Grade/GradeCreate";
+import GradeDetail from "./screens/Grade/GradeDetail";
+import GradeUpdate from "./screens/Grade/GradeUpdate";
+import Semester from "./screens/Semester/Semester";
+import SemesterUpdate from "./screens/Semester/SemesterUpdate";
+import SemesterCreate from "./screens/Semester/SemesterCreate";
+import UserList from "./screens/User/UserList";
+import UserCreate from "./screens/User/UserCreate";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -177,19 +186,19 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/request`}
                   component={RequestList}
-                  allowedRoles={[2, 3, 5]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/request-detail/:requestId`}
                   component={RequestDetail}
-                  allowedRoles={[2, 3, 5]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/request-update/:requestId`}
                   component={RequestUpdate}
-                  allowedRoles={[2, 3, 5]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
                 <ProtectedRoute
                   exact
@@ -198,6 +207,63 @@ class App extends React.Component {
                   allowedRoles={[2]}
                 />
 
+
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/grade`}
+                  component={Grade}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/grade-detail/:gradeId`}
+                  component={GradeDetail}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/grade-update/:gradeId`}
+                  component={GradeUpdate}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/create-grade`}
+                  component={GradeCreate}
+                  allowedRoles={[4]}
+                />
+
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/semester`}
+                  component={Semester}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/semester-update/:semesterId`}
+                  component={SemesterUpdate}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/create-semester`}
+                  component={SemesterCreate}
+                  allowedRoles={[3]}
+                />
+
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/user`}
+                  component={UserList}
+                  allowedRoles={[1]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/create-user`}
+                  component={UserCreate}
+                  allowedRoles={[1]}
+                />
 
                 <ProtectedRoute
                   exact

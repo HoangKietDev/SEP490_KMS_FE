@@ -56,26 +56,6 @@ class NavbarMenu extends React.Component {
     }
   }
 
-  // Update status when user readed noti
-  // async handleNoti(myNoti) {
-  //   for (let index = 0; index < myNoti.length; index++) {
-  //     try {
-  //       // Lấy userNotificationId từ usernotifications của thông báo hiện tại
-  //       const userNotificationId = myNoti[index]?.usernotifications[0]?.userNotificationId;
-
-  //       // Kiểm tra nếu userNotificationId tồn tại trước khi gọi API
-  //       if (userNotificationId) {
-  //         await axios.get(`http://localhost:5124/api/Notification/UpdateNotificationStatus`, {
-  //           params: { UserNotificationID: userNotificationId }
-  //         });
-  //       } else {
-  //         console.warn(`UserNotificationID không tồn tại ở chỉ mục ${index}`);
-  //       }
-  //     } catch (error) {
-  //       console.error('There was a problem with the fetch operation:', error);
-  //     }
-  //   }
-  // }
 
   // Update status when user readed noti
   async handleNoti(myNoti) {
@@ -162,7 +142,7 @@ class NavbarMenu extends React.Component {
       activeKey === "/viewmenu2" ||
       activeKey === "/listmenu"
     ) {
-      this.activeMenutabContainer("ScheduleContainer");
+      this.activeMenutabContainer("MenuContainer");
     }
     else if (
       activeKey === "/teacher"
@@ -175,7 +155,7 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("RequestContainer");
     }
     else if (
-      activeKey === "/locationActivity" 
+      activeKey === "/locationActivity"
     ) {
       this.activeMenutabContainer("LocationActivityContainer");
     }
@@ -210,6 +190,11 @@ class NavbarMenu extends React.Component {
       activeKey === "/updateclass"
     ) {
       this.activeMenutabContainer("ClassContainer");
+    }
+    else if (
+      activeKey === "/"
+    ) {
+      this.activeMenutabContainer("UserContainer");
     }
     else if (
       activeKey === "/" ||
@@ -436,12 +421,6 @@ class NavbarMenu extends React.Component {
                   <Dropdown.Item href="profilev1page">
                     <i className="icon-user"></i>My Profile
                   </Dropdown.Item>
-                  <Dropdown.Item href="appinbox">
-                    <i className="icon-envelope-open"></i>Messages
-                  </Dropdown.Item>
-                  <Dropdown.Item>
-                    <i className="icon-settings"></i>Settings
-                  </Dropdown.Item>
                   <li className="divider"></li>
                   <Dropdown.Item onClick={this.handleLogOut}>
                     <i className="icon-power"></i>Logout
@@ -514,6 +493,26 @@ class NavbarMenu extends React.Component {
                           <li className={activeKey === "ioT" ? "active" : ""}>
                             <Link to="ioT">IoT</Link>
                           </li>
+                        </ul>
+                      </li>
+                    ) : null}
+
+                    {/* UserAccount */}
+                    {roleId === 1 ? (
+                      <li id="UserContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/user");
+                            this.activeMenutabContainer("UserContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>User</span>
+                        </a>
+
+                        <ul className="collapse">
                         </ul>
                       </li>
                     ) : null}
@@ -635,6 +634,46 @@ class NavbarMenu extends React.Component {
                             </li>
                           ) : null}
 
+                        </ul>
+                      </li>
+                    ) : null}
+
+                    {/* Grade */}
+                    {roleId === 4 ? (
+                      <li id="GradeContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault(); // Ngăn chặn hành vi mặc định
+                            this.props.history.push("/grade"); // Chuyển hướng đến route /grade
+                            this.activeMenutabContainer("GradeContainer"); // Gọi hàm tùy chỉnh
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Grades</span>
+                        </a>
+
+                        <ul className="collapse">
+                        </ul>
+                      </li>
+                    ) : null}
+
+                    {/* Semester */}
+                    {roleId === 3 ? (
+                      <li id="SemesterContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault(); // Ngăn chặn hành vi mặc định
+                            this.props.history.push("/semester"); // Chuyển hướng đến route /grade
+                            this.activeMenutabContainer("SemesterContainer"); // Gọi hàm tùy chỉnh
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Semesters</span>
+                        </a>
+
+                        <ul className="collapse">
                         </ul>
                       </li>
                     ) : null}
@@ -794,15 +833,6 @@ class NavbarMenu extends React.Component {
                           >
                             <Link to="/locationActivity">List items</Link>
                           </li>
-                          {/* 
-                          {roleId === 2 ? (
-                            <li
-                              className={activeKey === "createrequest" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/create-request">Create Request</Link>
-                            </li>
-                          ) : null} */}
                         </ul>
                       </li>
                     ) : null}
@@ -867,15 +897,6 @@ class NavbarMenu extends React.Component {
                               onClick={() => { }}
                             >
                               <Link to="/create-schedule">New Schedule </Link>
-                            </li>
-                          ) : null}
-
-                          {roleId === 4 ? (
-                            <li
-                              className={activeKey === "listschedule" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/listschedule">List Schedule </Link>
                             </li>
                           ) : null}
                         </ul>

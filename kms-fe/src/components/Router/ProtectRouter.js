@@ -8,7 +8,7 @@ const getAuthDetails = () => {
     if (user) {
         return { user, roleId: user.user.roleId }; // Returns roleId if available
     }
-    return { user:null, roleId: null }; // Returns null if not logged in
+    return { user: null, roleId: null }; // Returns null if not logged in
 };
 
 // Higher-order component to protect routes based on role

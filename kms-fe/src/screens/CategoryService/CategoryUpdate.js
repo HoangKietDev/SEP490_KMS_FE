@@ -126,7 +126,7 @@ class CategoryUpdate extends React.Component {
                                                 </label>
                                             </div>
                                             <br />
-                                            <button type="submit" className="btn btn-primary">Update Category</button>
+                                            <button type="submit" className="btn btn-primary mr-4">Update Category</button>
                                             <a href="/category" className="btn btn-success text-center">Back to Category List</a>
                                         </form>
                                     </div>

@@ -330,7 +330,7 @@ class Albumlist extends React.Component {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredAlbumListData.slice(indexOfFirstItem, indexOfLastItem);
     console.log(filteredAlbumListData);
-    
+
     // Get user data from cookie
     const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
@@ -417,7 +417,7 @@ class Albumlist extends React.Component {
                       </select>
                     </div>
                     <div className="form-group col-md-3">
-                      <label htmlFor="searchFilter">Search</label>
+                      <label htmlFor="searchFilter">Search</label>                
                       <input
                         type="text"
                         id="searchFilter"
@@ -427,8 +427,8 @@ class Albumlist extends React.Component {
                         placeholder="Enter album title"
                       />
                     </div>
-                    <div className="form-group col-md-3">
-                      <button className="btn btn-primary " onClick={this.handleClearFilters}>
+                    <div className="form-group col-md-3 align-content-end"> 
+                      <button className="btn btn-primary" onClick={this.handleClearFilters}>
                         Clear Filters
                       </button>
                     </div>

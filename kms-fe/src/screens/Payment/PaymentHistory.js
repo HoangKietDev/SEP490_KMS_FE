@@ -4,12 +4,20 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
+import Notification from "../../components/Notification";
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
+
 
 class PaymentHistory extends React.Component {
   state = {
     historyPayment: [],
     myChildren: [],
     selectedChildren: '',
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
+
   };
 
   async componentDidMount() {
@@ -31,18 +39,27 @@ class PaymentHistory extends React.Component {
     // Kiểm tra nếu các tham số cần thiết có trong URL
     if (mydata.vnp_TxnRef && mydata.vnp_ResponseCode && mydata.vnp_SecureHash) {
       // Gọi API callback để xác nhận
-      axios.post("http://localhost:5124/api/Payment/payment-callback",  
+      axios.post("http://localhost:5124/api/Payment/payment-callback",
         {
           "data": mydata
-        } 
+        }
       )
         .then(response => {
           console.log('Payment Callback Response:', response.data);
+          this.setState({
+            notificationText: "Payment successfully!",
+            notificationType: "success",
+            showNotification: true
+          });
           // Xử lý logic nếu cần, ví dụ: hiển thị thông báo thành công
         })
         .catch(error => {
           console.error('Error in Payment Callback:', error);
-          alert("Payment callback failed. Please try again.");
+          this.setState({
+            notificationText: "Payment Cancel!",
+            notificationType: "error",
+            showNotification: true
+          });
         });
     }
 
@@ -72,12 +89,20 @@ class PaymentHistory extends React.Component {
     this.setState({ selectedChildren });
   };
 
+  pdfRef = React.createRef(); // Ref duy nhất cho bản ghi
+
+  generatePDF = (item) => {
+
+  };
+
+
   render() {
     const { historyPayment, myChildren, selectedChildren, currentItems, description, status, createAt, studentName, createByName, ReasonReject } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
 
     // Lọc dữ liệu historyPayment dựa trên đứa trẻ được chọn
     const filteredHistory = selectedChildren
-      ? historyPayment.filter(item => item.Childid === selectedChildren)
+      ? historyPayment.filter(item => item.childid == selectedChildren)
       : historyPayment;
 
     return (
@@ -85,6 +110,15 @@ class PaymentHistory extends React.Component {
         style={{ flex: 1 }}
         onClick={() => document.body.classList.remove("offcanvas-active")}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div className="container-fluid">
           <PageHeader
             HeaderText="Payment"
@@ -139,24 +173,46 @@ class PaymentHistory extends React.Component {
                           <th>Time</th>
                           <th>Total</th>
                           <th>Payment Name</th>
+                          <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredHistory?.map((item, index) => {
-                          // Đặt fullname ra ngoài return của map
-                          return (
-                            <React.Fragment key={"teacher" + index}>
-                              <tr>
-                                <td>{index + 1}</td>
-                                <td>{item?.childName}</td>
-                                <td>{item?.paymentDate}</td>
-                                <td>{item?.totalAmount} VNĐ</td>
-                                <td className="text-truncate" style={{ maxWidth: "150px" }}>{item?.paymentName}</td>
-                              </tr>
-                            </React.Fragment>
-                          );
-                        })}
+                        {filteredHistory.map((item, index) => (
+                          <React.Fragment key={index}>
+                            <tr>
+                              <td>{index + 1}</td>
+                              <td>{item?.childName}</td>
+                              <td>{item?.paymentDate}</td>
+                              <td>{item?.totalAmount} VNĐ</td>
+                              <td>{item?.paymentName}</td>
+                              <td>
+                                {/* Generate PDF button */}
+                                <PDFDownloadLink
+                                  document={
+                                    <Document>
+                                      <Page size="A4">
+                                        <View style={styles.page}>
+                                          <Text style={styles.title}>Payment Details</Text>
+                                          <Text><strong>Child Name:</strong> {item?.childName}</Text>
+                                          <Text><strong>Payment Date:</strong> {item?.paymentDate}</Text>
+                                          <Text><strong>Total Amount:</strong> {item?.totalAmount} VNĐ</Text>
+                                          <Text><strong>Payment Name:</strong> {item?.paymentName}</Text>
+                                        </View>
+                                      </Page>
+                                    </Document>
+                                  }
+                                  fileName={`payment_${item?.childName || "unknown"}.pdf`}
+                                >
+                                  {({ loading }) =>
+                                    loading ? 'Generating PDF...' : 'Download PDF'
+                                  }
+                                </PDFDownloadLink>
+                              </td>
+                            </tr>
+                          </React.Fragment>
+                        ))}
                       </tbody>
+
                     </table>
                   </div>
                   {/* <div className="pt-4">

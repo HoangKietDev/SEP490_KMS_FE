@@ -9,27 +9,35 @@ import Button from "react-bootstrap/Button";
 class ScheduleCreate extends React.Component {
 
   state = {
+    semesterData: [],
     classData: [],
-    startdate: '',
-    enddate: '',
+    semesterId: null,
     classId: null,
+    semesterName: ''
   };
 
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5124/api/Class/GetAllClass`);
-        const data = response.data;
-        this.setState({
-          classData: data,
-        })
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
+
+    // Gọi hàm fetchData
+    this.fetchData();
+  }
+
+  async fetchData() {
+    try {
+      const [classResponse, semesterResponse] = await Promise.all([
+        axios.get('http://localhost:5124/api/Class/GetAllClass'),
+        axios.get('http://localhost:5124/api/Semester/GetAllSemester')
+      ]);
+
+      this.setState({
+        classData: classResponse.data,
+        semesterData: semesterResponse.data,
+      });
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
   }
 
 
@@ -37,10 +45,9 @@ class ScheduleCreate extends React.Component {
     event.preventDefault(); // Prevent form from reloading the page
 
     // Prepare the schedule data to send
-    const { startdate, enddate, classId } = this.state;
+    const { startdate, enddate, classId, semesterId } = this.state;
     const scheduleData = {
-      startDate: startdate,
-      endDate: enddate,
+      semesterId: parseInt(semesterId),
       status: 0,
       classId: parseInt(classId),
       teacherName: '',
@@ -58,6 +65,26 @@ class ScheduleCreate extends React.Component {
     }
   };
 
+  handleChooseClass = (event) => {
+    const selectedClassId = event.target.value;
+    this.setState({ classId: selectedClassId }, () => {
+      const classchoose = this.state.classData.find((i) => i.classId === parseInt(this.state.classId));
+      
+      console.log(classchoose);
+      
+      if (classchoose) {
+        const relatedSemester = this.state.semesterData.filter((i) => i.semesterId === classchoose.semesterId);
+        console.log(relatedSemester);
+        
+        this.setState({
+          semesterId: relatedSemester[0]?.semesterId,
+          semesterName: relatedSemester[0]?.name,
+        })
+      }
+
+    });
+  };
+
 
 
   render() {
@@ -65,7 +92,7 @@ class ScheduleCreate extends React.Component {
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
         <div className="container-fluid">
           <PageHeader
-            HeaderText="New Request"
+            HeaderText="New Schedule"
             Breadcrumb={[
               { name: "Schedule List", navigate: "listschedule" },
               { name: "Schedule Create", navigate: "" },
@@ -87,7 +114,7 @@ class ScheduleCreate extends React.Component {
                           value={this.state.classId}
                           name="classname"
                           required
-                          onChange={(e) => this.setState({ classId: e.target.value })}
+                          onChange={this.handleChooseClass}
                         >
                           <option value="">Choose Class</option>
                           {this.state.classData?.map((option) => (
@@ -99,26 +126,14 @@ class ScheduleCreate extends React.Component {
                       </div>
                     </div>
                     <div className="row">
-                      <div className="form-group col-md-6">
-                        <label>Start Date</label>
+                      <div className="form-group col-md-12">
+                        <label>Semeter</label>
                         <input
                           className="form-control"
-                          value={this.state.startdate}
-                          name="startdate"
-                          required
-                          type="date"
-                          onChange={(e) => this.setState({ startdate: e.target.value })}
-                        />
-                      </div>
-                      <div className="form-group col-md-6">
-                        <label>End Date</label>
-                        <input
-                          className="form-control"
-                          value={this.state.enddate}
-                          name="enddate"
-                          required
-                          type="date"
-                          onChange={(e) => this.setState({ enddate: e.target.value })}
+                          value={this.state.semesterName}
+                          name="semesterName"
+                          readOnly
+                          type="text"
                         />
                       </div>
                     </div>
