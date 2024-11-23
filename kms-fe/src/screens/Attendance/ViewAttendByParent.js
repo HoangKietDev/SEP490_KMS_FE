@@ -80,7 +80,13 @@ class ViewAttendByParent extends React.Component {
       );
 
       if (isMounted) {
-        this.setState({ attendanceData: attendanceResponse.data }, this.updateSummary);
+        // Lưu dữ liệu kèm theo imageUrl
+        const attendanceData = attendanceResponse.data.map((attendance) => ({
+          ...attendance,
+          imageUrl: attendance.attendanceDetail[0]?.imageUrl || null,
+        }));
+
+        this.setState({ attendanceData }, this.updateSummary);
       }
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu điểm danh:", error);
@@ -89,11 +95,11 @@ class ViewAttendByParent extends React.Component {
 
   handleStudentChange = (e) => {
     const studentId = e.target.value;
-  
+
     // Xác định tuần hiện tại
     const startOfWeek = moment().startOf("isoWeek");
     const endOfWeek = startOfWeek.clone().endOf("isoWeek");
-  
+
     // Cập nhật `studentId` và đặt tuần về tuần hiện tại
     this.setState(
       {
@@ -107,16 +113,15 @@ class ViewAttendByParent extends React.Component {
       }
     );
   };
-  
 
   updateSummary = () => {
     if (!isMounted) return;
-  
+
     const { attendanceData } = this.state;
-    
+
     // Đảm bảo `total` là số lượng phần tử hợp lệ trong `attendanceData`
     const validAttendanceData = attendanceData.filter(att => att && att.attendanceDetail && att.attendanceDetail.length > 0);
-    
+
     const summary = {
       total: validAttendanceData.length,
       attended: validAttendanceData.filter(
@@ -129,10 +134,9 @@ class ViewAttendByParent extends React.Component {
         (att) => att.attendanceDetail[0]?.status === "Vắng"
       ).length,
     };
-  
+
     this.setState({ summary });
   };
-  
 
   handleDayHover = (date) => {
     const startOfWeek = moment(date).startOf("isoWeek");
@@ -186,13 +190,16 @@ class ViewAttendByParent extends React.Component {
         );
 
         let status = "No Data";
+        let imageUrl = null;
         if (dayAttendance && dayAttendance.attendanceDetail.length > 0) {
           status = dayAttendance.attendanceDetail[0].status;
+          imageUrl = dayAttendance.attendanceDetail[0].imageUrl;
         }
 
         return {
           date,
           status,
+          imageUrl,
         };
       });
 
@@ -351,6 +358,7 @@ class ViewAttendByParent extends React.Component {
                   <th>Date</th>
                   <th>Day</th>
                   <th>Status</th>
+                  <th>Image</th> {/* Thêm cột hiển thị hình ảnh */}
                 </tr>
               </thead>
               <tbody>
@@ -370,6 +378,17 @@ class ViewAttendByParent extends React.Component {
                       )}
                       {attendance.status === "No Data" && (
                         <span className="badge bg-secondary">No Data</span>
+                      )}
+                    </td>
+                    <td>
+                      {attendance.imageUrl ? (
+                        <img
+                          src={attendance.imageUrl}
+                          alt="Attendance"
+                          style={{ width: "100px", height: "auto" }}
+                        />
+                      ) : (
+                        "No Image"
                       )}
                     </td>
                   </tr>

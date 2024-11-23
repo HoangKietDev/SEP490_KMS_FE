@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import { withRouter } from 'react-router-dom';
+import { withRouter } from "react-router-dom";
 
 class CreateClass extends React.Component {
   state = {
@@ -15,54 +15,58 @@ class CreateClass extends React.Component {
     gradeId: 0,
     status: 0,
     submeet: false,
-    semesters: [],      // Chứa danh sách các semester
-    grades: [],         // Chứa danh sách các grade
-    teachers: [],       // Chứa danh sách các giáo viên
-    selectedTeachers: [] // Chứa danh sách giáo viên được chọn
+    semesters: [], // Danh sách các semester
+    grades: [], // Danh sách các grade
+    teachers: [], // Danh sách các giáo viên
+    selectedTeachers: [], // Danh sách giáo viên được chọn
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
+    this.fetchData();
+  }
 
-    // Gọi API để lấy danh sách semester, grade và teachers
+  fetchData = () => {
     Promise.all([
-      fetch("http://localhost:5124/api/Semester").then((res) => res.json()),
+      fetch("http://localhost:5124/api/Semester/GetAllSemester").then((res) => res.json()),
       fetch("http://localhost:5124/api/Grade").then((res) => res.json()),
-      fetch("http://localhost:5124/api/Teacher/GetAllTeachers").then((res) => res.json())
+      fetch("http://localhost:5124/api/Teacher/GetAllTeachers").then((res) => res.json()),
     ])
       .then(([semesters, grades, teachers]) => {
-        this.setState({ semesters, grades, teachers });
+        const activeSemesters = semesters.filter((semester) => semester.status === 0);
+        const validTeachers = teachers.filter((teacher) => teacher.name?.trim());
+        this.setState({
+          semesters: activeSemesters,
+          grades,
+          teachers: validTeachers,
+        });
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
         alert("Failed to fetch data.");
       });
-  }
+  };
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { className, number, isActive, expireDate, schoolId, semesterId, gradeId, selectedTeachers } = this.state;
-  
-    // Kiểm tra dữ liệu trước khi gửi
-    if (!className || !expireDate || schoolId === 0) {
+    const { className, number, isActive, schoolId, semesterId, gradeId, selectedTeachers } = this.state;
+
+    if (!className  || semesterId === 0 || gradeId === 0 || selectedTeachers.length === 0) {
       this.setState({ submeet: true });
       return;
     }
-  
-    // Chuẩn bị dữ liệu để gửi lên API
+
     const newClass = {
-      classId: 0,  // Không cần gửi classId, vì API sẽ tự tạo và trả về
+      classId: 0,
       className,
       number,
       isActive,
-      expireDate,
       schoolId,
       semesterId,
       gradeId,
-      status: 0,  // Đặt mặc định là 0 khi gửi lên API
+      status: 0,
     };
-  
-    // Gọi API để thêm lớp học
+
     fetch("http://localhost:5124/api/Class/AddClass", {
       method: "POST",
       headers: {
@@ -72,19 +76,16 @@ class CreateClass extends React.Component {
     })
       .then((response) => response.json())
       .then((data) => {
-        const classId = data.classId;  // Lấy classId từ phản hồi API sau khi tạo lớp
-  
+        const classId = data.classId;
         console.log("Class added successfully:", data);
         alert("Class has been added successfully!");
-  
-        // Gọi API để thêm từng giáo viên vào lớp
+
         selectedTeachers.forEach((teacherId) => {
           fetch(`http://localhost:5124/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ classId, teacherId }),  // Sử dụng classId vừa tạo
           })
             .then((res) => res.json())
             .then((result) => {
@@ -94,45 +95,43 @@ class CreateClass extends React.Component {
               console.error("Error adding teacher to class:", error);
             });
         });
-  
-        // Chuyển hướng đến trang viewclass sau khi tạo lớp và thêm giáo viên xong
-        this.props.history.push('/viewclass');
-  
-        // Reset form sau khi thêm thành công
-        this.setState({
-          classId: 0,
-          className: "",
-          number: 0,
-          isActive: 1,
-          expireDate: "",
-          schoolId: 1,
-          semesterId: 0,
-          gradeId: 0,
-          status: 0,
-          submeet: false,
-          selectedTeachers: []  // Reset lựa chọn giáo viên
-        });
+
+        this.props.history.push("/viewclass");
+        this.resetForm();
       })
       .catch((error) => {
         console.error("Error adding class:", error);
         alert("Failed to add class. Please try again.");
       });
   };
-  
 
-
+  resetForm = () => {
+    this.setState({
+      classId: 0,
+      className: "",
+      number: 0,
+      isActive: 1,
+      expireDate: "",
+      schoolId: 1,
+      semesterId: 0,
+      gradeId: 0,
+      status: 0,
+      submeet: false,
+      selectedTeachers: [],
+    });
+  };
 
   handleTeacherSelection = (teacherId) => {
     const { selectedTeachers } = this.state;
     if (selectedTeachers.includes(teacherId)) {
-      this.setState({ selectedTeachers: selectedTeachers.filter(id => id !== teacherId) });
+      this.setState({ selectedTeachers: selectedTeachers.filter((id) => id !== teacherId) });
     } else {
       this.setState({ selectedTeachers: [...selectedTeachers, teacherId] });
     }
   };
 
   render() {
-    const { className, number, expireDate, semesterId, gradeId, semesters, grades, teachers, selectedTeachers, submeet } = this.state;
+    const { className, number, semesterId, gradeId, semesters, grades, teachers, selectedTeachers, submeet } = this.state;
 
     return (
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -152,7 +151,6 @@ class CreateClass extends React.Component {
                   className={`form-control ${className === "" && submeet && "parsley-error"}`}
                   value={className}
                   name="className"
-                  required=""
                   onChange={(e) => this.setState({ className: e.target.value })}
                 />
                 {className === "" && submeet && (
@@ -183,7 +181,7 @@ class CreateClass extends React.Component {
                   <option value={0}>Select Semester</option>
                   {semesters.map((semester) => (
                     <option key={semester.semesterId} value={semester.semesterId}>
-                      {semester.name}
+                      {semester.name} ({semester.startDate.split("T")[0]} - {semester.endDate.split("T")[0]})
                     </option>
                   ))}
                 </select>
@@ -214,7 +212,10 @@ class CreateClass extends React.Component {
                       checked={selectedTeachers.includes(teacher.teacherId)}
                       onChange={() => this.handleTeacherSelection(teacher.teacherId)}
                     />
-                    <label>{teacher.name}</label>
+                    <label>
+                      {teacher.name}
+                  
+                    </label>
                   </div>
                 ))}
               </div>

@@ -16,7 +16,7 @@ class ViewMenu extends React.Component {
       "0-3": [],
       "3-6": [],
     },
-    daysOfWeek: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"],
+    daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     showCalendar: false,
     selectedFile: null,
   };
@@ -24,14 +24,14 @@ class ViewMenu extends React.Component {
   componentDidMount() {
     const { startOfWeek, endOfWeek } = this.getWeekRange(new Date());
     this.setState({ selectedWeek: { startOfWeek, endOfWeek } }, () => {
-      this.fetchMenuData(startOfWeek, endOfWeek); // Gọi API để lấy dữ liệu
+      this.fetchMenuData(startOfWeek, endOfWeek); // Fetch menu data
     });
   }
 
   getWeekRange = (date) => {
     const startOfWeek = new Date(date);
     const day = startOfWeek.getDay();
-    const diff = (day === 0) ? 6 : day - 1;
+    const diff = day === 0 ? 6 : day - 1;
     startOfWeek.setDate(startOfWeek.getDate() - diff);
 
     const endOfWeek = new Date(startOfWeek);
@@ -49,17 +49,14 @@ class ViewMenu extends React.Component {
 
   formatDate = (date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
   fetchMenuData = async (startOfWeek, endOfWeek) => {
-    console.log(startOfWeek);
-    
     const startDate = this.formatDate(startOfWeek);
     const endDate = this.formatDate(endOfWeek);
-    console.log(startDate, endDate);
 
     try {
       const response1 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
@@ -78,13 +75,14 @@ class ViewMenu extends React.Component {
       console.error("Error fetching menu data:", error);
     }
   };
+
   handleUpdate = (ageGroup) => {
     const { selectedWeek } = this.state;
     const startDate = this.formatDate(selectedWeek.startOfWeek);
     const endDate = this.formatDate(selectedWeek.endOfWeek);
     const gradeId = ageGroup === "0-3" ? 1 : 2;
 
-    // Điều hướng sang trang `/updatemenu` với các tham số gradeId, startDate và endDate
+    // Navigate to `/updatemenu` with gradeId, startDate, and endDate parameters
     this.props.history.push({
       pathname: "/updatemenu",
       state: {
@@ -94,7 +92,6 @@ class ViewMenu extends React.Component {
       },
     });
   };
-
 
   handleFileChange = (event) => {
     this.setState({ selectedFile: event.target.files[0] });
@@ -144,9 +141,9 @@ class ViewMenu extends React.Component {
           </thead>
           <tbody>
             <tr>
-              <td className="sticky-col"><strong>Bữa Sáng</strong></td>
+              <td className="sticky-col"><strong>Breakfast</strong></td>
               {daysOfWeek.map((day, index) => {
-                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BS" && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BS" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                 return (
                   <td key={index}>
                     {menuItems.length > 0 ? (
@@ -156,16 +153,16 @@ class ViewMenu extends React.Component {
                         ))}
                       </ul>
                     ) : (
-                      "Không có dữ liệu"
+                      "No data available"
                     )}
                   </td>
                 );
               })}
             </tr>
             <tr>
-              <td className="sticky-col"><strong>Bữa Trưa</strong></td>
+              <td className="sticky-col"><strong>Lunch</strong></td>
               {daysOfWeek.map((day, index) => {
-                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BT" && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BT" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                 return (
                   <td key={index}>
                     {menuItems.length > 0 ? (
@@ -175,16 +172,16 @@ class ViewMenu extends React.Component {
                         ))}
                       </ul>
                     ) : (
-                      "Không có dữ liệu"
+                      "No data available"
                     )}
                   </td>
                 );
               })}
             </tr>
             <tr>
-              <td className="sticky-col"><strong>Bữa Chiều</strong></td>
+              <td className="sticky-col"><strong>Dinner</strong></td>
               {daysOfWeek.map((day, index) => {
-                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                 return (
                   <td key={index}>
                     {menuItems.length > 0 ? (
@@ -194,20 +191,18 @@ class ViewMenu extends React.Component {
                         ))}
                       </ul>
                     ) : (
-                      "Không có dữ liệu"
+                      "No data available"
                     )}
                   </td>
                 );
               })}
             </tr>
-            {/* Thêm nút Update vào dưới bảng */}
             <tr>
               <td className="sticky-col" colSpan={daysOfWeek.length + 1}>
                 <button type="button" onClick={() => this.handleUpdate(ageGroup)} className="btn btn-primary mr-1">
                   <span>Update {ageGroup === "0-3" ? "0-3" : "3-6"}</span>
                 </button>
               </td>
-
             </tr>
           </tbody>
         </table>
@@ -215,16 +210,15 @@ class ViewMenu extends React.Component {
     );
   };
 
-
-  mapDayToVietnamese = (day) => {
+  mapDayToEnglish = (day) => {
     const dayMap = {
-      Monday: "Thứ 2",
-      Tuesday: "Thứ 3",
-      Wednesday: "Thứ 4",
-      Thursday: "Thứ 5",
-      Friday: "Thứ 6",
-      Saturday: "Thứ 7",
-      Sunday: "Chủ nhật",
+      Monday: "Monday",
+      Tuesday: "Tuesday",
+      Wednesday: "Wednesday",
+      Thursday: "Thursday",
+      Friday: "Friday",
+      Saturday: "Saturday",
+      Sunday: "Sunday",
     };
     return dayMap[day] || day;
   };
@@ -247,7 +241,7 @@ class ViewMenu extends React.Component {
 
             <div className="row align-items-center justify-content-between mb-3">
               <div className="week-selector col-lg-3" onClick={this.toggleCalendar}>
-                Tuần được chọn: {selectedWeek.startOfWeek.toLocaleDateString("vi-VN")} - {selectedWeek.endOfWeek.toLocaleDateString("vi-VN")}
+                Selected week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
               </div>
 
               <div className="upload-section d-flex align-items-center">
@@ -261,16 +255,16 @@ class ViewMenu extends React.Component {
                 <Calendar
                   onChange={this.handleWeekSelect}
                   value={selectedWeek.startOfWeek}
-                  locale="en-EN"
+                  locale="en-US"
                   showWeekNumbers={true}
                 />
               </div>
             )}
 
-            <h4 className="menu-title">Tất cả: 0-3</h4>
+            <h4 className="menu-title">All: 0-3</h4>
             <div className="table-container">{this.renderTable("0-3")}</div>
 
-            <h4 className="menu-title">Tất cả: 3-6</h4>
+            <h4 className="menu-title">All: 3-6</h4>
             <div className="table-container">{this.renderTable("3-6")}</div>
           </div>
         </div>

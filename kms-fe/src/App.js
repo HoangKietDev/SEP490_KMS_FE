@@ -36,10 +36,10 @@ import ProtectedRoute from "./components/Router/ProtectRouter";
 import Schedule from "./screens/Schedule/Schedule";
 import ScheduleList from "./screens/Schedule/ScheduleList";
 import Checkin from "./screens/Attendance/Checkin";
-import ListClass from "./screens/Attendance/ListClass";
+import ListClassCheckin from "./screens/Attendance/ListClassCheckin";
 import UpdateMenu from "./screens/Menu/UpdateMenu";
 import profilev1page from "./screens/Pages/ProfileV1";
-
+import Test from "./screens/Attendance/test";
 import ListMenu from "./screens/Menu/ListMenu"
 import ViewChildrenbyClassID from "./screens/Children/ViewChildrenbyClassID";
 import ViewMenuByTeacherAndParent from "./screens/Menu/ViewMenuByTeacherAndParent";
@@ -54,6 +54,11 @@ import AlbumDetail from "./screens/Album/AlbumDetail";
 import AlbumCreate from "./screens/Album/AlbumCreate";
 import PaymentList from "./screens/Payment/PaymentList";
 import PaymentHistory from "./screens/Payment/PaymentHistory";
+import DashboardPrincipal from "./screens/Dashbord/DashboardPrincipal";
+import AddPickupPerson from "./screens/Pickup_Person/AddPickupPerson";
+import ListClassAttend from "./screens/Attendance/ListClassAttend";
+import Attend from "./screens/Attendance/Attend";
+
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -216,7 +221,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewclass`}
                   component={viewclass}
-                  allowedRoles={[2, 3, 4, 5]}
+                  allowedRoles={[3,4]}
                 />
                 <ProtectedRoute
                   exact
@@ -332,14 +337,26 @@ class App extends React.Component {
                 />
                 <ProtectedRoute
                   exact
-                  path={`${process.env.PUBLIC_URL}/checkin/:classId`}
+                  path={`${process.env.PUBLIC_URL}/checkin`}
                   component={Checkin}
                   allowedRoles={[5]}
                 />
                 <ProtectedRoute
                   exact
-                  path={`${process.env.PUBLIC_URL}/listclass`}
-                  component={ListClass}
+                  path={`${process.env.PUBLIC_URL}/listclasscheckin`}
+                  component={ListClassCheckin}
+                  allowedRoles={[5]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/listclassattendance`}
+                  component={ListClassAttend}
+                  allowedRoles={[5]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/attend/:classId`}
+                  component={Attend}
                   allowedRoles={[5]}
                 />
                 <ProtectedRoute
@@ -366,7 +383,22 @@ class App extends React.Component {
                   component={ChooseService}
                   allowedRoles={[2]}
                 />
-
+                <Route
+                  path={`${process.env.PUBLIC_URL}/test`}
+                  component={Test}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/dashboardprin`}
+                  component={DashboardPrincipal}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/addpickupperson`}
+                  component={AddPickupPerson}
+                  allowedRoles={[2]}
+                />
               </Switch>
             </div>
           </>

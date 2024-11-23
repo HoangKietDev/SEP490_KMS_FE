@@ -55,7 +55,7 @@ class UpdateClassByPrincipal extends React.Component {
       });
 
     // Gọi API lấy danh sách Semester
-    axios.get("http://localhost:5124/api/Semester")
+    axios.get("http://localhost:5124/api/Semester/GetAllSemester")
       .then((response) => {
         this.setState({ semesters: response.data });
       })
@@ -78,10 +78,10 @@ class UpdateClassByPrincipal extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { classId, className, isActive, expireDate, schoolId, semesterId, gradeId, status } = this.state;
+    const { classId, className, isActive, schoolId, semesterId, gradeId, status } = this.state;
 
     // Kiểm tra dữ liệu trước khi gửi
-    if (!className || !expireDate || schoolId === 0 || semesterId === 0 || gradeId === 0) {
+    if (!className  || schoolId === 0 || semesterId === 0 || gradeId === 0) {
       this.setState({ submeet: true });
       return;
     }
@@ -92,7 +92,6 @@ class UpdateClassByPrincipal extends React.Component {
       className,
       number: 0,
       isActive: 1,
-      expireDate,
       schoolId,
       semesterId,
       gradeId,
@@ -178,7 +177,7 @@ class UpdateClassByPrincipal extends React.Component {
                 </label>
               </div>
 
-              <div className="form-group">
+              {/* <div className="form-group">
                 <label>Expire Date</label>
                 <input
                   type="datetime-local"
@@ -193,7 +192,7 @@ class UpdateClassByPrincipal extends React.Component {
                     <li className="parsley-required">Expire date is required.</li>
                   </ul>
                 )}
-              </div>
+              </div> */}
 
               <div className="form-group">
                 <label>Grade</label>

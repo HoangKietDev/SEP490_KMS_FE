@@ -5,26 +5,38 @@ import { withRouter } from 'react-router-dom';
 
 class ViewClassByTeacher extends React.Component {
   state = {
-    ProjectsData: [], // State để lưu trữ dữ liệu từ API
-    statusFilter: '', // State để lưu trạng thái lọc
+    ProjectsData: [],
+    GradesData: [],
+    statusFilter: '',
+    gradeFilter: '',
+    nameFilter: '',
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
     const user = JSON.parse(localStorage.getItem('user'));
-    const teacherId = user ? user.user.userId : null; // Lấy teacherId từ localStorage
+    const teacherId = user ? user.user.userId : null;
 
     if (teacherId) {
-      // Gọi API và cập nhật state
+      // Gọi API lấy danh sách class theo teacherId
       fetch(`http://localhost:5124/api/Class/GetClassesByTeacherId/${teacherId}`)
         .then((response) => response.json())
         .then((data) => {
-          // Lọc các lớp có status là 1
           const activeClasses = data.filter(classData => classData.status === 1);
           this.setState({ ProjectsData: activeClasses });
         })
         .catch((error) => {
-          console.error("Error fetching data: ", error);
+          console.error("Error fetching class data: ", error);
+        });
+
+      // Gọi API lấy danh sách grade
+      fetch("http://localhost:5124/api/Grade")
+        .then((response) => response.json())
+        .then((data) => {
+          this.setState({ GradesData: data });
+        })
+        .catch((error) => {
+          console.error("Error fetching grade data: ", error);
         });
     } else {
       console.error("Teacher ID không tồn tại trong localStorage.");
@@ -50,14 +62,34 @@ class ViewClassByTeacher extends React.Component {
     this.setState({ statusFilter: event.target.value });
   };
 
-  render() {
-    const { ProjectsData, statusFilter } = this.state;
+  handleGradeFilterChange = (event) => {
+    this.setState({ gradeFilter: event.target.value });
+  };
 
-    // Lọc dữ liệu theo trạng thái
+  handleNameFilterChange = (event) => {
+    this.setState({ nameFilter: event.target.value });
+  };
+
+  getGradeName = (gradeId) => {
+    const { GradesData } = this.state;
+    const grade = GradesData.find((g) => g.gradeId === gradeId);
+    return grade ? grade.name : 'N/A';
+  };
+
+  render() {
+    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData } = this.state;
+
+    // Lọc dữ liệu theo status, grade, và tên lớp
     const filteredData = ProjectsData.filter(classData => {
-      if (statusFilter === '') return true; // Không lọc nếu không có bộ lọc
-      return (statusFilter === 'active' && classData.status === 1) ||
+      const statusMatch = statusFilter === '' || 
+        (statusFilter === 'active' && classData.status === 1) ||
         (statusFilter === 'inactive' && classData.status === 0);
+      
+      const gradeMatch = gradeFilter === '' || classData.gradeId === parseInt(gradeFilter);
+
+      const nameMatch = nameFilter === '' || classData.className.toLowerCase().includes(nameFilter.toLowerCase());
+
+      return statusMatch && gradeMatch && nameMatch;
     });
 
     return (
@@ -80,27 +112,58 @@ class ViewClassByTeacher extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
-                    {/* Dropdown để chọn trạng thái */}
-                    <div className="form-group">
-                      <label htmlFor="statusFilter">Filter by Status:</label>
-                      <select
-                        id="statusFilter"
-                        className="form-control"
-                        value={statusFilter}
-                        onChange={this.handleStatusFilterChange}
-                      >
-                        <option value="">All</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
+                    {/* Các bộ lọc trên cùng một dòng */}
+                    <div className="form-inline mb-3">
+                      <div className="form-group mr-3">
+                        <label htmlFor="statusFilter" className="mr-2">Status:</label>
+                        <select
+                          id="statusFilter"
+                          className="form-control"
+                          value={statusFilter}
+                          onChange={this.handleStatusFilterChange}
+                        >
+                          <option value="">All</option>
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      </div>
+                      <div className="form-group mr-3">
+                        <label htmlFor="gradeFilter" className="mr-2">Grade:</label>
+                        <select
+                          id="gradeFilter"
+                          className="form-control"
+                          value={gradeFilter}
+                          onChange={this.handleGradeFilterChange}
+                        >
+                          <option value="">All</option>
+                          {GradesData.map(grade => (
+                            <option key={grade.gradeId} value={grade.gradeId}>
+                              {grade.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="nameFilter" className="mr-2">Class Name:</label>
+                        <input
+                          type="text"
+                          id="nameFilter"
+                          className="form-control"
+                          value={nameFilter}
+                          onChange={this.handleNameFilterChange}
+                          placeholder="Enter class name"
+                        />
+                      </div>
                     </div>
+
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
                         <thead className="thead-light">
                           <tr>
                             <th>Class Name</th>
+                            <th>Number</th>
+                            <th>Grade</th>
                             <th>Status</th>
-                            <th>Expire Date</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -109,6 +172,8 @@ class ViewClassByTeacher extends React.Component {
                             <React.Fragment key={"class" + classIndex}>
                               <tr>
                                 <td>{classData.className}</td>
+                                <td>{classData.number}</td>
+                                <td>{this.getGradeName(classData.gradeId)}</td>
                                 <td>
                                   {classData.status === 1 ? (
                                     <span className="badge badge-success">Active</span>
@@ -116,16 +181,13 @@ class ViewClassByTeacher extends React.Component {
                                     <span className="badge badge-default">Inactive</span>
                                   )}
                                 </td>
-                                <td>
-                                  {new Date(classData.expireDate).toLocaleDateString()}
-                                </td>
+
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"
                                     onClick={() => this.handleView(classData.classId)}
                                   >
                                     <i className="icon-eye"></i>
                                   </a>
-                                  
                                   <a className="btn btn-outline-secondary">
                                     <i className="icon-trash"></i>
                                   </a>

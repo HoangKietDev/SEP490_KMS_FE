@@ -1,118 +1,180 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import { withRouter } from 'react-router-dom';
+import { withRouter } from "react-router-dom";
 import axios from "axios";
 
-class viewstudentbyId extends React.Component {
+class ViewStudentById extends React.Component {
   state = {
     studentDetailId: 0,
-    classId: 1, // Đặt mặc định classId là 1
+    classId: 1,
     fullName: "",
     nickName: "",
-    grade: 0,
+    gradeId: 0,
     dob: "",
     gender: 1,
     status: 1,
-    admissionDay: "",
-    ethnicGroups: "string", // Thêm trường ethnicGroups
-    nationality: "string",   // Thêm trường nationality
-    religion: "string",      // Thêm trường religion
-    identifier: "string",    // Thêm trường identifier
-    issueDate: "",           // Thêm trường issueDate
-    issuePlace: "string",    // Thêm trường issuePlace
-    studentId: 1,            // Thêm trường studentId
+    ethnicGroups: "",
+    nationality: "",
+    religion: "",
+    code: "",
+    avatar: "", // URL ảnh từ database
+    selectedFile: null, // File được chọn
+    parentId: 0, // Parent ID được lấy từ dữ liệu fetch
+    grades: [],
     submeet: false,
   };
 
   componentDidMount() {
-    window.scrollTo(0, 0);
     const { studentID } = this.props.match.params;
     this.setState({ studentDetailId: parseInt(studentID) });
 
-    // Gọi API để lấy thông tin học sinh
-    axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentID}`)
+    // Fetch student details
+    axios
+      .get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentID}`)
       .then((response) => {
         const data = response.data;
-
-        // Cập nhật state với dữ liệu học sinh
         this.setState({
-          studentDetailId: data.studentDetailId,
+          studentDetailId: data.studentId,
           fullName: data.fullName,
           nickName: data.nickName,
-          grade: data.grade,
-          dob: data.dob ? new Date(data.dob).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
+          gradeId: data.gradeId,
+          dob: data.dob ? new Date(data.dob).toISOString().slice(0, 10) : "",
           gender: data.gender,
           status: data.status,
-          admissionDay: data.admissionDay ? new Date(data.admissionDay).toISOString().slice(0, 10) : "",
-          ethnicGroups: data.ethnicGroups || "string",
-          nationality: data.nationality || "string",
-          religion: data.religion || "string",
-          identifier: data.identifier || "string",
-          issueDate: data.issueDate ? new Date(data.issueDate).toISOString().slice(0, 10) : "", // Chuyển đổi sang định dạng YYYY-MM-DD
-          issuePlace: data.issuePlace || "string",
-          studentId: data.studentId || 1,
+          ethnicGroups: data.ethnicGroups || "",
+          nationality: data.nationality || "",
+          religion: data.religion || "",
+          code: data.code || "",
+          avatar: data.avatar || "",
+          parentId: data.parentId, // Lấy parentId từ dữ liệu fetch
         });
       })
       .catch((error) => {
-        console.error("Error fetching student data: ", error);
         alert("Failed to fetch student data. Please try again.");
+      });
+
+    // Fetch grades
+    axios
+      .get("http://localhost:5124/api/Grade")
+      .then((response) => {
+        this.setState({ grades: response.data });
+      })
+      .catch(() => {
+        alert("Failed to fetch grade data. Please try again.");
       });
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault();
-    const { studentDetailId, classId, fullName, nickName, grade, dob, gender, status, admissionDay, ethnicGroups, nationality, religion, identifier, issueDate, issuePlace, studentId } = this.state;
+  handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      this.setState({ selectedFile: file });
 
-    // Kiểm tra dữ liệu trước khi gửi
+      // Hiển thị hình ảnh đã chọn (local preview)
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.setState({ avatar: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const {
+      studentDetailId,
+      fullName,
+      nickName,
+      gradeId,
+      dob,
+      gender,
+      status,
+      ethnicGroups,
+      nationality,
+      religion,
+      code, // Thay identifier thành code
+      avatar,
+      selectedFile,
+      parentId,
+    } = this.state;
+
     if (!fullName || !dob) {
       this.setState({ submeet: true });
       return;
     }
 
-    // Chuẩn bị dữ liệu cập nhật học sinh
-    const updatedStudent = {
-      studentDetailId,
-      classId, // Sử dụng classId mặc định là 1
+    try {
+      // Nếu có sự thay đổi avatar, gọi API để upload
+      if (selectedFile) {
+        // Gọi API AddChildrenImage
+        const childrenImageFormData = new FormData();
+        childrenImageFormData.append("image", selectedFile); // Trường image cho AddChildrenImage
+
+        const childrenImageResponse = await axios.post(
+          `http://localhost:5124/api/Children/AddChildrenImage?studentId=${studentDetailId}`,
+          childrenImageFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("Avatar updated successfully!", childrenImageResponse.data);
+
+        // Gọi API AddPerson
+      
+      }
+
+      // Chuẩn bị dữ liệu JSON để cập nhật thông tin học sinh
+      const updatedStudent = {
+        studentId: studentDetailId,
+        fullName,
+        nickName,
+        gradeId,
+        dob,
+        gender,
+        status,
+        ethnicGroups,
+        nationality,
+        religion,
+        code, // Sử dụng code thay vì identifier
+        parentId,
+        avatar: "", // Avatar để trống trong request JSON
+      };
+
+      // Gọi API UpdateChildren
+      await axios.put("http://localhost:5124/api/Children/UpdateChildren", updatedStudent, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      alert("Student updated successfully!");
+      this.props.history.push("/viewallstudent");
+    } catch (error) {
+      console.error("Error updating student:", error.response || error.message);
+      alert("Failed to update student. Please try again.");
+    }
+  };
+
+
+  render() {
+    const {
       fullName,
       nickName,
-      grade,
+      gradeId,
       dob,
       gender,
       status,
-      admissionDay,
       ethnicGroups,
       nationality,
       religion,
-      identifier,
-      issueDate,
-      issuePlace,
-      studentId,
-    };
-
-    console.log("Updating student with data:", updatedStudent); // In dữ liệu gửi đi
-
-    // Gọi API cập nhật học sinh
-    axios.put("http://localhost:5124/api/Children/UpdateChildren", updatedStudent, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        console.log("Student updated successfully:", response.data);
-        alert("Student has been updated successfully!");
-
-        // Chuyển hướng về danh sách học sinh
-        this.props.history.push('/viewstudents');
-      })
-      .catch((error) => {
-        console.error("Error updating student:", error.response ? error.response.data : error.message); // Log thêm thông tin lỗi
-        alert("Failed to update student. Please try again.");
-      });
-  };
-
-  render() {
-    const { fullName, nickName, grade, dob, gender, status, admissionDay, ethnicGroups, nationality, religion, identifier, issueDate, issuePlace, submeet } = this.state;
+      code,
+      avatar,
+      grades,
+      submeet,
+    } = this.state;
 
     return (
       <div
@@ -128,169 +190,181 @@ class viewstudentbyId extends React.Component {
                 { name: "Update Student", navigate: "" },
               ]}
             />
-            <form onSubmit={this.handleSubmit} className="update-student-form">
-              <div className="form-group">
-                <label>Full Name</label>
-                <input
-                  className={`form-control ${fullName === "" && submeet && "parsley-error"}`}
-                  value={fullName}
-                  name="fullName"
-                  onChange={(e) => this.setState({ fullName: e.target.value })}
-                />
-                {fullName === "" && submeet && (
-                  <ul className="parsley-errors-list filled">
-                    <li className="parsley-required">Full name is required.</li>
-                  </ul>
-                )}
+            <div className="card shadow-lg">
+              <div
+                className="card-header text-white"
+                style={{ backgroundColor: "#48C3B4" }}
+              >
+                <h4 className="mb-0">Update Student Information</h4>
               </div>
+              <div className="card-body">
+                <form onSubmit={this.handleSubmit}>
+                  <div className="form-group">
+                    <label>Avatar</label>
+                    <div className="d-flex align-items-center">
+                      {avatar && (
+                        <img
+                          src={avatar}
+                          alt="Avatar"
+                          style={{ width: "80px", height: "80px", marginRight: "10px" }}
+                          className="rounded-circle border"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="form-control-file"
+                        onChange={this.handleFileChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="row">
 
-              <div className="form-group">
-                <label>Nick Name</label>
-                <input
-                  className="form-control"
-                  value={nickName}
-                  name="nickName"
-                  onChange={(e) => this.setState({ nickName: e.target.value })}
-                />
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Full Name</label>
+                        <input
+                          type="text"
+                          className={`form-control ${fullName === "" && submeet && "is-invalid"}`}
+                          value={fullName}
+                          onChange={(e) => this.setState({ fullName: e.target.value })}
+                        />
+                        {fullName === "" && submeet && (
+                          <div className="invalid-feedback">Full name is required.</div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Nick Name</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={nickName}
+                          onChange={(e) => this.setState({ nickName: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Grade</label>
+                        <select
+                          className="form-control"
+                          value={gradeId}
+                          onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
+                        >
+                          <option value={0}>Select Grade</option>
+                          {grades.map((grade) => (
+                            <option key={grade.gradeId} value={grade.gradeId}>
+                              {grade.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Date of Birth</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={dob}
+                          onChange={(e) => this.setState({ dob: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Gender</label>
+                        <select
+                          className="form-control"
+                          value={gender}
+                          onChange={(e) => this.setState({ gender: parseInt(e.target.value) })}
+                        >
+                          <option value={1}>Male</option>
+                          <option value={0}>Female</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Status</label>
+                        <select
+                          className="form-control"
+                          value={status}
+                          onChange={(e) => this.setState({ status: parseInt(e.target.value) })}
+                        >
+                          <option value={1}>Active</option>
+                          <option value={0}>Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Ethnic Groups</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={ethnicGroups}
+                          onChange={(e) => this.setState({ ethnicGroups: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Nationality</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={nationality}
+                          onChange={(e) => this.setState({ nationality: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Religion</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={religion}
+                          onChange={(e) => this.setState({ religion: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Code</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={code}
+                          onChange={(e) => this.setState({ code: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <button type="submit" className="btn btn-primary">
+                      Update Student
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <div className="form-row">
-                <div className="form-group col-md-6">
-                  <label>Grade</label>
-                  <input
-                    className="form-control"
-                    value={grade}
-                    name="grade"
-                    type="number"
-                    onChange={(e) => this.setState({ grade: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group col-md-6">
-                  <label>Date of Birth</label>
-                  <input
-                    className="form-control"
-                    type="date"
-                    value={dob}
-                    name="dob"
-                    onChange={(e) => this.setState({ dob: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col-md-6">
-                  <label>Gender</label>
-                  <select
-                    className="form-control"
-                    value={gender}
-                    name="gender"
-                    onChange={(e) => this.setState({ gender: e.target.value })}
-                  >
-                    <option value={1}>Male</option>
-                    <option value={0}>Female</option>
-                  </select>
-                </div>
-
-                <div className="form-group col-md-6">
-                  <label>Status</label>
-                  <select
-                    className="form-control"
-                    value={status}
-                    name="status"
-                    onChange={(e) => this.setState({ status: e.target.value })}
-                  >
-                    <option value={1}>Active</option>
-                    <option value={0}>Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col-md-6">
-                  <label>Admission Day</label>
-                  <input
-                    className="form-control"
-                    type="date"
-                    value={admissionDay}
-                    name="admissionDay"
-                    onChange={(e) => this.setState({ admissionDay: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group col-md-6">
-                  <label>Ethnic Groups</label>
-                  <input
-                    className="form-control"
-                    value={ethnicGroups}
-                    name="ethnicGroups"
-                    onChange={(e) => this.setState({ ethnicGroups: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col-md-6">
-                  <label>Nationality</label>
-                  <input
-                    className="form-control"
-                    value={nationality}
-                    name="nationality"
-                    onChange={(e) => this.setState({ nationality: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group col-md-6">
-                  <label>Religion</label>
-                  <input
-                    className="form-control"
-                    value={religion}
-                    name="religion"
-                    onChange={(e) => this.setState({ religion: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col-md-6">
-                  <label>Identifier</label>
-                  <input
-                    className="form-control"
-                    value={identifier}
-                    name="identifier"
-                    onChange={(e) => this.setState({ identifier: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group col-md-6">
-                  <label>Issue Date</label>
-                  <input
-                    className="form-control"
-                    type="date"
-                    value={issueDate}
-                    name="issueDate"
-                    onChange={(e) => this.setState({ issueDate: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col-md-6">
-                  <label>Issue Place</label>
-                  <input
-                    className="form-control"
-                    value={issuePlace}
-                    name="issuePlace"
-                    onChange={(e) => this.setState({ issuePlace: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <br />
-              <button type="submit" className="btn btn-primary">
-                Update Student
-              </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -302,4 +376,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(viewstudentbyId));
+export default connect(mapStateToProps)(withRouter(ViewStudentById));

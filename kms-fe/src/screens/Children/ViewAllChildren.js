@@ -6,20 +6,33 @@ import { withRouter } from "react-router-dom";
 class ViewAllChildren extends React.Component {
   state = {
     StudentsData: [], // State để lưu trữ dữ liệu từ API
+    Grades: [], // State để lưu trữ danh sách grades
+
     file: null, // State để lưu trữ file Excel đã chọn
     error: "", // State để lưu trữ thông báo lỗi
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    // Gọi API và cập nhật state
+
+    // Gọi API để lấy danh sách học sinh
     fetch("http://localhost:5124/api/Children/GetAllChildren")
       .then((response) => response.json())
       .then((data) => {
         this.setState({ StudentsData: data });
       })
       .catch((error) => {
-        console.error("Error fetching data: ", error);
+        console.error("Error fetching students data: ", error);
+      });
+
+    // Gọi API để lấy danh sách grades
+    fetch("http://localhost:5124/api/Grade")
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState({ Grades: data });
+      })
+      .catch((error) => {
+        console.error("Error fetching grades data: ", error);
       });
   }
 
@@ -55,7 +68,7 @@ class ViewAllChildren extends React.Component {
       .then((data) => {
         console.log("File uploaded successfully:", data);
         alert("File uploaded successfully!");
-        
+
         // Reset trạng thái sau khi upload thành công
         this.setState({ error: "", file: null }); // Reset file về null và xóa thông báo lỗi
 
@@ -123,36 +136,42 @@ class ViewAllChildren extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {StudentsData.map((student, index) => (
-                            <React.Fragment key={"student" + index}>
-                              <tr>
-                                <td>{student.fullName}</td>
-                                <td>{student.nickName}</td>
-                                <td>{student.grade}</td>
-                                <td>
-                                  {student.status === 1 ? (
-                                    <span className="badge badge-success">Active</span>
-                                  ) : (
-                                    <span className="badge badge-default">Inactive</span>
-                                  )}
-                                </td>
-                                <td className="project-actions">
-                                  <a className="btn btn-outline-secondary mr-1">
-                                    <i className="icon-eye"></i>
-                                  </a>
-                                  <a
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => this.handleEdit(student.studentId)} // Gọi hàm handleEdit
-                                  >
-                                    <i className="icon-pencil"></i>
-                                  </a>
-                                  <a className="btn btn-outline-secondary">
-                                    <i className="icon-trash"></i>
-                                  </a>
-                                </td>
-                              </tr>
-                            </React.Fragment>
-                          ))}
+                          {StudentsData.map((student, index) => {
+                            // Tìm grade name dựa trên gradeId
+                            const grade = this.state.Grades.find((g) => g.gradeId === student.gradeId);
+                            const gradeName = grade ? grade.name : "Unknown"; // Nếu không tìm thấy thì hiển thị "Unknown"
+
+                            return (
+                              <React.Fragment key={"student" + index}>
+                                <tr>
+                                  <td>{student.fullName}</td>
+                                  <td>{student.nickName}</td>
+                                  <td>{gradeName}</td> {/* Hiển thị tên grade */}
+                                  <td>
+                                    {student.status === 1 ? (
+                                      <span className="badge badge-success">Active</span>
+                                    ) : (
+                                      <span className="badge badge-default">Inactive</span>
+                                    )}
+                                  </td>
+                                  <td className="project-actions">
+                                    <a className="btn btn-outline-secondary mr-1">
+                                      <i className="icon-eye"></i>
+                                    </a>
+                                    <a
+                                      className="btn btn-outline-secondary"
+                                      onClick={() => this.handleEdit(student.studentId)} // Gọi hàm handleEdit
+                                    >
+                                      <i className="icon-pencil"></i>
+                                    </a>
+                                    <a className="btn btn-outline-secondary">
+                                      <i className="icon-trash"></i>
+                                    </a>
+                                  </td>
+                                </tr>
+                              </React.Fragment>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import "react-calendar/dist/Calendar.css";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-import { Modal, Button, Form } from "react-bootstrap"; // Nhập Modal và các thành phần từ React Bootstrap
+import { Modal, Button, Form } from "react-bootstrap"; // Import Modal and other components from React Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class UpdateMenu extends React.Component {
@@ -15,7 +15,7 @@ class UpdateMenu extends React.Component {
         menuData: {
             "0-3": [],
         },
-        daysOfWeek: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"],
+        daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         showModal: false,
         structuredMenuData: null,
         selectedMenuItem: null,
@@ -86,7 +86,7 @@ class UpdateMenu extends React.Component {
     };
 
     formatDate = (date) => {
-        return date.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
+        return date.toISOString().split('T')[0]; // Format YYYY-MM-DD
     };
 
     handleSave = async () => {
@@ -122,7 +122,7 @@ class UpdateMenu extends React.Component {
 
     renderTable = (ageGroup) => {
         const { menuData, daysOfWeek } = this.state;
-    
+
         return (
             <div className="table-wrapper">
                 <table className="custom-table table table-striped table-bordered">
@@ -146,22 +146,22 @@ class UpdateMenu extends React.Component {
             </div>
         );
     };
-    
+
     renderMeals = (ageGroup, mealCode) => {
         const { menuData, daysOfWeek } = this.state;
 
         return daysOfWeek.map((day, index) => {
-            const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === mealCode && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+            const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === mealCode && this.mapDayToEnglish(menu.dayOfWeek) === day);
             return (
                 <td key={index} className="text-center">
                     {menuItems.length > 0 ? (
                         <ul className="list-unstyled" style={{ paddingLeft: '0' }}>
                             {menuItems.map((menuItem, itemIndex) => (
-                                <li key={`${menuItem.foodName}-${day}-${itemIndex}`} style={{ textAlign: 'left', margin: 0, listStyleType: 'disc',  marginLeft:'20px' }}>
-                                    <span 
-                                        className="menu-item text-info" 
-                                        onClick={() => this.toggleModal(menuItem)} 
-                                        style={{ cursor: 'pointer',  }}
+                                <li key={`${menuItem.foodName}-${day}-${itemIndex}`} style={{ textAlign: 'left', margin: 0, listStyleType: 'disc', marginLeft: '20px' }}>
+                                    <span
+                                        className="menu-item text-info"
+                                        onClick={() => this.toggleModal(menuItem)}
+                                        style={{ cursor: 'pointer', }}
                                     >
                                         {menuItem.foodName}
                                     </span>
@@ -169,31 +169,31 @@ class UpdateMenu extends React.Component {
                             ))}
                         </ul>
                     ) : (
-                        <span className="text-muted">Không có dữ liệu</span>
+                        <span className="text-muted">No data available</span>
                     )}
                 </td>
             );
         });
     };
-    
+
     getMealLabel = (mealCode) => {
         const mealLabels = {
-            BS: "Bữa Sáng",
-            BT: "Bữa Trưa",
-            BC: "Bữa Chiều",
+            BS: "Breakfast",
+            BT: "Lunch",
+            BC: "Dinner",
         };
         return mealLabels[mealCode];
     };
 
-    mapDayToVietnamese = (day) => {
+    mapDayToEnglish = (day) => {
         const dayMap = {
-            Monday: "Thứ 2",
-            Tuesday: "Thứ 3",
-            Wednesday: "Thứ 4",
-            Thursday: "Thứ 5",
-            Friday: "Thứ 6",
-            Saturday: "Thứ 7",
-            Sunday: "Chủ nhật",
+            Monday: "Monday",
+            Tuesday: "Tuesday",
+            Wednesday: "Wednesday",
+            Thursday: "Thursday",
+            Friday: "Friday",
+            Saturday: "Saturday",
+            Sunday: "Sunday",
         };
         return dayMap[day] || day;
     };
@@ -211,9 +211,9 @@ class UpdateMenu extends React.Component {
                     <div className="col-lg-12 col-md-12">
                         <h2>Menu</h2>
                         <div className="week-selector">
-                            Tuần được chọn: {selectedWeek.startOfWeek.toLocaleDateString("vi-VN")} - {selectedWeek.endOfWeek.toLocaleDateString("vi-VN")}
+                            Selected Week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
                         </div>
-                        <h4 className="menu-title">Tất cả: 0-3</h4>
+                        <h4 className="menu-title">All: 0-3</h4>
                         <div className="table-container">{this.renderTable("0-3")}</div>
 
                         {/* Modal for editing menu item */}

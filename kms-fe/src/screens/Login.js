@@ -38,47 +38,72 @@ class Login extends React.Component {
   handleOnSubmit = async (evt) => {
     evt.preventDefault();
     try {
-      // Gọi API để lấy danh sách account
-      const response = await axios.post("http://localhost:5124/api/Account/login", {
+      // Gọi API để đăng nhập
+      const loginResponse = await axios.post("http://localhost:5124/api/Account/login", {
         email: this.props.email,
-        password: this.props.password
+        password: this.props.password,
       });
-      // Check the response status
-      if (response.status !== 200) {
-        throw new Error("Failed to fetch accounts");
+  
+      if (loginResponse.status !== 200) {
+        throw new Error("Failed to log in");
       }
-      const accountList = response.data; // Adjust according to your API response structure
-      console.log(accountList);
-
-      if (accountList) {
-        // Đăng nhập thành công
-        localStorage.setItem("user", JSON.stringify(accountList));
-        setSession('user', accountList)
-        if (accountList.user.roleId === 2 || accountList.user.roleId === 5 || accountList.user.roleId === 3) {
-          window.location.href = "/viewclass";
-        }
-        if (accountList.user.roleId === 1) {
+  
+      const loginData = loginResponse.data; // Dữ liệu từ API /api/Account/login
+      console.log(loginData, "Login response");
+  
+      const userId = loginData.user.userId;
+  
+      // Gọi API để lấy thông tin chi tiết người dùng (bao gồm avatar)
+      const profileResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${userId}`);
+  
+      if (profileResponse.status !== 200) {
+        throw new Error("Failed to fetch user profile");
+      }
+  
+      const profileData = profileResponse.data; // Dữ liệu từ API /api/User/ProfileById
+      console.log(profileData, "Profile response");
+  
+      // Thêm avatar vào dữ liệu user mà không thay đổi cấu trúc ban đầu
+      const userWithAvatar = {
+        ...loginData.user, // Dữ liệu ban đầu
+        avatar: profileData.avatar, // Thêm trường avatar
+      };
+  
+      // Lưu lại vào localStorage và sessionStorage
+      localStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
+      sessionStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
+  
+      // Chuyển hướng dựa trên roleId
+      switch (userWithAvatar.roleId) {
+        case 1:
           window.location.href = "/dashboard";
-        }
-        if (accountList.user.roleId === 4) {
-          window.location.href = "/request";
-        }
-      } else {
-        this.setState({
-          notificationText: "Incorrect email or password, or your account is inactive.",
-          notificationType: "error",
-          showNotification: true
-        });
+          break;
+        case 2:
+          window.location.href = "/viewattendparent";
+          break;
+        case 3:
+          window.location.href = "/viewclass";
+          break;
+        case 4:
+          window.location.href = "/dashboardprin";
+          break;
+        case 5:
+          window.location.href = "/viewclass3";
+          break;
+        default:
+          window.location.href = "/";
+          break;
       }
     } catch (error) {
-      console.error("Login error:", error); // Log error details for debugging
+      console.error("Login error:", error); // Log lỗi để kiểm tra
       this.setState({
-        notificationText: error.response.data,
+        notificationText: error.response?.data || "An error occurred during login.",
         notificationType: "error",
-        showNotification: true
+        showNotification: true,
       });
     }
   };
+  
 
   togglePasswordVisibility = () => {
     this.setState(prevState => ({ showPassword: !prevState.showPassword }));

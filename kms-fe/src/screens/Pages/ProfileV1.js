@@ -17,6 +17,8 @@ class ProfileV1Page extends React.Component {
       mail: "",
       accounts: [],
     },
+    selectedFile: null, // Lưu file ảnh
+    previewImage: null, // URL để xem trước ảnh
   };
 
   componentDidMount() {
@@ -26,14 +28,12 @@ class ProfileV1Page extends React.Component {
 
   fetchUserData = async () => {
     try {
-      // Lấy user từ localStorage
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userId = storedUser.user.userId;
-  
-      // Fetch dữ liệu người dùng theo userId
-      const response = await fetch(`http://localhost:5124/api/User/${userId}`);
+
+      const response = await fetch(`http://localhost:5124/api/User/ProfileById/${userId}`);
       const data = await response.json();
-  
+
       this.setState({
         userData: data,
         updatedUserData: {
@@ -46,12 +46,13 @@ class ProfileV1Page extends React.Component {
           mail: data.mail,
           accounts: data.accounts,
         },
+        previewImage: data.avatar || null, // Lưu URL avatar vào state
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
-  
+
 
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,47 +74,60 @@ class ProfileV1Page extends React.Component {
     }));
   };
 
+  handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const preview = URL.createObjectURL(file);
+
+      this.setState({
+        selectedFile: file,
+        previewImage: preview,
+      });
+    }
+  };
+
   handleUpdate = async () => {
-    const { updatedUserData } = this.state;
+    const { updatedUserData, selectedFile } = this.state;
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    const requestBody = {
-      userId: storedUser.user.userId , 
-      firstname: updatedUserData.firstname,
-      lastName: updatedUserData.lastName,
-      address: updatedUserData.address,
-      phoneNumber: updatedUserData.phoneNumber,
-      gender: updatedUserData.gender,
-      dob: updatedUserData.dob,
-    };
+
+    const formData = new FormData();
+    formData.append("userId", storedUser.user.userId);
+    formData.append("firstname", updatedUserData.firstname);
+    formData.append("lastName", updatedUserData.lastName);
+    formData.append("address", updatedUserData.address);
+    formData.append("phoneNumber", updatedUserData.phoneNumber);
+    formData.append("gender", updatedUserData.gender);
+    formData.append("dob", updatedUserData.dob ? `${updatedUserData.dob}T00:00:00.000Z` : null);
+
+    if (selectedFile) {
+      formData.append("avatar", selectedFile);
+    }
 
     try {
-      const response = await fetch("http://localhost:5124/api/User/UpdateClass", {
+      const response = await fetch("http://localhost:5124/api/User/UpdateProfile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
+        body: formData,
       });
 
       if (response.ok) {
         const result = await response.json();
         console.log("User updated successfully:", result);
-        alert("Cập nhật người dùng thành công!"); // Hiển thị thông báo thành công
+        alert("Cập nhật người dùng thành công!");
       } else {
         console.error("Failed to update user:", response.statusText);
-        alert("Cập nhật người dùng thất bại."); // Hiển thị thông báo thất bại
+        alert("Cập nhật người dùng thất bại.");
       }
     } catch (error) {
       console.error("Error updating user data:", error);
-      alert("Có lỗi xảy ra trong quá trình cập nhật."); // Hiển thị thông báo lỗi
+      alert("Có lỗi xảy ra trong quá trình cập nhật.");
     }
   };
 
   render() {
-    const { updatedUserData } = this.state;
+    const { updatedUserData, previewImage } = this.state;
 
     if (!updatedUserData) {
-      return <div>Loading...</div>; // Thêm loading khi dữ liệu chưa có
+      return <div>Loading...</div>;
     }
 
     return (
@@ -143,22 +157,26 @@ class ProfileV1Page extends React.Component {
                                 <img
                                   alt="User"
                                   className="user-photo media-object"
-                                  src={imageuser}
+                                  src={this.state.previewImage || imageuser} // Sử dụng ảnh avatar hoặc ảnh mặc định
+                                  style={{ width: "140px", height: "140px", objectFit: "cover" }}
                                 />
                               </div>
+
                               <div className="media-body">
                                 <p>
                                   Upload your photo. <br />
                                   <em>Image should be at least 140px x 140px</em>
                                 </p>
-                                <button
-                                  className="btn btn-default-dark"
-                                  id="btn-upload-photo"
-                                  type="button"
-                                >
+                                <label className="btn btn-default-dark" htmlFor="filePhoto">
                                   Upload Photo
-                                </button>
-                                <input className="sr-only" id="filePhoto" type="file" />
+                                </label>
+                                <input
+                                  id="filePhoto"
+                                  type="file"
+                                  className="sr-only"
+                                  accept="image/*"
+                                  onChange={this.handleFileChange}
+                                />
                               </div>
                             </div>
                           </div>
@@ -223,7 +241,7 @@ class ProfileV1Page extends React.Component {
                                     type="date"
                                     name="dob"
                                     value={updatedUserData.dob || ""}
-                                    onChange={this.handleChange} // Xử lý thay đổi ngày
+                                    onChange={this.handleChange}
                                   />
                                 </div>
                               </div>
@@ -258,7 +276,6 @@ class ProfileV1Page extends React.Component {
                                     readOnly
                                   />
                                 </div>
-
                                 <div className="form-group">
                                   <label>Country</label>
                                   <select className="form-control" defaultValue="VN">

@@ -2,7 +2,7 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import "../Menu/ListMenu.css"
+import "../Menu/ListMenu.css";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 
@@ -16,16 +16,16 @@ class ListMenu extends React.Component {
             "0-3": [],
             "3-6": [],
         },
-        daysOfWeek: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"],
+        daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         showCalendar: false,
-        selectedStatus0_3: 0, // Trạng thái cho khối lớp 0-3
-        selectedStatus3_6: 0, // Trạng thái cho khối lớp 3-6
+        selectedStatus0_3: 0, // Status for age group 0-3
+        selectedStatus3_6: 0, // Status for age group 3-6
     };
 
     componentDidMount() {
         const { startOfWeek, endOfWeek } = this.getWeekRange(new Date());
         this.setState({ selectedWeek: { startOfWeek, endOfWeek } }, () => {
-            this.fetchMenuData(startOfWeek, endOfWeek); // Gọi API để lấy dữ liệu
+            this.fetchMenuData(startOfWeek, endOfWeek);
         });
     }
 
@@ -73,8 +73,8 @@ class ListMenu extends React.Component {
                     "0-3": menuData1[0]?.menuDetails || [],
                     "3-6": menuData2[0]?.menuDetails || [],
                 },
-                selectedStatus0_3: menuData1[0]?.status || 0, // Giả sử status nằm trong menuData1
-                selectedStatus3_6: menuData2[0]?.status || 0, // Giả sử status nằm trong menuData2
+                selectedStatus0_3: menuData1[0]?.status || 0,
+                selectedStatus3_6: menuData2[0]?.status || 0,
             });
         } catch (error) {
             console.error("Error fetching menu data:", error);
@@ -82,26 +82,18 @@ class ListMenu extends React.Component {
     };
 
     updateMenuStatus = async (gradeID) => {
-        console.log(gradeID, "gradeID");
-
         const { selectedWeek } = this.state;
         const startDate = this.formatDate(selectedWeek.startOfWeek);
         const endDate = this.formatDate(selectedWeek.endOfWeek);
-        console.log(startDate, "sdasdsa");
-
 
         const response1 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=${gradeID}`);
-
         const menuData1 = await response1.json();
 
         const { selectedStatus0_3, selectedStatus3_6 } = this.state;
         const status = gradeID === 1 ? selectedStatus0_3 : selectedStatus3_6;
 
-        console.log(menuData1, "dsdsd");
-
-
         if (!menuData1) {
-            alert("Không có thực đơn để cập nhật trạng thái.");
+            alert("No menu available to update status.");
             return;
         }
 
@@ -112,19 +104,18 @@ class ListMenu extends React.Component {
             gradeID: gradeID,
             status: status,
         };
-        console.log(payload, "ooo");
 
         try {
             const response = await axios.put("http://localhost:5124/api/Menu/UpdateMenuStatus", payload);
             if (response.status === 200) {
-                alert(`Cập nhật trạng thái của thực đơn khối ${gradeID === 1 ? "0-3" : "3-6"} thành công!`);
+                alert(`Successfully updated the menu status for age group ${gradeID === 1 ? "0-3" : "3-6"}!`);
                 this.fetchMenuData(selectedWeek.startOfWeek, selectedWeek.endOfWeek);
             } else {
-                alert("Cập nhật trạng thái thất bại!");
+                alert("Failed to update the menu status!");
             }
         } catch (error) {
             console.error("Error updating menu status:", error);
-            alert("Đã xảy ra lỗi khi cập nhật trạng thái.");
+            alert("An error occurred while updating the status.");
         }
     };
 
@@ -185,11 +176,11 @@ class ListMenu extends React.Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Bữa Sáng */}
+                        {/* Breakfast */}
                         <tr>
-                            <td className="sticky-col"><strong>Bữa Sáng</strong></td>
+                            <td className="sticky-col"><strong>Breakfast</strong></td>
                             {daysOfWeek.map((day, index) => {
-                                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BS" && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+                                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BS" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                                 return (
                                     <td key={index}>
                                         {menuItems.length > 0 ? (
@@ -199,18 +190,18 @@ class ListMenu extends React.Component {
                                                 ))}
                                             </ul>
                                         ) : (
-                                            "Không có dữ liệu"
+                                            "No data available"
                                         )}
                                     </td>
                                 );
                             })}
                         </tr>
 
-                        {/* Bữa Trưa */}
+                        {/* Lunch */}
                         <tr>
-                            <td className="sticky-col"><strong>Bữa Trưa</strong></td>
+                            <td className="sticky-col"><strong>Lunch</strong></td>
                             {daysOfWeek.map((day, index) => {
-                                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BT" && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+                                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BT" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                                 return (
                                     <td key={index}>
                                         {menuItems.length > 0 ? (
@@ -220,18 +211,18 @@ class ListMenu extends React.Component {
                                                 ))}
                                             </ul>
                                         ) : (
-                                            "Không có dữ liệu"
+                                            "No data available"
                                         )}
                                     </td>
                                 );
                             })}
                         </tr>
 
-                        {/* Bữa Chiều */}
+                        {/* Dinner */}
                         <tr>
-                            <td className="sticky-col"><strong>Bữa Chiều</strong></td>
+                            <td className="sticky-col"><strong>Dinner</strong></td>
                             {daysOfWeek.map((day, index) => {
-                                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToVietnamese(menu.dayOfWeek) === day);
+                                const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                                 return (
                                     <td key={index}>
                                         {menuItems.length > 0 ? (
@@ -241,34 +232,34 @@ class ListMenu extends React.Component {
                                                 ))}
                                             </ul>
                                         ) : (
-                                            "Không có dữ liệu"
+                                            "No data available"
                                         )}
                                     </td>
                                 );
                             })}
                         </tr>
 
-                        {/* Chọn trạng thái và nút cập nhật */}
+                        {/* Status selection */}
                         {menuData[ageGroup]?.length > 0 && (
                             <tr>
                                 <td colSpan={daysOfWeek.length + 1} className="text-center">
                                     <div className="status-selector">
                                         <label className="status-label">
-                                            Chọn trạng thái:
+                                            Select status:
                                             <select
                                                 value={selectedStatus}
                                                 onChange={this.handleStatusChange(ageGroup)}
                                                 className="status-dropdown"
                                             >
-                                                <option value={0}>Không hoạt động</option>
-                                                <option value={1}>Hoạt động</option>
+                                                <option value={0}>Inactive</option>
+                                                <option value={1}>Active</option>
                                             </select>
                                         </label>
                                         <button
                                             onClick={() => this.updateMenuStatus(ageGroup === "0-3" ? 1 : 2)}
                                             className="update-status-button"
                                         >
-                                            Cập nhật trạng thái thực đơn khối {ageGroup === "0-3" ? "0-3" : "3-6"}
+                                            Update menu status for {ageGroup === "0-3" ? "0-3" : "3-6"}
                                         </button>
                                     </div>
                                 </td>
@@ -280,15 +271,15 @@ class ListMenu extends React.Component {
         );
     };
 
-    mapDayToVietnamese = (day) => {
+    mapDayToEnglish = (day) => {
         const dayMap = {
-            Monday: "Thứ 2",
-            Tuesday: "Thứ 3",
-            Wednesday: "Thứ 4",
-            Thursday: "Thứ 5",
-            Friday: "Thứ 6",
-            Saturday: "Thứ 7",
-            Sunday: "Chủ nhật",
+            Monday: "Monday",
+            Tuesday: "Tuesday",
+            Wednesday: "Wednesday",
+            Thursday: "Thursday",
+            Friday: "Friday",
+            Saturday: "Saturday",
+            Sunday: "Sunday",
         };
         return dayMap[day] || day;
     };
@@ -307,24 +298,24 @@ class ListMenu extends React.Component {
                 />
                 <div className="row">
                     <div className="col-lg-12 col-md-12">
-                        <h2>Thực Đơn</h2>
+                        <h2>Menu</h2>
 
                         <div className="row align-items-center justify-content-between mb-3">
                             <div className="week-selector col-lg-3" onClick={this.toggleCalendar}>
-                                Tuần được chọn: {selectedWeek.startOfWeek.toLocaleDateString("vi-VN")} - {selectedWeek.endOfWeek.toLocaleDateString("vi-VN")}
+                                Selected week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
                             </div>
                         </div>
 
                         {showCalendar && (
                             <div className="calendar-dropdown">
-                                <Calendar onChange={this.handleWeekSelect} value={selectedWeek.startOfWeek} locale="en-EN" showWeekNumbers={true} />
+                                <Calendar onChange={this.handleWeekSelect} value={selectedWeek.startOfWeek} locale="en-US" showWeekNumbers={true} />
                             </div>
                         )}
 
-                        <h4 className="menu-title">Tất cả: 0-3</h4>
+                        <h4 className="menu-title">All: 0-3</h4>
                         <div className="table-container">{this.renderTable("0-3")}</div>
 
-                        <h4 className="menu-title">Tất cả: 3-6</h4>
+                        <h4 className="menu-title">All: 3-6</h4>
                         <div className="table-container">{this.renderTable("3-6")}</div>
                     </div>
                 </div>

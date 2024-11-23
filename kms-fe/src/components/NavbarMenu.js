@@ -32,6 +32,8 @@ class NavbarMenu extends React.Component {
     res = res.length > 4 ? res[4] : "/";
     const { activeKey } = this.props;
     this.activeMenutabwhenNavigate("/" + activeKey);
+    console.log(getSession('user')?.user.avatar, "test avt");
+
   }
 
   activeMenutabwhenNavigate(activeKey) {
@@ -64,7 +66,7 @@ class NavbarMenu extends React.Component {
     ) {
       this.activeMenutabContainer("ClassContainer");
     }
-   
+
     else if (
       activeKey === "/viewmenu" ||
       activeKey === "/viewmenu2" ||
@@ -90,7 +92,8 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("scheduleContainer");
     }
     else if (
-      activeKey === "/listclassattendance" 
+      activeKey === "/listclasscheckin" ||
+      activeKey === "/listclassattendance"
     ) {
       this.activeMenutabContainer("attendanceContainer");
     }
@@ -362,10 +365,15 @@ class NavbarMenu extends React.Component {
           <div className="sidebar-scroll">
             <div className="user-account">
               <img
-                src={UserImage}
+                src={getSession('user')?.user.avatar || UserImage}
                 className="rounded-circle user-photo"
                 alt="User Profile Picture"
+                style={{
+                  width: "50px",
+                  height: "50px",
+                }}
               />
+
               <Dropdown>
                 <span>Welcome,</span>
                 <Dropdown.Toggle
@@ -394,7 +402,6 @@ class NavbarMenu extends React.Component {
                 </Dropdown.Menu>
               </Dropdown>
               <hr />
-
             </div>
             <ul className="nav nav-tabs">
               <li className="nav-item">
@@ -838,17 +845,24 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Attendance</span>
                         </a>
                         <ul className="collapse">
-                            <li
-                              className={activeKey === "listclassattendance" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/listclass">Attendance</Link>
-                            </li>
+                          <li
+                            className={activeKey === "listclasscheckin" ? "active" : ""}
+                            onClick={() => { }}
+                          >
+                            <Link to="/listclasscheckin">Check in/out</Link>
+                          </li>
+                          <li
+                            className={activeKey === "listclassattendance" ? "active" : ""}
+                            onClick={() => { }}
+                          >
+                            <Link to="/listclassattendance">Attendance</Link>
+                          </li>
                         </ul>
+
                       </li>
                     ) : null}
-                      {/* Payment */}
-                      {roleId === 2  ? (
+                    {/* Payment */}
+                    {roleId === 2 ? (
                       <li id="AttendParentContainer" className="">
                         <a
                           href="#!"
@@ -867,7 +881,7 @@ class NavbarMenu extends React.Component {
                           >
                             <Link to="/viewattendparent">Attend</Link>
                           </li>
-                          
+
                         </ul>
                       </li>
                     ) : null}
