@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
+import Notification from "../../components/Notification";
 
 class RequestCreate extends React.Component {
     state = {
@@ -14,7 +15,11 @@ class RequestCreate extends React.Component {
         studentId: null,
         reason: "",
         childerParent: [],
-        studentClasses: null // Start with null for better control
+        studentClasses: null, // Start with null for better control
+
+        showNotification: false, // Để hiển thị thông báo
+        notificationText: "", // Nội dung thông báo
+        notificationType: "success", // Loại thông báo (success/error)
     };
 
     componentDidMount() {
@@ -88,21 +93,42 @@ class RequestCreate extends React.Component {
         console.log(newRequest);
         try {
             const response = await axios.post("http://localhost:5124/api/Request/AddRequest", newRequest);
-
-            console.log("Request created successfully:", response.data);
-            alert("Request created successfully!");
-            this.props.history.push('/request');
-        } catch (error) {
-            console.error("Error creating request:", error);
-            alert("Error creating request!");
+            this.setState({
+                notificationText: "Request created successfully!",
+                notificationType: "success",
+                showNotification: true,
+            });
+            setTimeout(() => {
+                if (this.state.showNotification) {
+                    this.props.history.push('/request');
+                }
+            }, 1000);
+        } catch (error) { 
+            const errorMessage = error.response?.data?.message || "Failed to create request!";
+            this.setState({
+                notificationText: errorMessage,
+                notificationType: "error",
+                showNotification: true,
+            });
         }
     };
 
     render() {
         const { studentId, childerParent, title, classAll, classChangeId, description, studentClasses } = this.state;
+        const { showNotification, notificationText, notificationType } = this.state;
+
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div className="container-fluid">
                     <PageHeader
                         HeaderText="New Request"

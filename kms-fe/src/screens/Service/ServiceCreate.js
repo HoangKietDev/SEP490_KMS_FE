@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
-import BasicValidation from "../../components/Forms/BasicValidation";
 import axios from "axios";
 
 class ServiceCreate extends React.Component {
@@ -30,8 +29,8 @@ class ServiceCreate extends React.Component {
         fetchData();
     }
 
-    handleCreatService = async () => {
-
+    handleCreatService = async (event) => {
+        event.preventDefault(); // Ngăn hành vi mặc định của form
         const newService = {
             serviceName: this.state.serviceName,
             servicePrice: this.state.servicePrice,
@@ -52,7 +51,7 @@ class ServiceCreate extends React.Component {
             console.log("Tạo service thành công:", response.data);
             alert("Tạo service thành công!"); // User-friendly success message
             this.props.history.push('/service'); // Redirect to category list after successful update
-            
+
         } catch (error) {
             console.error("Lỗi khi tạo service:", error);
             alert("Lỗi khi tạo service!"); // User-friendly error message
@@ -75,7 +74,7 @@ class ServiceCreate extends React.Component {
                         <PageHeader
                             HeaderText="New Service"
                             Breadcrumb={[
-                                { name: "Service", navigate: "" },
+                                { name: "Service", navigate: "service" },
                                 { name: "New Service", navigate: "" },
                             ]}
                         />
@@ -83,7 +82,7 @@ class ServiceCreate extends React.Component {
                             <div className="col-md-12">
                                 <div className="card">
                                     <div className="header text-center">
-                                        <h4>Create new category Form</h4>
+                                        <h4>Create new Service</h4>
                                     </div>
                                     <div className="body">
                                         <form className="ng-untouched ng-dirty ng-invalid" onSubmit={this.handleCreatService}>
@@ -108,7 +107,7 @@ class ServiceCreate extends React.Component {
                                                     <label>Service Price</label>
                                                     <input
                                                         className={`form-control ${servicePrice === "" && "parsley-error"
-                                                        }`}
+                                                            }`}
                                                         value={servicePrice}
                                                         name="servicePrice"
                                                         required=""

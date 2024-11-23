@@ -44,10 +44,10 @@ class RequestDetail extends React.Component {
       // Fetch student information
       const studentResponse = await axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${data.studentId}`);
       const studentData = studentResponse.data;
-      this.setState({ studentName: studentData?.nickName });
+      this.setState({ studentName: studentData?.fullName });
 
       // Fetch user information
-      const userResponse = await axios.get(`http://localhost:5124/api/User/${data.createBy}`);
+      const userResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${data.createBy}`);
       const userData = userResponse.data;
       this.setState({ createByName: `${userData?.firstname} ${userData?.lastName}` });
 
@@ -134,6 +134,10 @@ class RequestDetail extends React.Component {
                     </div>
                     <br />
                   </form>
+                </div>
+
+                <div className="text-center pb-4">
+                  <a href="/request" class="btn btn-success text-white">Back to list Request</a>
                 </div>
               </div>
             </div>

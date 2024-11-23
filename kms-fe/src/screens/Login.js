@@ -94,6 +94,11 @@ class Login extends React.Component {
           window.location.href = "/";
           break;
       }
+      this.setState({
+        notificationText: "Wellcome to KMS",
+        notificationType: "info",
+        showNotification: true
+      });
     } catch (error) {
       console.error("Login error:", error); // Log lỗi để kiểm tra
       this.setState({

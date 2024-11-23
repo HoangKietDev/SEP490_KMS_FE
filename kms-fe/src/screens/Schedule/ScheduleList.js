@@ -5,12 +5,20 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Login from "../Login";
 import { getSession } from "../../components/Auth/Auth";
+import { addNotificationByRoleId, addNotificationByUserId } from "../../components/Common/Notification";
+import Notification from "../../components/Notification";
+
 
 
 class ScheduleList extends React.Component {
   state = {
     ScheduleListData: [],
-    classData: []
+    classData: [],
+    semesterListData: [],
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -30,12 +38,23 @@ class ScheduleList extends React.Component {
           .catch((error) => {
             console.error("Error fetching data: ", error);
           });
-        const response = await axios.get(`http://localhost:5124/api/Class/GetAllClass`);
-        const data = response.data;
-        // Update state with the default class and then fetch schedule data
-        this.setState({
-          classData: data,
-        });
+
+        axios.get("http://localhost:5124/api/Semester/GetAllSemester")
+          .then((response) => {
+            this.setState({ semesterListData: response.data });
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+          });
+
+        axios.get("http://localhost:5124/api/Class/GetAllClass")
+          .then((response) => {
+            this.setState({ classData: response.data });
+          })
+          .catch((error) => {
+            console.error("Error fetching data: ", error);
+          });
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -57,7 +76,10 @@ class ScheduleList extends React.Component {
         teacherName: data?.teacherName
       }
       await axios.put(`http://localhost:5124/api/Schedule/UpdateSchedule`, formdata);
-      console.log(data);
+
+      // tao thong bao moi
+      addNotificationByUserId('UserId', 'content', 21);
+      // addNotificationByRoleId('RoleId', 'content', 3);
 
       // Update the state locally after a successful API call
       this.setState((prevState) => ({
@@ -65,10 +87,18 @@ class ScheduleList extends React.Component {
           schedule.scheduleId === scheduleId ? { ...schedule, status: newStatus } : schedule
         )
       }));
-      alert("Status updated successfully.");
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update status.");
+      this.setState({
+        notificationText: "Status updated Error!",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -81,7 +111,9 @@ class ScheduleList extends React.Component {
   }
 
   render() {
-    const { ScheduleListData, classData } = this.state;
+    const { ScheduleListData, classData, semesterListData } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     const statusOptions = [
       { value: 1, label: "Active", className: "badge-success" },
       { value: 2, label: "Inactive", className: "badge-danger" },
@@ -98,10 +130,19 @@ class ScheduleList extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader
-              HeaderText="Request Management"
+              HeaderText="Schedule List"
               Breadcrumb={[
                 { name: "Schedule List", navigate: "" },
               ]}
@@ -127,15 +168,17 @@ class ScheduleList extends React.Component {
                           <tr>
                             <th>#</th>
                             <th>Class</th>
+                            <th>Semeter</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Create By</th>
-                            {/* <th>Processing</th> */}
                             <th>Status</th>
                           </tr>
                         </thead>
                         <tbody>
                           {ScheduleListData?.map((request, index) => {
+                            const classDetail = classData?.find(i => i.classId === request?.classId)
+                            const semesterDetail = semesterListData?.find(i => i.semesterId === classDetail?.semesterId)
                             return (
                               <React.Fragment key={"schedule" + index}>
                                 <tr>
@@ -144,14 +187,17 @@ class ScheduleList extends React.Component {
                                     onClick={() => this.handleDetailSchedule(request?.classId)}
                                     style={{ cursor: 'pointer' }}
                                     className="theme-color"
-                                  >{classData?.find(i => i.classId === request?.classId)?.className}</td>
-                                  <td>{request?.startDate}</td>
-                                  <td>{request?.endDate}</td>
+                                  >{classDetail?.className}</td>
+                                  <td>
+                                    {semesterDetail?.name}
+                                  </td>
+                                  <td>{semesterDetail?.startDate?.split("T")[0]}</td>
+                                  <td>{semesterDetail?.endDate?.split("T")[0]}</td>
                                   <td>{request?.createBy || 'Staff'}</td>
                                   {/* <td>{request?.teacherName}</td> */}
                                   {/* <td>{request?.processing || ''}</td> */}
 
-                                  {(roleId === 3 || roleId === 4) && (
+                                  {(roleId === 4) ? (
                                     <td>
                                       <select
                                         value={request.status}
@@ -165,7 +211,14 @@ class ScheduleList extends React.Component {
                                         ))}
                                       </select>
                                     </td>
+                                  ) : (roleId === 2 || roleId === 3 || roleId === 5) && (
+                                    <td>
+                                      <span className={`badge ${request?.status === 1 ? 'badge-success' : request?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
+                                        {statusOptions.find(option => option.value === request.status)?.label || 'Unknown'}
+                                      </span>
+                                    </td>
                                   )}
+
 
                                 </tr>
                               </React.Fragment>

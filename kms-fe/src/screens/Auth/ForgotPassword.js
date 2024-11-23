@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import axios from 'axios'; // Import axios
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Logo from "../../assets/images/logo-white.svg";
+import Notification from "../../components/Notification";
 
 class ForgotPassword extends React.Component {
   constructor(props) {
@@ -10,9 +11,12 @@ class ForgotPassword extends React.Component {
     this.state = {
       email: "",  // State to store email input
       errorMessage: "",
-      successMessage: "",
+
+      showNotification: false, // State to control notification visibility
+      notificationText: "", // Text for the notification
+      notificationType: "success" // Type of notification (success or error)
     };
-    
+
   }
 
   handleEmailChange = (event) => {
@@ -27,33 +31,53 @@ class ForgotPassword extends React.Component {
       this.setState({ errorMessage: "Please enter a valid email address." });
       return;
     }
-    console.log(email);
-    
+
     try {
       const response = await axios.post("http://localhost:5124/api/Account/forgot-password", {
         mail: email,  // Send the email in the request body
       });
-
       if (response.status === 200) {
         this.setState({
-          successMessage: "Password reset instructions have been sent to your email.",
-          errorMessage: "",
+          notificationText: "Password reset instructions have been sent to your email!",
+          notificationType: "success",
+          showNotification: true
         });
         // Optionally redirect to login
-        this.props.history.push("login");
+        setTimeout(() => {
+          this.props.history.push('/login');
+        }, 2000);
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        this.setState({ errorMessage: error.response.data.message || "Failed to send reset instructions." });
+        this.setState({
+          notificationText: error.response.data,
+          notificationType: "error",
+          showNotification: true
+        });
       } else {
-        this.setState({ errorMessage: "An error occurred while sending the request." });
+        this.setState({
+          notificationText: "An error occurred while sending the request.!",
+          notificationType: "error",
+          showNotification: true
+        });
       }
     }
   }
 
   render() {
+    const { showNotification, notificationText, notificationType } = this.state;
+
     return (
       <div className="theme-cyan">
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div >
           <div className="vertical-align-wrap">
             <div className="vertical-align-middle auth-main">
@@ -80,9 +104,6 @@ class ForgotPassword extends React.Component {
                       </div>
                       {this.state.errorMessage && (
                         <p style={{ color: "red" }}>{this.state.errorMessage}</p>
-                      )}
-                      {this.state.successMessage && (
-                        <p style={{ color: "green" }}>{this.state.successMessage}</p>
                       )}
                       <button className="btn btn-primary btn-lg btn-block" type="submit">
                         RESET PASSWORD
