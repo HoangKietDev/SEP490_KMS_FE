@@ -381,43 +381,47 @@ class Albumlist extends React.Component {
                       </div>
                     }
                     {roleId === 3 &&
-                      <div className="col-md-3">
-                        <label htmlFor="classFilter">Filter by Class</label>
-                        <select
-                          id="classFilter"
-                          className="form-control"
-                          value={selectedClassId}
-                          onChange={this.handleClassFilterChange}
-                        >
-                          <option value="">All Classes</option>
-                          {classListData.map((classItem) => (
-                            <option key={classItem.classId} value={classItem.classId}>
-                              {classItem.className}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      <>
+                        <div className="col-md-3">
+                          <label htmlFor="classFilter">Filter by Class</label>
+                          <select
+                            id="classFilter"
+                            className="form-control"
+                            value={selectedClassId}
+                            onChange={this.handleClassFilterChange}
+                          >
+                            <option value="">All Classes</option>
+                            {classListData.map((classItem) => (
+                              <option key={classItem.classId} value={classItem.classId}>
+                                {classItem.className}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className=" col-md-3">
+                          <label htmlFor="statusFilter">Filter by Status</label>
+                          <select
+                            id="statusFilter"
+                            className="form-control"
+                            value={this.state.selectedStatusId}
+                            onChange={this.handleStatusFilterChange}
+                          >
+                            <option value="">All Status</option>
+                            {statusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
                     }
 
-                    <div className=" col-md-3">
-                      <label htmlFor="statusFilter">Filter by Status</label>
-                      <select
-                        id="statusFilter"
-                        className="form-control"
-                        value={this.state.selectedStatusId}
-                        onChange={this.handleStatusFilterChange}
-                        disabled={roleId === 2} // Vô hiệu hóa dropdown nếu roleId = 2
-                      >
-                        <option value="">All Status</option>
-                        {statusOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+
+
+
                     <div className="form-group col-md-3">
-                      <label htmlFor="searchFilter">Search</label>                
+                      <label htmlFor="searchFilter">Search</label>
                       <input
                         type="text"
                         id="searchFilter"
@@ -427,7 +431,7 @@ class Albumlist extends React.Component {
                         placeholder="Enter album title"
                       />
                     </div>
-                    <div className="form-group col-md-3 align-content-end"> 
+                    <div className="form-group col-md-3 align-content-end">
                       <button className="btn btn-primary" onClick={this.handleClearFilters}>
                         Clear Filters
                       </button>

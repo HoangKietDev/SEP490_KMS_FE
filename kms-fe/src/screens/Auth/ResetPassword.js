@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // Don't forget to import axios if you're making API requests
 import Logo from "../../assets/images/logo-white.svg";
+import Notification from "../../components/Notification";
 
 class ResetPassword extends React.Component {
 
@@ -15,7 +16,11 @@ class ResetPassword extends React.Component {
       errorMessage: "",
       successMessage: "",
       showPassword: false, // State to manage password visibility
-      showConfirmPassword: false // State to manage password visibility
+      showConfirmPassword: false, // State to manage password visibility
+
+      showNotification: false, // State to control notification visibility
+      notificationText: "", // Text for the notification
+      notificationType: "success" // Type of notification (success or error)
     };
   }
 
@@ -57,11 +62,18 @@ class ResetPassword extends React.Component {
 
       if (response.status === 200) {
         this.setState({
-          successMessage: "Password successfully reset!",
           errorMessage: "",
         });
+        this.setState({
+          notificationText: "Password successfully reset!",
+          notificationType: "success",
+          showNotification: true
+        });
+        
         // Optionally redirect to login after successful password reset
-        this.props.history.push("login");
+        setTimeout(() => {
+          this.props.history.push('/login');
+        }, 2000);
       }
     } catch (error) {
       // If the response is a string (not an object)
@@ -85,9 +97,20 @@ class ResetPassword extends React.Component {
   render() {
 
     const { showPassword, showConfirmPassword } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+    
 
     return (
       <div className="theme-cyan">
+         {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div >
           <div className="vertical-align-wrap">
             <div className="vertical-align-middle auth-main">
@@ -128,7 +151,7 @@ class ResetPassword extends React.Component {
                           placeholder="Confirm Password"
                           type={showConfirmPassword ? "text" : "password"}
                           name="confirmPassword"
-                          value={this.state.confirmPassword} 
+                          value={this.state.confirmPassword}
                           onChange={this.handleInputChange}
                           required
                         />

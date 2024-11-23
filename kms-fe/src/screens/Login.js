@@ -48,7 +48,6 @@ class Login extends React.Component {
         throw new Error("Failed to fetch accounts");
       }
       const accountList = response.data; // Adjust according to your API response structure
-      console.log(accountList);
 
       if (accountList) {
         // Đăng nhập thành công
@@ -63,15 +62,13 @@ class Login extends React.Component {
         if (accountList.user.roleId === 4) {
           window.location.href = "/request";
         }
-      } else {
         this.setState({
-          notificationText: "Incorrect email or password, or your account is inactive.",
-          notificationType: "error",
+          notificationText: "Wellcome to KMS",
+          notificationType: "info",
           showNotification: true
         });
-      }
+      } 
     } catch (error) {
-      console.error("Login error:", error); // Log error details for debugging
       this.setState({
         notificationText: error.response.data,
         notificationType: "error",

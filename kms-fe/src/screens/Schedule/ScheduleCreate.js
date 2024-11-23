@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
+import Notification from "../../components/Notification";
 
 class ScheduleCreate extends React.Component {
 
@@ -13,7 +14,11 @@ class ScheduleCreate extends React.Component {
     classData: [],
     semesterId: null,
     classId: null,
-    semesterName: ''
+    semesterName: '',
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
 
@@ -36,14 +41,13 @@ class ScheduleCreate extends React.Component {
         semesterData: semesterResponse.data,
       });
     } catch (error) {
-      console.error("Error fetching data: ", error);
+      console.error('Error:', error);
     }
   }
 
 
   handleCreateSchedule = async (event) => {
     event.preventDefault(); // Prevent form from reloading the page
-
     // Prepare the schedule data to send
     const { startdate, enddate, classId, semesterId } = this.state;
     const scheduleData = {
@@ -58,10 +62,23 @@ class ScheduleCreate extends React.Component {
       const response = await axios.post(`http://localhost:5124/api/Schedule/AddSchedule`, scheduleData);
       console.log('Schedule created successfully:', response.data);
 
-      // Optionally, you can redirect or show a success message after creation
-      this.props.history.push('/listschedule'); // Redirect to the schedule list after creation
+      this.setState({
+        notificationText: "Schedule Create successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
+
+      // Set timeout để chuyển hướng sau 2 giây
+      setTimeout(() => {
+        this.props.history.push('/listschedule');
+      }, 2000);
+
     } catch (error) {
-      console.error('Error creating schedule:', error);
+      this.setState({
+        notificationText: "Schedule Create error!",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -69,13 +86,13 @@ class ScheduleCreate extends React.Component {
     const selectedClassId = event.target.value;
     this.setState({ classId: selectedClassId }, () => {
       const classchoose = this.state.classData.find((i) => i.classId === parseInt(this.state.classId));
-      
+
       console.log(classchoose);
-      
+
       if (classchoose) {
         const relatedSemester = this.state.semesterData.filter((i) => i.semesterId === classchoose.semesterId);
         console.log(relatedSemester);
-        
+
         this.setState({
           semesterId: relatedSemester[0]?.semesterId,
           semesterName: relatedSemester[0]?.name,
@@ -88,8 +105,19 @@ class ScheduleCreate extends React.Component {
 
 
   render() {
+    const { showNotification, notificationText, notificationType } = this.state;
+
     return (
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div className="container-fluid">
           <PageHeader
             HeaderText="New Schedule"

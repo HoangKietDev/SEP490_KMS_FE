@@ -8,10 +8,9 @@ import Notification from "../../components/Notification";
 class UserCreate extends React.Component {
 
     state = {
-        semesterDetail: null,
-        email: "",
+        mail: "",
+        roleId: "",
         password: '',
-        role: "",
 
         roleMap: {
             1: "Admin",
@@ -29,35 +28,36 @@ class UserCreate extends React.Component {
         window.scrollTo(0, 0);
     }
 
-    handleCreatSemester = async (event) => {
+    handleCreatUser = async (event) => {
         event.preventDefault(); // Ngăn hành vi mặc định của form
         const values = {
-            Email: this.state.Email,
+            mail: this.state.mail,
+            roleId: this.state.roleId,
+            password: ''
         };
         try {
             const response = await axios.post(
-                "http://localhost:5124/api/Semester/AddSemester", values
+                "http://localhost:5124/api/Account/register", values
             );
             this.setState({
-                notificationText: "Semester Create successfully!",
+                notificationText: "Account User Create successfully!",
                 notificationType: "success",
                 showNotification: true
             });
-            setTimeout(() => {
-                if (this.state.showNotification) {
-                    this.props.history.push('/semester');
-                }
-            }, 1000);
-        } catch (error) {
-            let errorMessage = "An unexpected error occurred!";
-
-            if (error.response?.data) {
-                const fullMessage = error.response.data; // Lấy thông báo đầy đủ
-                const startIndex = fullMessage.lastIndexOf(":") + 1; // Vị trí bắt đầu từ dấu `:`
-                errorMessage = fullMessage.slice(startIndex).trim(); // Lấy phần sau dấu `:` và xóa khoảng trắng
-            }
             this.setState({
-                notificationText: errorMessage,
+                mail: "",
+                roleId: "",
+            });
+        } catch (error) {
+            // let errorMessage = "An unexpected error occurred!";
+
+            // if (error.response?.data) {
+            //     const fullMessage = error.response.data; // Lấy thông báo đầy đủ
+            //     const startIndex = fullMessage.lastIndexOf(":") + 1; // Vị trí bắt đầu từ dấu `:`
+            //     errorMessage = fullMessage.slice(startIndex).trim(); // Lấy phần sau dấu `:` và xóa khoảng trắng
+            // }
+            this.setState({
+                notificationText: error.response?.data,
                 notificationType: "error",
                 showNotification: true
             });
@@ -65,7 +65,7 @@ class UserCreate extends React.Component {
     };
 
     render() {
-        const { email, password } = this.state;
+        const { mail, roleId } = this.state;
         const { showNotification, notificationText, notificationType } = this.state;
 
 
@@ -91,7 +91,7 @@ class UserCreate extends React.Component {
                         <PageHeader
                             HeaderText="User Create"
                             Breadcrumb={[
-                                { name: "UserList", navigate: "user" },
+                                { name: "User", navigate: "user" },
                                 { name: "User Create", navigate: "" },
                             ]}
                         />
@@ -99,14 +99,15 @@ class UserCreate extends React.Component {
                             <div className="col-md-12">
                                 <div className="card">
                                     <div className="body">
-                                        <form onSubmit={this.handleCreatSemester}>
+                                        <form onSubmit={this.handleCreatUser}>
                                             <div className="row">
                                                 <div className="form-group col-md-6">
                                                     <label>Enter Email </label>
                                                     <input
+                                                        type="email"
                                                         className={`form-control`}
-                                                        value={email} // Bind value from state
-                                                        name="email"
+                                                        value={mail} // Bind value from state
+                                                        name="mail"
                                                         required
                                                         onChange={(e) => {
                                                             this.setState({
@@ -115,47 +116,31 @@ class UserCreate extends React.Component {
                                                         }}
                                                     />
                                                 </div>
-                                                <div className="form-group  col-md-6">
-                                                    <label>Enter Password</label>
-                                                    <input
-                                                        className={`form-control`}
-                                                        value={password} // Bind value from state
-                                                        name="password"
+                                                <div className="form-group col-md-6">
+                                                    <label>Select Role</label>
+                                                    <select
+                                                        className="form-control"
+                                                        name="role"
+                                                        value={this.state.roleId} // Bind value từ state
                                                         required
                                                         onChange={(e) => {
-                                                            this.setState({
-                                                                [e.target.name]: e.target.value,
-                                                            });
+                                                            this.setState({ roleId: e.target.value });
                                                         }}
-                                                    />
+                                                    >
+                                                        <option value="" >Select a Role</option>
+                                                        {Object.entries(this.state.roleMap).map(([key, value]) => (
+                                                            <option key={key} value={key}>
+                                                                {value}
+                                                            </option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </div>
-                                            <div className="row">
-                                            <div className="form-group col-md-6">
-                                                <label>Select Role</label>
-                                                <select
-                                                    className="form-control"
-                                                    name="role"
-                                                    value={this.state.role} // Bind value từ state
-                                                    required
-                                                    onChange={(e) => {
-                                                        this.setState({ role: e.target.value });
-                                                    }}
-                                                >
-                                                    <option value="" disabled>Select a Role</option>
-                                                    {Object.entries(this.state.roleMap).map(([key, value]) => (
-                                                        <option key={key} value={key}>
-                                                            {value}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            </div>
-                                            
+
                                             <br />
                                             <br />
-                                            <button type="submit" className="btn btn-primary mr-4">Create Semester</button>
-                                            <a href="semester" className="btn btn-success text-center">Back to Semester List</a>
+                                            <button type="submit" className="btn btn-primary mr-4">Create User</button>
+                                            <a href="user" className="btn btn-success text-center">Back to User List</a>
                                         </form>
                                     </div>
                                 </div>

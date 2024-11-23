@@ -6,6 +6,7 @@ import axios from "axios";
 import Login from "../Login";
 import { getSession } from "../../components/Auth/Auth";
 import { addNotificationByRoleId, addNotificationByUserId } from "../../components/Common/Notification";
+import Notification from "../../components/Notification";
 
 
 
@@ -14,6 +15,10 @@ class ScheduleList extends React.Component {
     ScheduleListData: [],
     classData: [],
     semesterListData: [],
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -82,10 +87,18 @@ class ScheduleList extends React.Component {
           schedule.scheduleId === scheduleId ? { ...schedule, status: newStatus } : schedule
         )
       }));
-      alert("Status updated successfully.");
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Failed to update status.");
+      this.setState({
+        notificationText: "Status updated Error!",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -99,6 +112,8 @@ class ScheduleList extends React.Component {
 
   render() {
     const { ScheduleListData, classData, semesterListData } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     const statusOptions = [
       { value: 1, label: "Active", className: "badge-success" },
       { value: 2, label: "Inactive", className: "badge-danger" },
@@ -115,6 +130,15 @@ class ScheduleList extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader

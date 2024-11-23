@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import { withRouter } from "react-router-dom/cjs/react-router-dom";
+import Notification from "../../components/Notification";
 
 class CategoryUpdate extends React.Component {
     state = {
@@ -11,6 +12,10 @@ class CategoryUpdate extends React.Component {
         errorMessage: "",
         name: "", // Initialize with empty string
         baseTuitionFee: "", // Initialize with empty string
+
+        showNotification: false, // Để hiển thị thông báo
+        notificationText: "", // Nội dung thông báo
+        notificationType: "success", // Loại thông báo (success/error)
     };
 
     componentDidMount() {
@@ -53,19 +58,40 @@ class CategoryUpdate extends React.Component {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Grade has been updated successfully!");
-            this.props.history.push('/grade'); // Redirect to category list after successful update
+            this.setState({
+                notificationText: "Grade updated successfully!",
+                notificationType: "success",
+                showNotification: true,
+            });
+            setTimeout(() => {
+                if (this.state.showNotification) {
+                    this.props.history.push('/grade');
+                }
+            }, 1000);
         } catch (error) {
-            console.error('Error updating grade:', error);
-            this.setState({ errorMessage: 'Error updating grade' });
+            this.setState({
+                notificationText: "Error updating grade",
+                notificationType: "error",
+                showNotification: true,
+            });
         }
     };
 
     render() {
         const { gradeDetail, name, baseTuitionFee } = this.state;
+        const { showNotification, notificationText, notificationType } = this.state;
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div>
                     <div className="container-fluid">
                         <PageHeader

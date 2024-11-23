@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
+import { getSession } from "../../components/Auth/Auth";
 
 
 class RequestList extends React.Component {
@@ -57,8 +58,10 @@ class RequestList extends React.Component {
       4: "Rejected",
     };
     let NewRequestListData = []
-    const userData = JSON.parse(localStorage.getItem("user")).user;
-    const roleId = userData.roleId
+
+    const userData = getSession('user')?.user;
+    const roleId = userData?.roleId
+
     console.log(RequestListData);
 
     if (roleId === 5) {
@@ -148,7 +151,27 @@ class RequestList extends React.Component {
                                     })()}
                                   </td>
 
-                                  {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 3 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 5) ? (
+                                  {/* {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 3 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 5) ? ( */}
+                                  <td className="project-actions">
+                                    <a className="btn btn-outline-secondary mr-1"
+                                      onClick={() => this.handleDetail(request.requestId)}
+                                    >
+                                      <i className="icon-eye"></i>
+                                    </a>
+
+                                    {(roleId === 3 || roleId === 2 || roleId === 5) && (
+                                      <a className="btn btn-outline-secondary"
+                                        onClick={() => this.handleEdit(request.requestId)}
+                                      >
+                                        <i className="icon-pencil"></i>
+                                      </a>
+                                    )}
+                                  </td>
+                                  {/* ) : (
+                                    <td></td>
+                                  )} */}
+
+                                  {/* {(roleId === 3 || roleId === 2 || roleId === 4) ? (
                                     <td className="project-actions">
                                       <a className="btn btn-outline-secondary mr-1"
                                         onClick={() => this.handleDetail(request.requestId)}
@@ -156,7 +179,7 @@ class RequestList extends React.Component {
                                         <i className="icon-eye"></i>
                                       </a>
 
-                                      {(roleId === 3 || roleId === 5) && (
+                                      {(roleId === 3 || roleId === 4) && (
                                         <a className="btn btn-outline-secondary"
                                           onClick={() => this.handleEdit(request.requestId)}
                                         >
@@ -166,7 +189,7 @@ class RequestList extends React.Component {
                                     </td>
                                   ) : (
                                     <td></td>
-                                  )}
+                                  )} */}
                                 </tr>
                               </React.Fragment>
                             );

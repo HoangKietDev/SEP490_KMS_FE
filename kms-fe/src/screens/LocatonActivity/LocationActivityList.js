@@ -5,6 +5,8 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Pagination from "../../components/Common/Pagination";
 import { Modal, Button, Form } from "react-bootstrap"; // Thêm modal từ react-bootstrap
+import Notification from "../../components/Notification";
+import { getSession } from "../../components/Auth/Auth";
 
 
 class LocationActivityList extends React.Component {
@@ -22,9 +24,18 @@ class LocationActivityList extends React.Component {
 
     newLocationName: "", // State để lưu trữ tên địa điểm mới
     showModalLocation: false, // State để kiểm soát hiển thị modal
+    selectedStatusLocation: "", // Lưu trạng thái được chọn để lọc
+    FilterLocationListData: [],
 
     newActivityName: "", // State để lưu trữ tên địa điểm mới
     showModalActivity: false, // State để kiểm soát hiển thị modal
+    selectedStatusActivity: "", // Lưu trạng thái được chọn để lọc
+    FilterActivityListData: [],
+
+
+    showNotification: false,
+    notificationText: "",
+    notificationType: "success",
   };
 
   componentDidMount() {
@@ -33,6 +44,7 @@ class LocationActivityList extends React.Component {
     axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
       .then((response) => {
         this.setState({ LocationListData: response.data });
+        this.setState({ FilterLocationListData: response.data });
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
@@ -41,6 +53,8 @@ class LocationActivityList extends React.Component {
     axios.get("http://localhost:5124/api/LocationActivity/GetAllActivities")
       .then((response) => {
         this.setState({ ActivityListData: response.data });
+        this.setState({ FilterActivityListData: response.data });
+
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
@@ -51,15 +65,24 @@ class LocationActivityList extends React.Component {
   handleCreateLocation = () => {
     const { newLocationName } = this.state;
     if (!newLocationName.trim()) {
-      alert("Please enter a location name.");
+      this.setState({
+        notificationText: "Please enter a Location name!",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
 
     axios.post("http://localhost:5124/api/LocationActivity/AddLocation", {
       locationName: newLocationName,
+      status: 0
     })
       .then((response) => {
-        alert("Location added successfully!");
+        this.setState({
+          notificationText: "Location added successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
         // Gọi lại API để lấy danh sách mới nhất
         axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
           .then((response) => {
@@ -74,8 +97,11 @@ class LocationActivityList extends React.Component {
           });
       })
       .catch((error) => {
-        console.error("Error adding location: ", error);
-        alert("Failed to add location. Please try again.");
+        this.setState({
+          notificationText: "Failed to add location!",
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
 
@@ -101,6 +127,7 @@ class LocationActivityList extends React.Component {
 
     axios.post("http://localhost:5124/api/LocationActivity/AddActivity", {
       activityName: newActivityName,
+      status: 0
     })
       .then((response) => {
         alert("Activity added successfully!");
@@ -154,24 +181,110 @@ class LocationActivityList extends React.Component {
     this.setState({ currentPageLocation: pageNumber });
   };
 
+  handleStatusFilterLocation = (status) => {
+    let filteredData = this.state.LocationListData;
+    this.setState({ selectedStatusLocation: status }, () => {
+      const filteredLocations = filteredData?.filter((location) =>
+        status === "" ? true : location.status == status
+      );
+      this.setState({ FilterLocationListData: filteredLocations });
+    });
+  };
+
+  handleStatusChangeLocation = async (location, newStatus) => {
+    try {
+      const response = await axios.put(`http://localhost:5124/api/LocationActivity/UpdateLocation`, {
+        locationId: location.locationId,
+        locationName: location.locationName,
+        status: newStatus
+      });
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true,
+      });
+
+      // Cập nhật trạng thái trong state
+      this.setState((prevState) => {
+        const updatedLocationListData = prevState.FilterLocationListData.map((item) =>
+          item.locationId === location.locationId ? { ...item, status: newStatus } : item
+        );
+        return { FilterLocationListData: updatedLocationListData };
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      this.setState({
+        notificationText: "Error updating status!",
+        notificationType: "error",
+        showNotification: true,
+      });
+    }
+  };
+
+  handleStatusFilterActivity = (status) => {
+    let filteredData = this.state.ActivityListData;
+    this.setState({ selectedStatusActivity: status }, () => {
+      const filteredActivitys = filteredData?.filter((activity) =>
+        status === "" ? true : activity.status == status
+      );
+      this.setState({ FilterActivityListData: filteredActivitys });
+    });
+  };
+
+  handleStatusChangeActivity = async (activity, newStatus) => {
+    try {
+      const response = await axios.put(`http://localhost:5124/api/LocationActivity/UpdateActivity`, {
+        activityId: activity.activityId,
+        activityName: activity.activityName,
+        status: newStatus
+      });
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true,
+      });
+
+      // Cập nhật trạng thái trong state
+      this.setState((prevState) => {
+        const updatedActivityListData = prevState.FilterActivityListData.map((item) =>
+          item.activityId === activity.activityId ? { ...item, status: newStatus } : item
+        );
+        return { FilterActivityListData: updatedActivityListData };
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      this.setState({
+        notificationText: "Error updating status!",
+        notificationType: "error",
+        showNotification: true,
+      });
+    }
+  };
+
   render() {
-    const { LocationListData, ActivityListData, newLocationName, showModalLocation , newActivityName, showModalActivity} = this.state;
-    const statusDescriptions = {
-      1: "Active",
-      2: "Inactive",
-    };
+    const { FilterLocationListData, FilterActivityListData, newLocationName, showModalLocation, newActivityName, showModalActivity } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
+    const statusOptions = [
+      { value: 1, label: "Active", className: "badge-success" },
+      { value: 0, label: "InActive", className: "badge-default" },
+    ];
 
     // phan trang activity
     const { currentPageActivity, itemsPerPage } = this.state;
     const indexOfLastItemActivity = currentPageActivity * itemsPerPage;
     const indexOfFirstItemActivity = indexOfLastItemActivity - itemsPerPage;
-    const currentItemsActivity = ActivityListData.slice(indexOfFirstItemActivity, indexOfLastItemActivity);
+    const currentItemsActivity = FilterActivityListData.slice(indexOfFirstItemActivity, indexOfLastItemActivity);
 
     // phan trang location
     const { currentPageLocation } = this.state;
     const indexOfLastItemLocation = currentPageLocation * itemsPerPage;
     const indexOfFirstItemLocation = indexOfLastItemLocation - itemsPerPage;
-    const currentItemsLocation = LocationListData.slice(indexOfFirstItemLocation, indexOfLastItemLocation);
+    const currentItemsLocation = FilterLocationListData.slice(indexOfFirstItemLocation, indexOfLastItemLocation);
+
+    // Get user data from cookie
+    const userData = getSession('user')?.user;
+    const roleId = userData?.roleId;
 
     return (
       <div
@@ -180,6 +293,15 @@ class LocationActivityList extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader
@@ -205,12 +327,26 @@ class LocationActivityList extends React.Component {
                     <div className="col-md-6">
                       <div className="d-flex justify-content-between">
                         <h4>Location Table</h4>
-                        <a
-                          onClick={this.handleShowModalLocation}
-                          className="btn btn-primary text-white mb-2"
+                        {/* Filter by status */}
+                        <select
+                          className="form-control"
+                          style={{ width: "200px" }}
+                          value={this.state.selectedStatus} // Bind với state
+                          onChange={(e) => this.handleStatusFilterLocation(e.target.value)}
                         >
-                          <i className="icon-plus"></i>
-                        </a>
+                          <option value="">All Status Location</option>
+                          <option value="1">Active</option>
+                          <option value="0">Inactive</option>
+                        </select>
+                        {roleId === 3 ?
+                          <a
+                            onClick={() => this.handleShowModalLocation()}
+                            className="btn btn-primary text-white mb-2"
+                          >
+                            <i className="icon-plus"></i>
+                          </a>
+                          : <></>
+                        }
                       </div>
                       <div className="table-responsive">
                         <table className="table m-b-0 table-hover">
@@ -228,28 +364,29 @@ class LocationActivityList extends React.Component {
                                   <tr>
                                     <td>{index + 1}</td>
                                     <td>{item?.locationName}</td>
-                                    <td>{item?.status}</td>
 
-                                    {/* 
-                                    {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 3 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 5) ? (
-                                      <td className="project-actions">
-                                        <a className="btn btn-outline-secondary mr-1"
-                                          onClick={() => this.handleDetail(request.requestId)}
+                                    {(roleId === 4) && ( // Chỉ cho phép roleId = 4 thay đổi trạng thái
+                                      <td>
+                                        <select
+                                          value={item?.status}
+                                          onChange={(e) => this.handleStatusChangeLocation(item, parseInt(e.target.value))}
+                                          className={`form-control ${item?.status === 1 ? 'badge-success' : 'badge-default'}`}
                                         >
-                                          <i className="icon-eye"></i>
-                                        </a>
-
-                                        {(roleId === 3 || roleId === 5) && (
-                                          <a className="btn btn-outline-secondary"
-                                            onClick={() => this.handleEdit(request.requestId)}
-                                          >
-                                            <i className="icon-pencil"></i>
-                                          </a>
-                                        )}
+                                          {statusOptions.map(option => (
+                                            <option key={option.value} value={option.value} className={option.className}>
+                                              {option.label}
+                                            </option>
+                                          ))}
+                                        </select>
                                       </td>
-                                    ) : (
-                                      <td></td>
-                                    )} */}
+                                    )}
+                                    {(roleId === 3) && ( // Nếu roleId = 3 chỉ hiển thị trạng thái mà không có select
+                                      <td>
+                                        <span className={`badge ${item?.status === 1 ? 'badge-success' : 'badge-default'}`}>
+                                          {statusOptions.find(option => option.value === item?.status)?.label} {/* Hiển thị trạng thái */}
+                                        </span>
+                                      </td>
+                                    )}
                                   </tr>
 
                                 </React.Fragment>
@@ -260,7 +397,7 @@ class LocationActivityList extends React.Component {
                         <div className="pt-4">
                           <Pagination
                             currentPage={currentPageLocation}
-                            totalItems={LocationListData.length}
+                            totalItems={FilterLocationListData.length}
                             itemsPerPage={itemsPerPage}
                             onPageChange={this.handlePageChangeLocation}
                           />
@@ -270,12 +407,26 @@ class LocationActivityList extends React.Component {
                     <div className="col-md-6">
                       <div className="d-flex justify-content-between">
                         <h4>Actibity Table</h4>
-                        <a
-                          onClick={() => this.handleShowModalActivity()}
-                          className="btn btn-primary text-white mb-2"
+                        {/* Filter by status */}
+                        <select
+                          className="form-control"
+                          style={{ width: "200px" }}
+                          value={this.state.selectedStatus} // Bind với state
+                          onChange={(e) => this.handleStatusFilterActivity(e.target.value)}
                         >
-                          <i className="icon-plus"></i>
-                        </a>
+                          <option value="">All Status Activity</option>
+                          <option value="1">Active</option>
+                          <option value="0">Inactive</option>
+                        </select>
+                        {roleId === 3 &&
+                          <a
+                            onClick={() => this.handleShowModalActivity()}
+                            className="btn btn-primary text-white mb-2"
+                          >
+                            <i className="icon-plus"></i>
+                          </a>
+                        }
+
                       </div>
                       <div className="table-responsive">
                         <table className="table m-b-0 table-hover">
@@ -293,27 +444,28 @@ class LocationActivityList extends React.Component {
                                   <tr>
                                     <td>{index + 1}</td>
                                     <td>{item?.activityName}</td>
-                                    <td>{item?.status}</td>
-
-                                    {/* {(statusDescriptions[request?.statusRequest] === 'Processing' && roleId === 3 || statusDescriptions[request?.statusRequest] === 'Pending' && roleId === 5) ? (
-                                      <td className="project-actions">
-                                        <a className="btn btn-outline-secondary mr-1"
-                                          onClick={() => this.handleDetail(request.requestId)}
+                                    {(roleId === 4) && ( // Chỉ cho phép roleId = 4 thay đổi trạng thái
+                                      <td>
+                                        <select
+                                          value={item?.status}
+                                          onChange={(e) => this.handleStatusChangeActivity(item, parseInt(e.target.value))}
+                                          className={`form-control ${item?.status === 1 ? 'badge-success' : 'badge-default'}`}
                                         >
-                                          <i className="icon-eye"></i>
-                                        </a>
-
-                                        {(roleId === 3 || roleId === 5) && (
-                                          <a className="btn btn-outline-secondary"
-                                            onClick={() => this.handleEdit(request.requestId)}
-                                          >
-                                            <i className="icon-pencil"></i>
-                                          </a>
-                                        )}
+                                          {statusOptions.map(option => (
+                                            <option key={option.value} value={option.value} className={option.className}>
+                                              {option.label}
+                                            </option>
+                                          ))}
+                                        </select>
                                       </td>
-                                    ) : (
-                                      <td></td>
-                                    )} */}
+                                    )}
+                                    {(roleId === 3) && ( // Nếu roleId = 3 chỉ hiển thị trạng thái mà không có select
+                                      <td>
+                                        <span className={`badge ${item?.status === 1 ? 'badge-success' : 'badge-default'}`}>
+                                          {statusOptions.find(option => option.value === item?.status)?.label} {/* Hiển thị trạng thái */}
+                                        </span>
+                                      </td>
+                                    )}
                                   </tr>
                                 </React.Fragment>
                               );
@@ -323,7 +475,7 @@ class LocationActivityList extends React.Component {
                         <div className="pt-4">
                           <Pagination
                             currentPage={currentPageActivity}
-                            totalItems={ActivityListData.length}
+                            totalItems={FilterActivityListData.length}
                             itemsPerPage={itemsPerPage}
                             onPageChange={this.handlePageChangeActivity}
                           />

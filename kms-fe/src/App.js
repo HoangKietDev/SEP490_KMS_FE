@@ -269,7 +269,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/locationActivity`}
                   component={LocationActivityList}
-                  allowedRoles={[3]}
+                  allowedRoles={[3,4]}
                 />
 
                 <ProtectedRoute

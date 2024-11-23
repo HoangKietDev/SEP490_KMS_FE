@@ -7,6 +7,8 @@ import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { getSession } from "../../components/Auth/Auth";
+import Notification from "../../components/Notification";
+
 
 class ScheduleDetailCreate extends React.Component {
 
@@ -67,6 +69,10 @@ class ScheduleDetailCreate extends React.Component {
     weekdate: '',
 
     showLocation: false,
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
 
@@ -80,19 +86,21 @@ class ScheduleDetailCreate extends React.Component {
         const urlParams = new URLSearchParams(this.props.location.search);
         const defaultClassId = urlParams.get('classId') || '';
 
-        const activityrespone = await axios.get(`http://localhost:5124/api/Schedule/GetAllActivities`);
+        const activityrespone = await axios.get(`http://localhost:5124/api/LocationActivity/GetAllActivities`);
         const activitydata = activityrespone.data;
 
-        const locationrespone = await axios.get(`http://localhost:5124/api/Schedule/GetAllLocations`);
+        const locationrespone = await axios.get(`http://localhost:5124/api/LocationActivity/GetAllLocations`);
         const locationdata = locationrespone.data;
 
 
+        console.log(activitydata);
+        
         // Update state with the default class and then fetch schedule data
         this.setState({
           classData: data,
           selectId: defaultClassId,
-          activities: activitydata,
-          locations: locationdata,
+          activities: activitydata?.filter(i=>i.status == 1),
+          locations: locationdata?.filter(i=>i.status == 1),
         }, async () => {
           // Fetch schedule data only after state update
           const { selectId } = this.state;
@@ -136,10 +144,6 @@ class ScheduleDetailCreate extends React.Component {
   };
 
 
-  handleLocation = async (event) => {
-
-  }
-
   handleShowLocation = () => {
     this.setState({ showLocation: true });
   };
@@ -148,9 +152,6 @@ class ScheduleDetailCreate extends React.Component {
     this.setState({ showLocation: false });
   };
 
-  handleActivity = async (event) => {
-
-  }
 
   handleSlotChange = (slotKey, field, value) => {
     const [day, timeSlotName] = slotKey.split('/');
@@ -202,7 +203,11 @@ class ScheduleDetailCreate extends React.Component {
 
     // Kiểm tra xem người dùng đã chọn startWeek và endWeek chưa
     if (!startWeek || !endWeek) {
-      alert('Please select both the start week and end week.');
+      this.setState({
+        notificationText: "Please select both the start week and end week.!",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -222,7 +227,11 @@ class ScheduleDetailCreate extends React.Component {
     });
 
     if (incompleteSlots.length > 0) {
-      alert('Please ensure all activity and location fields are filled out for all weekslots before saving.');
+      this.setState({
+        notificationText: "Please ensure all activity and location fields are filled out for all weekslots before saving.!",
+        notificationType: "info",
+        showNotification: true
+      });
       return; // Dừng thực hiện nếu có bản ghi chưa điền đủ
     }
 
@@ -268,20 +277,31 @@ class ScheduleDetailCreate extends React.Component {
       try {
         const response = await axios.post('http://localhost:5124/api/ScheduleDetail/AddListScheduleDetails', formattedDetails);
         console.log(`Schedule for week ${weekString} saved successfully!`, response.data);
+
       } catch (error) {
-        console.error(`Error saving schedule for week ${weekString}:`, error);
-        alert(`Failed to save schedule for week ${weekString}. Please try again.`);
+        this.setState({
+          notificationText: "Failed to save schedule. Please try again !",
+          notificationType: "error",
+          showNotification: true
+        });
       }
     }
-
-    alert('Schedule duplicated successfully for the selected weeks!');
+    this.setState({
+      notificationText: "Save and Duplicate Schedule successfully!",
+      notificationType: "success",
+      showNotification: true
+    });
   };
 
 
   handleCreateLocation = () => {
     const { newLocationName } = this.state;
     if (!newLocationName.trim()) {
-      alert("Please enter a location name.");
+      this.setState({
+        notificationText: "Please enter a location name.",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -289,7 +309,11 @@ class ScheduleDetailCreate extends React.Component {
       locationName: newLocationName,
     })
       .then((response) => {
-        alert("Location added successfully!");
+        this.setState({
+          notificationText: "Location added successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
         // Gọi lại API để lấy danh sách mới nhất
         axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
           .then((response) => {
@@ -305,7 +329,11 @@ class ScheduleDetailCreate extends React.Component {
       })
       .catch((error) => {
         console.error("Error adding location: ", error);
-        alert("Failed to add location. Please try again.");
+        this.setState({
+          notificationText: "Failed to add location. Please try again.!",
+          notificationType: "error",
+          showNotification: true
+        });
       });
   };
 
@@ -325,7 +353,11 @@ class ScheduleDetailCreate extends React.Component {
   handleCreateActivity = () => {
     const { newActivityName } = this.state;
     if (!newActivityName.trim()) {
-      alert("Please enter a location name.");
+      this.setState({
+        notificationText: "Please enter a Activity name!",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -333,7 +365,11 @@ class ScheduleDetailCreate extends React.Component {
       activityName: newActivityName,
     })
       .then((response) => {
-        alert("Activity added successfully!");
+        this.setState({
+          notificationText: "Activity added successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
         // Gọi lại API để lấy danh sách mới nhất
         axios.get("http://localhost:5124/api/LocationActivity/GetAllActivities")
           .then((response) => {
@@ -349,7 +385,11 @@ class ScheduleDetailCreate extends React.Component {
       })
       .catch((error) => {
         console.error("Error adding activity: ", error);
-        alert("Failed to add activity. Please try again.");
+        this.setState({
+          notificationText: "Failed to add activity. Please try again.!",
+          notificationType: "error",
+          showNotification: true
+        });
       });
   };
 
@@ -369,7 +409,10 @@ class ScheduleDetailCreate extends React.Component {
   renderTable = () => {
     const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, activity } = this.state;
     const { newLocationName, showModalLocation, newActivityName, showModalActivity } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
 
+    console.log(this.state.activities);
+    
 
     const userData = (getSession("user")).user;
     const roleId = userData.roleId;
@@ -384,6 +427,15 @@ class ScheduleDetailCreate extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader

@@ -77,7 +77,11 @@ class AlbumCreate extends React.Component {
                 notificationType: "success",
                 showNotification: true
             });
-            this.props.history.push('/album');
+            
+            // Set timeout để chuyển hướng sau 2 giây
+            setTimeout(() => {
+                this.props.history.push('/album');
+            }, 2000);
         } catch (error) {
             console.error("Error creating Album:", error);
             this.setState({

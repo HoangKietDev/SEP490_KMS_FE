@@ -6,17 +6,12 @@ import axios from "axios";
 import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
 import { getSession } from "../../components/Auth/Auth";
+import * as XLSX from 'xlsx';
+import Notification from "../../components/Notification";
+
 
 class Schedule extends React.Component {
 
-  // getCurrentWeek = () => {
-  //   const today = new Date();
-  //   const startYear = new Date(today.getFullYear(), 0, 1);
-  //   const days = Math.floor((today - startYear) / (24 * 60 * 60 * 1000));
-  //   const currentWeek = Math.ceil((days + startYear.getDay() + 1) / 7);
-  //   const year = today.getFullYear();
-  //   return `${year}-W${currentWeek.toString().padStart(2, '0')}`;
-  // };
   getCurrentWeek = () => {
     const today = new Date();
     const vietnamTimezoneOffset = 7 * 60; // GMT+7 offset in minutes
@@ -92,6 +87,10 @@ class Schedule extends React.Component {
     selectedSlot: null, // Để lưu thông tin của slot được chọn
     activities: [],
     locations: [],
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
 
@@ -243,16 +242,22 @@ class Schedule extends React.Component {
         locationId: location.locationId,
         locationName: location.locationName,
       });
-
-      alert("Slot details updated successfully!");
       this.handleCloseModal(); // Close modal after successful update
-
+      this.setState({
+        notificationText: "Slot details updated successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
       // Refetch the schedule data to reflect the changes on the interface
       const { startDate, endDate, selectId } = this.state;
       await this.fetchScheduleData(startDate, endDate, selectId);
     } catch (error) {
       console.error("Error updating slot: ", error);
-      alert("Failed to update slot. Please try again.");
+      this.setState({
+        notificationText: "Failed to update slot. Please try again.",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -315,14 +320,22 @@ class Schedule extends React.Component {
 
       // Kiểm tra phản hồi từ API
       if (response.status === 200) {
-        alert("Import successful!");
+        this.setState({
+          notificationText: "Import successful!!",
+          notificationType: "success",
+          showNotification: true
+        });
         // Có thể làm thêm các thao tác khác như refresh data...
         const { startDate, endDate, selectId } = this.state; // Lấy các giá trị cần thiết
         await this.fetchScheduleData(startDate, endDate, selectId); // Gọi lại hàm fetch dữ liệu
       }
     } catch (error) {
       console.error("Error importing schedule: ", error);
-      alert("Failed to import schedule. Please try again.");
+      this.setState({
+        notificationText: "Failed to import schedule. Please try again.!!",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -330,10 +343,52 @@ class Schedule extends React.Component {
     this.props.history.push(`/create-scheduledetail?classId=${selectId}`);
   }
 
+  handleFileUpload = (e) => {
+    const { scheduleDetails, daysOfWeek } = this.state;
+
+    // Step 1: Group the data by timeSlotName and day
+    const groupedData = scheduleDetails.reduce((acc, item) => {
+      const slot = item.timeSlotName;
+
+      // Initialize the entry for this slot if it doesn't exist yet
+      if (!acc[slot]) {
+        acc[slot] = { slot, ...daysOfWeek.reduce((days, day) => ({ ...days, [day]: "" }), {}) };
+      }
+
+      // Assign activity for the current day
+      acc[slot][item.day] = `${item.activityName} - ${item.locationName}`;
+
+      return acc;
+    }, {});
+
+    // Step 2: Convert grouped data into the required array format
+    const dataExport = Object.values(groupedData);
+
+    // Chuyển dữ liệu thành worksheet
+    const ws = XLSX.utils.json_to_sheet(dataExport);
+
+
+    // Tạo workbook từ worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+    // Xuất file Excel
+    XLSX.writeFile(wb, 'Schedule_data.xlsx');
+  };
+
+  handleDownload = () => {
+    const link = document.createElement('a'); // Tạo thẻ a
+    link.href = '/assets/excel/sample.xlsx';  // Đường dẫn đến file Excel
+    link.download = 'sample.xlsx';             // Tên file khi tải về
+    link.click();                             // Kích hoạt sự kiện click để tải file
+  };
+
 
 
   renderTable = () => {
     const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     const userData = (getSession("user")).user;
     const roleId = userData.roleId;
 
@@ -347,6 +402,15 @@ class Schedule extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader
@@ -382,9 +446,23 @@ class Schedule extends React.Component {
                         </select>
                       </div>
                     </div>
-
+                    {roleId === 2 ? (
+                      <a
+                        onClick={this.handleFileUpload}
+                        className="btn btn-success text-white"
+                      >
+                        <i className="icon-arrow-down mr-2"></i>Export Excel
+                      </a>) : <></>}
                     {roleId === 3 ? (
                       <div>
+                        <a
+                          onClick={() => {
+                            this.handleDownload()
+                          }}
+                          className="btn btn-success text-white mr-4"
+                        >
+                          <i className="icon-arrow-down mr-2"></i>Dowload Template
+                        </a>
                         <a onClick={() => this.fileInput.click()} // Khi nhấn vào thẻ <a>, sẽ mở dialog chọn file
                           className="btn btn-primary text-white mr-4">
                           <i className="icon-arrow-up mr-2"></i>Import Excel
@@ -449,7 +527,7 @@ class Schedule extends React.Component {
                                       <div>
                                         <strong>{result?.activityName || 'No activity'}</strong>
                                         <div className="d-flex flex-column">
-                                          {result?.locationName !== 'trống' && (
+                                          {result?.locationName !== 'Trống' && (
                                             <span style={{ fontSize: 'smaller' }} className="pt-2">
                                               <i className="icon-layers m-1"></i>
                                               {result?.locationName}

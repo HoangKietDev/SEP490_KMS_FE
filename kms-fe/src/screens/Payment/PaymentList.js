@@ -32,20 +32,6 @@ class PaymentList extends React.Component {
 
     showModal: false, // State để kiểm soát hiển thị modal
 
-    "servicesUsed": [
-      {
-        serviceMonth: {
-          name: 'Service Month: 10/2024',
-          total: 15000000,
-        },
-        services: {
-          "service": 1,
-          "serviceName": "Ăn sáng",
-          "price": 20000,
-          "quantity": 2
-        }
-      },
-    ]
   };
 
 
@@ -249,23 +235,21 @@ class PaymentList extends React.Component {
     const year = currentDate.getFullYear(); // Lấy năm hiện tại
     const month = currentDate.getMonth() + 1; // Lấy tháng hiện tại (tháng trả về từ 0 -> 11, cộng 1 để có tháng đúng)
 
-    // Cập nhật paymentName động dựa trên tháng và năm
-    const paymentName = `Payment fee ${month < 10 ? `0${month}` : month}/${year}`;
-
     const paymentData = {
       amount: totalPayment,
       childId: selectedChild,
       tuitionId: selectedTuition ? ChildrenPayment?.tuition[0]?.tuitionId : null,
       serviceId: selectedServices ? selectedServices.map(service => (service.service)) : [],
 
-      paymentName: selectedTuition
-        ? tuition?.paymentName // Nếu có selectedTuition thì lấy paymentName từ tuition
-        : (selectedServices && selectedServices.length > 0)
-          ? `Service fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu có selectedServices và nó có phần tử, trả về "Service"
-          : `Payment fee ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có selectedTuition và selectedServices rỗng, trả về giá trị mặc định
+      paymentName: (selectedTuition && selectedServices && selectedServices.length > 0)
+        ? `Payment fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu cả 2 được chọn
+        : selectedTuition
+          ? `Tuition fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedTuition
+          : (selectedServices && selectedServices.length > 0)
+            ? `Service fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedServices
+            : `Payment fee ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có gì
 
-
-      tuitionAmount: ChildrenPayment?.tuition[0]?.tuitionFee,
+      tuitionAmount: ChildrenPayment?.tuition[0]?.tuitionFee || 0,
       month: selectedDiscount?.number - 1 || 0,
       discount: selectedDiscount?.discountId || 1,
     };
@@ -281,6 +265,7 @@ class PaymentList extends React.Component {
           if (response.data.url) {
             // Điều hướng người dùng đến URL của VNPAY sandbox
             window.location.href = response.data.url;
+
           } else {
             alert("Failed to get payment URL. Please try again.");
           }
@@ -299,7 +284,7 @@ class PaymentList extends React.Component {
     const { ServiceListData, UserListData, tuition, showServices, Children, Class, selectedChild, Payment, ChildrenPayment } = this.state;
     const userData = JSON.parse(localStorage.getItem("user")).user;
     const roleId = userData.roleId
-    const parentId = userData?.userId; 
+    const parentId = userData?.userId;
 
 
     // Tính tổng chi phí của tất cả các dịch vụ
@@ -311,9 +296,6 @@ class PaymentList extends React.Component {
     const currentDate = new Date();
     const year = currentDate.getFullYear(); // Lấy năm hiện tại
     const month = currentDate.getMonth() + 1; // Lấy tháng hiện tại (tháng trả về từ 0 -> 11, cộng 1 để có tháng đúng)
-
-    console.log(ChildrenPayment);
-
 
 
     return (

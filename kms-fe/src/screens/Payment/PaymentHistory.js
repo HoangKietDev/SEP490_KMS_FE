@@ -5,105 +5,266 @@ import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
+import Pagination from "../../components/Common/Pagination";
 
+// Import PDF generation utilities
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+    fontSize: 12,
+    fontFamily: "Helvetica",
+  },
+  header: {
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "grey",
+  },
+  section: {
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  table: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#000",
+    borderStyle: "solid",
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderColor: "#000",
+    borderStyle: "solid",
+  },
+  tableCell: {
+    flex: 1,
+    padding: 5,
+    borderRightWidth: 1,
+    borderColor: "#000",
+    borderStyle: "solid",
+    textAlign: "center",
+  },
+  bold: {
+    fontWeight: "bold",
+  },
+  total: {
+    marginTop: 20,
+    alignItems: "flex-end",
+    paddingRight: 10,
+  },
+  totalText: {
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  notes: {
+    marginTop: 30,
+  },
+});
 
 class PaymentHistory extends React.Component {
   state = {
     historyPayment: [],
     myChildren: [],
     selectedChildren: '',
+    showNotification: false,
+    notificationText: "",
+    notificationType: "success",
 
-    showNotification: false, // State to control notification visibility
-    notificationText: "", // Text for the notification
-    notificationType: "success" // Type of notification (success or error)
-
+    currentPage: 1,
+    itemsPerPage: 10,
   };
 
   async componentDidMount() {
     window.scrollTo(0, 0);
+    this.loadData();
+  }
+
+  componentDidUpdate(prevProps) {
+    // Kiểm tra nếu URL thay đổi
+    if (this.props.location.search !== prevProps.location.search) {
+      this.loadData(); // Tải lại dữ liệu khi URL thay đổi
+    }
+  }
+
+  loadData = async () => {
     const userData = getSession('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
+    if (!parentId) {
+      console.error("Parent ID is missing");
+      return;
+    }
 
     // Lấy tất cả các tham số từ URL
     const queryParams = new URLSearchParams(window.location.search);
-
-    // Tạo một đối tượng để lưu tất cả các tham số từ URL
     const mydata = {};
     queryParams.forEach((value, key) => {
       mydata[key] = value;
     });
-    console.log('All query parameters:', mydata);
 
-    // Kiểm tra nếu các tham số cần thiết có trong URL
+    console.log("All query parameters:", mydata);
+
+    // Kiểm tra nếu có redirect từ VNPAY
     if (mydata.vnp_TxnRef && mydata.vnp_ResponseCode && mydata.vnp_SecureHash) {
-      // Gọi API callback để xác nhận
-      axios.post("http://localhost:5124/api/Payment/payment-callback",
-        {
-          "data": mydata
-        }
-      )
-        .then(response => {
-          console.log('Payment Callback Response:', response.data);
-          this.setState({
-            notificationText: "Payment successfully!",
-            notificationType: "success",
-            showNotification: true
-          });
-          // Xử lý logic nếu cần, ví dụ: hiển thị thông báo thành công
-        })
-        .catch(error => {
-          console.error('Error in Payment Callback:', error);
-          this.setState({
-            notificationText: "Payment Cancel!",
-            notificationType: "error",
-            showNotification: true
-          });
+      try {
+        const response = await axios.post("http://localhost:5124/api/Payment/payment-callback", {
+          data: mydata,
         });
+
+        console.log("Payment Callback Response:", response.data);
+
+        this.setState({
+          notificationText: "Payment successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
+      } catch (error) {
+        console.error("Error in Payment Callback:", error);
+
+        this.setState({
+          notificationText: "Payment Cancel!",
+          notificationType: "error",
+          showNotification: true,
+        });
+      }
     }
 
+    // Tải PaymentHistory
+    try {
+      await this.getPaymentHistory(parentId);
+    } catch (error) {
+      console.error("Error fetching payment history:", error);
+    }
 
-    // Gọi API và cập nhật state bằng axios
-    axios.get(`http://localhost:5124/api/Payment/history/${parentId}`)
-      .then((response) => {
-        this.setState({ historyPayment: response.data });
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
+    // Tải danh sách Children
+    try {
+      const response = await axios.get("http://localhost:5124/api/Children/GetAllChildren");
+      const myChildren = response.data.filter((i) => i.parentId === parentId);
+      this.setState({ myChildren });
+    } catch (error) {
+      console.error("Error fetching children data:", error);
+    }
+  };
 
-    axios.get(`http://localhost:5124/api/Children/GetAllChildren`)
-      .then((response) => {
-        const data = response.data;
-        const myChildren = data?.filter(i => i.parentId === parentId);
-        this.setState({ myChildren: myChildren });
-      })
-      .catch((error) => {
-        console.error("Error fetching data: ", error);
-      });
-  }
+
+  getPaymentHistory = async (parentId) => {
+    if (!parentId) {
+      console.error("Parent ID is required to fetch payment history.");
+      return;
+    }
+    try {
+      const response = await axios.get(`http://localhost:5124/api/Payment/history/${parentId}`);
+      this.setState({ historyPayment: response.data });
+      console.log('Updated Payment History:', response.data);
+    } catch (error) {
+      console.error("Error fetching payment history:", error);
+    }
+  };
+
 
   handleChildrenFilterChange = (e) => {
     const selectedChildren = e.target.value;
     this.setState({ selectedChildren });
   };
 
-  pdfRef = React.createRef(); // Ref duy nhất cho bản ghi
-
-  generatePDF = (item) => {
-
+  handlePageChange = (pageNumber) => {
+    this.setState({ currentPage: pageNumber });
   };
 
+  // Generate PDF using react-pdf
+  generatePDF = (item) => {
+    return (
+      <Document>
+        <Page style={styles.page}>
+          {/* Tiêu đề hóa đơn */}
+          <View style={styles.header}>
+            <Text style={styles.title}>Payment Invoice</Text>
+            <Text style={styles.subtitle}>Thank you for your payment!</Text>
+          </View>
+
+          {/* Thông tin người thanh toán */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Customer Information</Text>
+            <Text>Children Name:  {item?.childName || "John Doe anh Kiệt"}</Text>
+            <Text>Payment Date: {item?.paymentDate || "example@example.com"}</Text>
+            <Text>Payment Name: {item?.paymentName || "DD/MM/YYYY"}</Text>
+          </View>
+
+          {/* Chi tiết thanh toán */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Payment Details</Text>
+            <View style={styles.table}>
+              <View style={styles.tableRow}>
+                <Text style={[styles.tableCell, styles.bold]}>#</Text>
+                <Text style={[styles.tableCell, styles.bold]}>Item</Text>
+                <Text style={[styles.tableCell, styles.bold]}>Price</Text>
+                <Text style={[styles.tableCell, styles.bold]}>Quantity</Text>
+                <Text style={[styles.tableCell, styles.bold]}>Total</Text>
+              </View>
+              {item?.services?.map((item1, index) => (
+                <View style={styles.tableRow} key={index}>
+                  <Text style={styles.tableCell}>{index + 1}</Text>
+                  <Text style={styles.tableCell}>{item1.serviceName}</Text>
+                  <Text style={styles.tableCell}>{item1.servicePrice} VNĐ</Text>
+                  <Text style={styles.tableCell}>{item1.quantity}</Text>
+                  <Text style={styles.tableCell}>{item1.total} VNĐ</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Thông tin tuition */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Tuition Information</Text>
+            <Text>Start Date:  {item?.tuitionDetails?.startDate || "John Doe anh Kiệt"}</Text>
+            <Text>End Date : {item?.tuitionDetails?.endDate || "example@example.com"}</Text>
+            <Text>Tuition Fee : {item?.tuitionDetails?.tuitionFee || "DD/MM/YYYY"}</Text>
+          </View>
+
+          {/* Tổng cộng */}
+          <View style={styles.total}>
+            <Text style={styles.totalText}>Grand Total: {item?.totalAmount} VNĐ</Text>
+          </View>
+
+          {/* Ghi chú */}
+          <View style={styles.notes}>
+            <Text style={styles.sectionTitle}>Notes</Text>
+            <Text>This is an automatically generated invoice. Please keep it for your records.</Text>
+          </View>
+        </Page>
+      </Document>
+
+    );
+  };
 
   render() {
-    const { historyPayment, myChildren, selectedChildren, currentItems, description, status, createAt, studentName, createByName, ReasonReject } = this.state;
-    const { showNotification, notificationText, notificationType } = this.state;
+    const { historyPayment, myChildren, selectedChildren, showNotification, notificationText, notificationType } = this.state;
 
-    // Lọc dữ liệu historyPayment dựa trên đứa trẻ được chọn
+
+
+    // Filter payment history based on selected children
     const filteredHistory = selectedChildren
-      ? historyPayment.filter(item => item.childid == selectedChildren)
+      ? historyPayment.filter(item => item.childId == selectedChildren)
       : historyPayment;
+
+    // phan trang activity
+    const { currentPage, itemsPerPage } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredHistory.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
       <div
@@ -177,7 +338,7 @@ class PaymentHistory extends React.Component {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredHistory.map((item, index) => (
+                        {currentItems.map((item, index) => (
                           <React.Fragment key={index}>
                             <tr>
                               <td>{index + 1}</td>
@@ -186,43 +347,20 @@ class PaymentHistory extends React.Component {
                               <td>{item?.totalAmount} VNĐ</td>
                               <td>{item?.paymentName}</td>
                               <td>
-                                {/* Generate PDF button */}
+                                {/* Download button */}
                                 <PDFDownloadLink
-                                  document={
-                                    <Document>
-                                      <Page size="A4">
-                                        <View style={styles.page}>
-                                          <Text style={styles.title}>Payment Details</Text>
-                                          <Text><strong>Child Name:</strong> {item?.childName}</Text>
-                                          <Text><strong>Payment Date:</strong> {item?.paymentDate}</Text>
-                                          <Text><strong>Total Amount:</strong> {item?.totalAmount} VNĐ</Text>
-                                          <Text><strong>Payment Name:</strong> {item?.paymentName}</Text>
-                                        </View>
-                                      </Page>
-                                    </Document>
-                                  }
-                                  fileName={`payment_${item?.childName || "unknown"}.pdf`}
+                                  document={this.generatePDF(item)}
+                                  fileName="payment-history.pdf"
                                 >
-                                  {({ loading }) =>
-                                    loading ? 'Generating PDF...' : 'Download PDF'
-                                  }
+                                  {({ loading }) => (loading ? 'Loading document...' : 'Download PDF')}
                                 </PDFDownloadLink>
                               </td>
                             </tr>
                           </React.Fragment>
                         ))}
                       </tbody>
-
                     </table>
                   </div>
-                  {/* <div className="pt-4">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalItems={filteredAlbumListData.length}
-                      itemsPerPage={itemsPerPage}
-                      onPageChange={this.handlePageChange}
-                    />
-                  </div> */}
                 </div>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import { withRouter } from "react-router-dom/cjs/react-router-dom.min";
+import Notification from "../../components/Notification";
 
 class GradeCreate extends React.Component {
 
@@ -10,6 +11,10 @@ class GradeCreate extends React.Component {
         name: '',
         baseTuitionfee: null,
         grades: [], // Chứa danh sách các grade
+
+        showNotification: false, // Để hiển thị thông báo
+        notificationText: "", // Nội dung thông báo
+        notificationType: "success", // Loại thông báo (success/error)
     };
     componentDidMount() {
         window.scrollTo(0, 0);
@@ -25,16 +30,28 @@ class GradeCreate extends React.Component {
             const response = await axios.post(
                 "http://localhost:5124/api/Grade/AddGrade", values
             );
-            alert("Tạo Khối lớp thành công!"); // User-friendly success message
-            this.props.history.push('/grade'); // Redirect to category list after successful update
+            this.setState({
+                notificationText: "Grade create successfully!",
+                notificationType: "success",
+                showNotification: true,
+            });
+            setTimeout(() => {
+                if (this.state.showNotification) {
+                    this.props.history.push('/grade');
+                }
+            }, 1000);
         } catch (error) {
-            console.error("Lỗi khi tạo Khối lớp:", error);
-            alert("Lỗi khi tạo Khối lớp!"); // User-friendly error message
+            this.setState({
+                notificationText: "Grade create Error!",
+                notificationType: "error",
+                showNotification: true,
+            });
         }
     };
 
     render() {
         const { name, baseTuitionfee } = this.state;
+        const { showNotification, notificationText, notificationType } = this.state;
 
         return (
             <div
@@ -43,6 +60,15 @@ class GradeCreate extends React.Component {
                     document.body.classList.remove("offcanvas-active");
                 }}
             >
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div>
                     <div className="container-fluid">
                         <PageHeader

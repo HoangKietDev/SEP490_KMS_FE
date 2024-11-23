@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
+import Notification from "../../components/Notification";
 
 class RequestUpdate extends React.Component {
   state = {
@@ -25,7 +26,11 @@ class RequestUpdate extends React.Component {
       4: "Rejected",
       // 4: "Cancel",
     },
-    filteredStatuses: ''
+    filteredStatuses: '',
+
+    showNotification: false, // Để hiển thị thông báo
+    notificationText: "", // Nội dung thông báo
+    notificationType: "success", // Loại thông báo (success/error)
   };
 
   async componentDidMount() {
@@ -65,12 +70,12 @@ class RequestUpdate extends React.Component {
       this.setState(prevState => ({
         ClassRequestChangeInfor: {
           ...prevState.ClassRequestChangeInfor,
-          studentName: studentData?.nickName,
+          studentName: studentData?.fullName,
         }
       }));
 
       // Fetch user information
-      const userResponse = await axios.get(`http://localhost:5124/api/User/${data.createBy}`);
+      const userResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${data.createBy}`);
       const userData = userResponse.data;
 
       this.setState(prevState => ({
@@ -104,10 +109,18 @@ class RequestUpdate extends React.Component {
         statusRequest: status,
         processNote: ReasonReject,
       });
-      alert("Request updated successfully!");
+      this.setState({
+        notificationText: "Request updated successfully!",
+        notificationType: "success",
+        showNotification: true,
+      });
     } catch (error) {
-      console.error("Error updating request: ", error);
-      alert("Failed to update the request. Please try again.");
+      const errorMessage = error.response?.data?.message || "Failed to update the request";
+      this.setState({
+        notificationText: errorMessage,
+        notificationType: "error",
+        showNotification: true,
+      });
     }
     this.props.history.push('/request');
   };
