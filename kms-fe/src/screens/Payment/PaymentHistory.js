@@ -184,8 +184,14 @@ class PaymentHistory extends React.Component {
     this.setState({ currentPage: pageNumber });
   };
 
+  removeDiacritics = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+
   // Generate PDF using react-pdf
   generatePDF = (item) => {
+    const user = getSession('user')?.user
+    const fullName = user?.firstname + user?.lastName
     return (
       <Document>
         <Page style={styles.page}>
@@ -197,8 +203,8 @@ class PaymentHistory extends React.Component {
 
           {/* Thông tin người thanh toán */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Customer Information</Text>
-            <Text>Children Name:  {item?.childName || "John Doe anh Kiệt"}</Text>
+            <Text style={styles.sectionTitle}>Customer Information : {this.removeDiacritics(fullName)}</Text>
+            <Text>Children Name:  {this.removeDiacritics(item?.childName)}</Text>
             <Text>Payment Date: {item?.paymentDate || "example@example.com"}</Text>
             <Text>Payment Name: {item?.paymentName || "DD/MM/YYYY"}</Text>
           </View>
@@ -218,9 +224,9 @@ class PaymentHistory extends React.Component {
                 <View style={styles.tableRow} key={index}>
                   <Text style={styles.tableCell}>{index + 1}</Text>
                   <Text style={styles.tableCell}>{item1.serviceName}</Text>
-                  <Text style={styles.tableCell}>{item1.servicePrice} VNĐ</Text>
+                  <Text style={styles.tableCell}>{item1.servicePrice?.toLocaleString('vi-VN')} VND</Text>
                   <Text style={styles.tableCell}>{item1.quantity}</Text>
-                  <Text style={styles.tableCell}>{item1.total} VNĐ</Text>
+                  <Text style={styles.tableCell}>{(item1.quantity * item1.servicePrice)?.toLocaleString('vi-VN')} VND</Text>
                 </View>
               ))}
             </View>
@@ -229,14 +235,14 @@ class PaymentHistory extends React.Component {
           {/* Thông tin tuition */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Tuition Information</Text>
-            <Text>Start Date:  {item?.tuitionDetails?.startDate || "John Doe anh Kiệt"}</Text>
-            <Text>End Date : {item?.tuitionDetails?.endDate || "example@example.com"}</Text>
-            <Text>Tuition Fee : {item?.tuitionDetails?.tuitionFee || "DD/MM/YYYY"}</Text>
+            <Text>Start Date:  {item?.tuitionDetails?.startDate?.split("T")[0] || "DD/MM/YYYY"}</Text>
+            <Text>End Date : {item?.tuitionDetails?.endDate?.split("T")[0] || "DD/MM/YYYY"}</Text>
+            <Text>Tuition Fee : {item?.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN') || ""} VND</Text>
           </View>
 
           {/* Tổng cộng */}
           <View style={styles.total}>
-            <Text style={styles.totalText}>Grand Total: {item?.totalAmount} VNĐ</Text>
+            <Text style={styles.totalText}>Grand Total: {item?.totalAmount?.toLocaleString('vi-VN')} VND</Text>
           </View>
 
           {/* Ghi chú */}
@@ -344,7 +350,7 @@ class PaymentHistory extends React.Component {
                               <td>{index + 1}</td>
                               <td>{item?.childName}</td>
                               <td>{item?.paymentDate}</td>
-                              <td>{item?.totalAmount} VNĐ</td>
+                              <td>{item?.totalAmount} VND</td>
                               <td>{item?.paymentName}</td>
                               <td>
                                 {/* Download button */}

@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
+import Notification from "../../components/Notification";
 
 class UpdateChildren extends React.Component {
   state = {
@@ -19,6 +20,10 @@ class UpdateChildren extends React.Component {
     education: "string",
     experience: "string",
     avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png",
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -49,13 +54,17 @@ class UpdateChildren extends React.Component {
       })
       .catch((error) => {
         console.error("Error fetching student data: ", error);
-        alert("Failed to fetch student data. Please try again.");
+        this.setState({
+          notificationText: "Failed to fetch Teacher data!",
+          notificationType: "error",
+          showNotification: true
+        });
       });
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const { teacherId, name, education, experience} = this.state;
+    const { teacherId, name, education, experience } = this.state;
 
     // Chuẩn bị dữ liệu cập nhật học sinh
     const updatedTeacher = {
@@ -73,26 +82,44 @@ class UpdateChildren extends React.Component {
     })
       .then((response) => {
         console.log("Teacher updated successfully:", response.data);
-        alert("Teacher has been updated successfully!");
-
-        // Chuyển hướng về danh sách học sinh
-        this.props.history.push('/teacher');
+        this.setState({
+          notificationText: "Teacher has been updated successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
+        setTimeout(() => {
+          this.props.history.push('/teacher');
+        }, 1000); // Delay of 1 second (1000ms)
       })
       .catch((error) => {
         console.error("Error updating Teacher:", error.response ? error.response.data : error.message); // Log thêm thông tin lỗi
-        alert("Failed to update Teacher. Please try again.");
+        this.setState({
+          notificationText: "Failed to update Teacher!",
+          notificationType: "error",
+          showNotification: true
+        });
       });
   };
 
 
   render() {
     const { firstName, lastName, address, phone, mail, gender, status, dob, code, education, experience, avatar } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
 
     return (
       <div
         style={{ flex: 1 }}
         onClick={() => document.body.classList.remove("offcanvas-active")}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader

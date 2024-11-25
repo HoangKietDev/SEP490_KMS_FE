@@ -5,6 +5,8 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Notification from "../../components/Notification";
+import { getSession } from "../../components/Auth/Auth";
+import { addNotificationByUserId } from "../../components/Common/Notification";
 
 class RequestUpdate extends React.Component {
   state = {
@@ -37,10 +39,8 @@ class RequestUpdate extends React.Component {
     window.scrollTo(0, 0);
     const { requestId } = this.props.match.params;
     this.setState({ requestId: parseInt(requestId) });
-    const userData = JSON.parse(localStorage.getItem("user")).user;
-    const roleId = userData.roleId;
-    console.log(roleId);
-
+    const userData = getSession('user')?.user;
+    const roleId = userData?.roleId;
 
     const dataRole = this.getFilteredStatusDescriptions(roleId); // Call filtering here
     this.setState({ filteredStatuses: dataRole });
@@ -114,6 +114,20 @@ class RequestUpdate extends React.Component {
         notificationType: "success",
         showNotification: true,
       });
+      console.log(typeof(status));
+     
+
+      if (status == 3) {
+        addNotificationByUserId("Request Handle", "Request has been approved", createBy)
+      }
+      if (status == 4) {
+        addNotificationByUserId("Request Handle", "Request has been rejected", createBy)
+      }
+      setTimeout(() => {
+        if (this.state.showNotification) {
+          this.props.history.push('/request');
+        }
+      }, 1000);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to update the request";
       this.setState({
@@ -122,7 +136,7 @@ class RequestUpdate extends React.Component {
         showNotification: true,
       });
     }
-    this.props.history.push('/request');
+
   };
   // Function to filter the statuses based on roleId
   getFilteredStatusDescriptions = (roleId) => {
@@ -165,6 +179,9 @@ class RequestUpdate extends React.Component {
   render() {
     const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject, filteredStatuses, statusDescriptions } = this.state;
 
+    const userData = getSession('user')?.user;
+    const roleId = userData?.roleId;
+
     return (
       <div
         style={{ flex: 1 }}
@@ -189,34 +206,47 @@ class RequestUpdate extends React.Component {
                     <div className="row">
                       <div className="form-group col-md-6">
                         <label>Title Request</label>
-                        <input className="form-control" value={title} name="title" readOnly />
+                        <input className="form-control" value={title} name="title"
+                          readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                        />
                       </div>
                       <div className="form-group col-md-6">
                         <label>Create At</label>
-                        <input className="form-control" value={createAt} name="createAt" readOnly />
+                        <input className="form-control" value={createAt} name="createAt"
+                          readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                        />
                       </div>
                     </div>
 
                     <div className="row">
                       <div className="form-group col-md-6">
                         <label>Student</label>
-                        <input className="form-control" value={ClassRequestChangeInfor?.studentName} name="studentId" readOnly />
+                        <input className="form-control" value={ClassRequestChangeInfor?.studentName} name="studentId"
+                          readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                        />
                       </div>
                       <div className="form-group col-md-6">
                         <label>Created by</label>
-                        <input className="form-control" value={ClassRequestChangeInfor?.createByName} name="createBy" readOnly />
+                        <input className="form-control" value={ClassRequestChangeInfor?.createByName} name="createBy"
+                          readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                        />
                       </div>
                     </div>
 
                     <div className="row">
                       <div className="form-group col-md-6 d-flex flex-column">
                         <label>Request Description</label>
-                        <textarea className="form" rows="6" value={description} name="description" readOnly />
+                        <textarea className="form" rows="6" value={description} name="description"
+                          readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                        />
                       </div>
                       <div className="form-group col-md-6 d-flex flex-column">
                         <label>Process Note</label>
                         <textarea className="form" rows="6" value={ReasonReject} name="ReasonReject"
-                          onChange={(e) => this.setState({ ReasonReject: e.target.value })} />
+                          onChange={(e) => this.setState({ ReasonReject: e.target.value })}
+                          readOnly={roleId === 2} // Không readonly nếu roleId = 2 
+
+                        />
                       </div>
                     </div>
 

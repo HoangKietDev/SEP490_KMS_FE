@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import Notification from "../../components/Notification";
 
 
+
 class Schedule extends React.Component {
 
   getCurrentWeek = () => {
@@ -31,9 +32,6 @@ class Schedule extends React.Component {
 
     return `${year}-W${currentWeek.toString().padStart(2, '0')}`;
   };
-
-
-
 
 
   // get Start date and end date
@@ -90,7 +88,8 @@ class Schedule extends React.Component {
 
     showNotification: false, // State to control notification visibility
     notificationText: "", // Text for the notification
-    notificationType: "success" // Type of notification (success or error)
+    notificationType: "success", // Type of notification (success or error)
+
   };
 
 
@@ -303,8 +302,17 @@ class Schedule extends React.Component {
     event.preventDefault();
     const file = this.fileInput.files[0]; // Lấy file từ ref
 
+    // Lấy classId từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const classId = urlParams.get('classId'); // Assumes classId is in query string
+
     if (!file) {
-      alert("Please select a file to import."); // Kiểm tra nếu không có file được chọn
+      alert("Please select a file to import!"); // Kiểm tra nếu không có file được chọn
+      this.setState({
+        notificationText: "Please select a file to import!",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -312,7 +320,7 @@ class Schedule extends React.Component {
     formData.append('file', file); // Thêm file vào FormData
 
     try {
-      const response = await axios.post('http://localhost:5124/api/Schedule/Import', formData, {
+      const response = await axios.post(`http://localhost:5124/api/Schedule/Import/${classId}`, formData, {
         headers: {
           'accept': '*/*', // Chỉ để header này
         },

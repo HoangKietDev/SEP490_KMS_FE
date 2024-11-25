@@ -350,8 +350,8 @@ class LocationActivityList extends React.Component {
                       </div>
                       <div className="table-responsive">
                         <table className="table m-b-0 table-hover">
-                          <thead className="thead-light">
-                            <tr>
+                          <thead className="">
+                            <tr className="theme-color">
                               <th>#</th>
                               <th>Location Name</th>
                               <th>Status</th>
@@ -430,8 +430,8 @@ class LocationActivityList extends React.Component {
                       </div>
                       <div className="table-responsive">
                         <table className="table m-b-0 table-hover">
-                          <thead className="thead-light">
-                            <tr>
+                          <thead className="">
+                            <tr className="theme-color">
                               <th>#</th>
                               <th>Activity Name</th>
                               <th>Status</th>

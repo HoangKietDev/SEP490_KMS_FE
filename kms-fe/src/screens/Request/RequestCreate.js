@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Notification from "../../components/Notification";
+import { getSession } from "../../components/Auth/Auth";
 
 class RequestCreate extends React.Component {
     state = {
@@ -27,8 +28,9 @@ class RequestCreate extends React.Component {
         const fetchData = async () => {
             try {
                 // Fetch student by ParentID
-                const user = localStorage.getItem("user");
-                const parentId = JSON.parse(user).user.userId;
+                const userData = getSession('user')?.user;
+                const parentId = userData?.userId;
+
                 const studentResponse = await axios.get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentId}`);
                 const studentData = studentResponse.data;
                 this.setState({ createBy: parentId });

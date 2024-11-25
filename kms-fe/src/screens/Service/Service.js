@@ -3,10 +3,24 @@ import React, { useState, useEffect } from 'react';
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from 'axios';
+import Notification from "../../components/Notification";
+import { getSession } from '../../components/Auth/Auth';
+import Pagination from "../../components/Common/Pagination";
 
 class Service extends React.Component {
   state = {
     services: [],
+    services: [],
+    filteredServices: [],
+    searchText: "", // Dùng để lọc theo serviceName
+    filterStatus: "", // Dùng để lọc theo status
+
+    showNotification: false, // Để hiển thị thông báo
+    notificationText: "", // Nội dung thông báo
+    notificationType: "success", // Loại thông báo (success/error)
+
+    currentPage: 1,
+    itemsPerPage: 10,
   };
   componentDidMount() {
     window.scrollTo(0, 0);
@@ -14,7 +28,7 @@ class Service extends React.Component {
       try {
         const response = await axios.get('http://localhost:5124/api/Service/GetAllServices');
         const data = response.data;
-        this.setState({ services: data });
+        this.setState({ services: data, filteredServices: data });
         console.log(data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -38,11 +52,86 @@ class Service extends React.Component {
     this.props.history.push(`/service-update/${serviceId}`);
   };
 
+  handleSearchChange = (e) => {
+    this.setState({ searchText: e.target.value }, this.filterServices);
+  };
+
+  handleStatusFilterChange = (e) => {
+    this.setState({ filterStatus: e.target.value }, this.filterServices);
+  };
+
+  filterServices = () => {
+    const { services, searchText, filterStatus } = this.state;
+    const filtered = services.filter(service => {
+      const matchesName = service.serviceName.toLowerCase().includes(searchText.toLowerCase());
+      const matchesStatus = filterStatus === "" || service.status === parseInt(filterStatus);
+      return matchesName && matchesStatus;
+    });
+    this.setState({ filteredServices: filtered });
+  };
+
+  handleStatusChange = async (service, newStatus) => {
+    let data = {
+      serviceId: service.serviceId,
+      serviceName: service.serviceName,
+      servicePrice: service.servicePrice,
+      serviceDes: service.serviceDes,
+      schoolId: service.schoolId,
+      status: newStatus,
+      categoryServiceId: service.categoryServiceId,
+      categoryService: {
+        categoryServiceId: service.categoryService.categoryServiceId,
+        categoryName: service.categoryService.categoryName,
+      }
+    }
+    console.log(data);
+    try {
+      const response = await axios.put(`http://localhost:5124/api/Service/UpdateService`, data);
+      console.log("Status updated successfully:", response.data);
+      this.setState({
+        notificationText: "Status update successfully!",
+        notificationType: "success",
+        showNotification: true,
+      });
+      // Cập nhật trạng thái trong state
+      this.setState((prevState) => {
+        const updatedListData = prevState.filteredServices.map((item) =>
+          item.serviceId === service.serviceId ? { ...item, status: newStatus } : item
+        );
+        return { filteredServices: updatedListData };
+      });
+    } catch (error) {
+      console.log(error);
+      this.setState({
+        notificationText: "Status updating error!",
+        notificationType: "error",
+        showNotification: true,
+      });
+    }
+  };
+
+  handlePageChange = (pageNumber) => {
+    this.setState({ currentPage: pageNumber });
+  };
+
   render() {
 
-    const { services } = this.state;
-    const userData = JSON.parse(localStorage.getItem("user")).user;
-    const roleId = userData.roleId
+    const { filteredServices } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
+    const userData = getSession('user')?.user;
+    const roleId = userData?.roleId;
+
+    const statusOptions = [
+      { value: 1, label: "Active", className: "badge-success" },
+      { value: 0, label: "InActive", className: "badge-default" },
+    ];
+
+    // phan trang
+    const { currentPage, itemsPerPage } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
       <div
@@ -51,6 +140,15 @@ class Service extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader
@@ -64,6 +162,29 @@ class Service extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Services Manager</h2>
+                    <div className="col-md-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search by Service Name"
+                        value={this.state.searchText}
+                        onChange={this.handleSearchChange}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <select
+                        className="form-control"
+                        value={this.state.filterStatus}
+                        onChange={this.handleStatusFilterChange}
+                      >
+                        <option value="">All Status</option>
+                        {statusOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     {roleId === 3 ? (
                       <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Service</a>
                     ) : null}
@@ -74,19 +195,19 @@ class Service extends React.Component {
                 <div className="card">
                   <div className="table-responsive">
                     <table className="table m-b-0 table-hover">
-                      <thead className="thead-light">
-                        <tr>
+                      <thead className="">
+                        <tr className='theme-color'>
                           <th>#</th>
                           <th>ServiceName</th>
-                          <th>ServicePrice</th>
-                          <th>ServiceDes</th>
+                          <th>Price</th>
+                          <th>Description</th>
                           <th>CategoryName</th>
                           <th>Status</th>
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {services.map((service, i) => {
+                        {currentItems.map((service, i) => {
                           return (
                             <tr key={"dihf" + i}>
 
@@ -106,17 +227,28 @@ class Service extends React.Component {
                                 {service?.categoryService?.categoryName || "1"}
                               </td>
 
-                              <td>
-                                {service?.status === "Active" ? (
-                                  <span className="badge badge-success">Active</span>
-                                ) : service?.status === "InActive" ? (
-                                  <span className="badge badge-default">InActive</span>
-                                ) : service?.status === "PENDING" ? (
-                                  <span className="badge badge-warning">Pending</span>
-                                ) : service?.status === "Closed" ? (
-                                  <span className="badge badge-primary">Closed</span>
-                                ) : null}
-                              </td>
+                              {(roleId === 4) && (
+                                <td>
+                                  <select
+                                    value={service?.status}
+                                    onChange={(e) => this.handleStatusChange(service, parseInt(e.target.value))}
+                                    className={`form-control ${service?.status === 1 ? 'badge-success' : 'badge-default'}`}
+                                  >
+                                    {statusOptions.map(option => (
+                                      <option key={option.value} value={option.value} className={option.className}>
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                              )}
+                              {(roleId === 3) && (
+                                <td>
+                                  <span className={`badge ${service?.status === 1 ? 'badge-success' : 'badge-default'}`}>
+                                    {statusOptions.find(option => option.value === service?.status)?.label} {/* Hiển thị trạng thái */}
+                                  </span>
+                                </td>
+                              )}
                               <td className="project-actions">
                                 <a onClick={() => this.handleViewDetail(service.serviceId)} className="btn btn-outline-secondary mr-1">
                                   <i className="icon-eye"></i>
@@ -130,6 +262,14 @@ class Service extends React.Component {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="pt-4">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalItems={filteredServices.length}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={this.handlePageChange}
+                    />
                   </div>
                 </div>
               </div>

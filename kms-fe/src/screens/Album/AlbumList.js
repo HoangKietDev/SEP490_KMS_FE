@@ -473,8 +473,12 @@ class Albumlist extends React.Component {
                                     {album?.className}
                                   </td>
                                   <td className="text-truncate" style={{ maxWidth: "150px" }}>{album?.description}</td>
+
                                   <td>
-                                    {teacherListData && teacherListData?.find(item => item.teacherId === album?.createBy)?.name}
+                                    {(() => {
+                                      const teacher = teacherListData?.find(item => item.teacherId === album?.createBy);
+                                      return teacher?.name || teacher?.firstname;
+                                    })()}
                                   </td>
 
 

@@ -3,6 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
+import Notification from "../../components/Notification";
 
 class ServiceUpdate extends React.Component {
     state = {
@@ -12,7 +13,12 @@ class ServiceUpdate extends React.Component {
         serviceName: "",
         servicePrice: "",
         serviceDes: "",
-        categoryServiceId: ""
+        categoryServiceId: "",
+        status: 0,
+
+        showNotification: false, // Để hiển thị thông báo
+        notificationText: "", // Nội dung thông báo
+        notificationType: "success", // Loại thông báo (success/error)
     };
 
     componentDidMount() {
@@ -32,6 +38,7 @@ class ServiceUpdate extends React.Component {
                     servicePrice: data.servicePrice,
                     serviceDes: data.serviceDes,
                     categoryServiceId: data.categoryService.categoryServiceId,
+                    status: data.status
                 });
 
                 console.log(Categorydata);
@@ -54,6 +61,7 @@ class ServiceUpdate extends React.Component {
             serviceDes: this.state.serviceDes,
             categoryServiceId: this.state.categoryServiceId,
             schoolId: 1,
+            status: this.state.status,
             categoryService: {
                 categoryServiceId: this.state.categoryServiceId,
                 categoryName: this.state.categories.find(cat => cat.categoryServiceId === this.state.categoryServiceId)?.categoryName, // Find category name based on selected id
@@ -66,25 +74,46 @@ class ServiceUpdate extends React.Component {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Service has been updated successfully!");
-            this.props.history.push('/service');
+            this.setState({
+                notificationText: "Service has been updated successfully!",
+                notificationType: "success",
+                showNotification: true,
+            });
+            setTimeout(() => {
+                if (this.state.showNotification) {
+                    this.props.history.push('/service');
+                }
+            }, 1000);
         } catch (error) {
-            console.error('Error updating Service:', error);
-            this.setState({ errorMessage: 'Error updating Service' });
+            this.setState({
+                notificationText: "Error updating Service!",
+                notificationType: "error",
+                showNotification: true,
+            });
         }
     };
 
     render() {
         const { categories, serviceName, servicePrice, serviceDes, categoryServiceId } = this.state;
+        const { showNotification, notificationText, notificationType } = this.state;
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div>
                     <div className="container-fluid">
                         <PageHeader
                             HeaderText="Service Update"
                             Breadcrumb={[
-                                { name: "Service", navigate: "" },
+                                { name: "Service", navigate: "service" },
                                 { name: "Service Update", navigate: "" },
                             ]}
                         />
@@ -100,7 +129,7 @@ class ServiceUpdate extends React.Component {
                                                         className={`form-control ${serviceName === "" && "parsley-error"}`}
                                                         value={serviceName} // Bind value from state
                                                         name="serviceName"
-                                                        required=""
+                                                        required
                                                         type="text"
                                                         onChange={(e) => {
                                                             this.setState({
@@ -113,11 +142,11 @@ class ServiceUpdate extends React.Component {
                                                     <label>Service Price</label>
                                                     <input
                                                         className={`form-control ${servicePrice === "" && "parsley-error"
-                                                        }`}
+                                                            }`}
                                                         value={servicePrice}
                                                         name="servicePrice"
-                                                        required=""
-                                                        type="text"
+                                                        required
+                                                        type="number"
                                                         onChange={(e) => {
                                                             this.setState({ [e.target.name]: e.target.value });
                                                         }}
@@ -132,7 +161,7 @@ class ServiceUpdate extends React.Component {
                                                             }`}
                                                         value={serviceDes} // Bind value from state
                                                         name="serviceDes"
-                                                        required=""
+                                                        required
                                                         type="text"
                                                         onChange={(e) => {
                                                             this.setState({
@@ -147,7 +176,7 @@ class ServiceUpdate extends React.Component {
                                                         className="form-control"
                                                         value={categoryServiceId} // Bind categoryServiceId directly
                                                         name="categoryServiceId"
-                                                        required=""
+                                                        required
                                                         onChange={(e) => this.setState({ categoryServiceId: e.target.value })}
                                                     >
                                                         <option value="">Select Category</option>
