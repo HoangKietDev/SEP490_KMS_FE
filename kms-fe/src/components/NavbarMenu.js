@@ -138,6 +138,11 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("dashboradContainer");
     }
     else if (
+      activeKey === "/dashboardprin" 
+    ) {
+      this.activeMenutabContainer("DasboardPrinContainer");
+    }
+    else if (
       activeKey === "/category" ||
       activeKey === "/create-category"
     ) {
@@ -192,7 +197,7 @@ class NavbarMenu extends React.Component {
     }
     // PickupPersonContainer
     else if (
-      activeKey === "/addpickupperson" 
+      activeKey === "/addpickupperson"
     ) {
       this.activeMenutabContainer("PickupPersonContainer");
     }
@@ -577,7 +582,22 @@ class NavbarMenu extends React.Component {
                         </ul>
                       </li>
                     ) : null}
-
+                      {/* Dashboard prin */}
+                    {roleId === 4 ? (
+                      <li id="DasboardPrinContainer" className="DasboardPrinContainer">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/dashboardprin");
+                            this.activeMenutabContainer("DasboardPrinContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Dashboard</span>
+                        </a>
+                      </li>
+                    ) : null}
                     {/* UserAccount */}
                     {roleId === 1 ? (
                       <li id="UserContainer" className="">
