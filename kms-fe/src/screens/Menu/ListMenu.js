@@ -5,7 +5,7 @@ import "react-calendar/dist/Calendar.css";
 import "../Menu/ListMenu.css";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-
+import Notification from "../../components/Notification";
 class ListMenu extends React.Component {
     state = {
         selectedWeek: {
@@ -20,6 +20,9 @@ class ListMenu extends React.Component {
         showCalendar: false,
         selectedStatus0_3: 0, // Status for age group 0-3
         selectedStatus3_6: 0, // Status for age group 3-6
+        showNotification: false, // State to control notification visibility
+        notificationText: "", // Text for the notification
+        notificationType: "success" // Type of notification (success or error)
     };
 
     componentDidMount() {
@@ -93,7 +96,12 @@ class ListMenu extends React.Component {
         const status = gradeID === 1 ? selectedStatus0_3 : selectedStatus3_6;
 
         if (!menuData1) {
-            alert("No menu available to update status.");
+            // alert("No menu available to update status.");
+            this.setState({
+                notificationText: "No menu available to update status.",
+                notificationType: "success",
+                showNotification: true
+            });
             return;
         }
 
@@ -108,10 +116,20 @@ class ListMenu extends React.Component {
         try {
             const response = await axios.put("http://localhost:5124/api/Menu/UpdateMenuStatus", payload);
             if (response.status === 200) {
-                alert(`Successfully updated the menu status for age group ${gradeID === 1 ? "0-3" : "3-6"}!`);
+                // alert(`Successfully updated the menu status for age group ${gradeID === 1 ? "0-3" : "3-6"}!`);
+                this.setState({
+                    notificationText: `Successfully updated the menu status for age group ${gradeID === 1 ? "0-3" : "3-6"}!`,
+                    notificationType: "success",
+                    showNotification: true
+                });
                 this.fetchMenuData(selectedWeek.startOfWeek, selectedWeek.endOfWeek);
             } else {
-                alert("Failed to update the menu status!");
+                // alert("Failed to update the menu status!");
+                this.setState({
+                    notificationText: "Failed to update the menu status!",
+                    notificationType: "error",
+                    showNotification: true
+                });
             }
         } catch (error) {
             console.error("Error updating menu status:", error);
@@ -126,7 +144,12 @@ class ListMenu extends React.Component {
     handleUpload = async () => {
         const { selectedFile } = this.state;
         if (!selectedFile) {
-            alert("Please select a file first!");
+            // alert("Please select a file first!");
+            this.setState({
+                notificationText: "Please select a file first!",
+                notificationType: "error",
+                showNotification: true
+            });
             return;
         }
 
@@ -139,11 +162,21 @@ class ListMenu extends React.Component {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            alert("File uploaded successfully!");
+            // alert("File uploaded successfully!");
+            this.setState({
+                notificationText: "File uploaded successfully!",
+                notificationType: "success",
+                showNotification: true
+            });
             this.fetchMenuData(new Date());
         } catch (error) {
             console.error("Error uploading file:", error);
-            alert("Error uploading file.");
+            // alert("Error uploading file.");
+            this.setState({
+                notificationText: "Error uploading file.",
+                notificationType: "error",
+                showNotification: true
+            });
         }
     };
 
@@ -285,7 +318,9 @@ class ListMenu extends React.Component {
     };
 
     render() {
-        const { selectedWeek, showCalendar } = this.state;
+        const { selectedWeek, showCalendar, showNotification, // State to control notification visibility
+            notificationText, // Text for the notification
+            notificationType } = this.state;
 
         return (
             <div className="container-fluid">
@@ -296,6 +331,15 @@ class ListMenu extends React.Component {
                         { name: "View Menu", navigate: "" },
                     ]}
                 />
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div className="row">
                     <div className="col-lg-12 col-md-12">
                         <h2>Menu</h2>

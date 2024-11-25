@@ -71,6 +71,7 @@ import SemesterUpdate from "./screens/Semester/SemesterUpdate";
 import SemesterCreate from "./screens/Semester/SemesterCreate";
 import UserList from "./screens/User/UserList";
 import UserCreate from "./screens/User/UserCreate";
+import ListPickupPerson from "./screens/Pickup_Person/ListPickupPerson";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -454,13 +455,13 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/payment`}
                   component={PaymentList}
-                  allowedRoles={[2]}
+                  allowedRoles={[2,3,4,5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/payment-history`}
                   component={PaymentHistory}
-                  allowedRoles={[2]}
+                  allowedRoles={[2,3,4,5]}
                 />
                 <ProtectedRoute
                   exact
@@ -482,6 +483,12 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/addpickupperson`}
                   component={AddPickupPerson}
+                  allowedRoles={[2]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/listpickupperson`}
+                  component={ListPickupPerson}
                   allowedRoles={[2]}
                 />
               </Switch>

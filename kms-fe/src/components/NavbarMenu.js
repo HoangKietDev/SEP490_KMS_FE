@@ -190,6 +190,12 @@ class NavbarMenu extends React.Component {
     ) {
       this.activeMenutabContainer("scheduleContainer");
     }
+    // PickupPersonContainer
+    else if (
+      activeKey === "/addpickupperson" 
+    ) {
+      this.activeMenutabContainer("PickupPersonContainer");
+    }
     else if (
       activeKey === "/listclasscheckin" ||
       activeKey === "/listclassattendance"
@@ -824,7 +830,24 @@ class NavbarMenu extends React.Component {
 
                       </li>
                     ) : null}
+                    {/* Teachers */}
+                    {roleId === 2 ? (
 
+                      <li id="PickupPersonContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/addpickupperson");
+                            this.activeMenutabContainer("PickupPersonContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Pickup Person Manager</span>
+                        </a>
+
+                      </li>
+                    ) : null}
                     {/* Requests */}
                     {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
                       <li id="RequestContainer" className="">
@@ -885,8 +908,8 @@ class NavbarMenu extends React.Component {
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
-                            this.props.history.push("/listschedule"); 
-                            this.activeMenutabContainer("scheduleContainer"); 
+                            this.props.history.push("/listschedule");
+                            this.activeMenutabContainer("scheduleContainer");
                           }}
                         >
                           <i className="icon-grid"></i> <span>Daily Schedule</span>
@@ -942,7 +965,7 @@ class NavbarMenu extends React.Component {
                             className={activeKey === "listclasscheckin" ? "active" : ""}
                             onClick={() => { }}
                           >
-                            <Link to="/listclasscheckin">Check in/out</Link>
+                            <Link to="/checkin">Check in/out</Link>
                           </li>
                           <li
                             className={activeKey === "listclassattendance" ? "active" : ""}

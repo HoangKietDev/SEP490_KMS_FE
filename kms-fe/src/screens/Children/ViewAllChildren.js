@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
-
+import Notification from "../../components/Notification";
 class ViewAllChildren extends React.Component {
   state = {
     StudentsData: [], // State để lưu trữ dữ liệu từ API
@@ -10,6 +10,9 @@ class ViewAllChildren extends React.Component {
 
     file: null, // State để lưu trữ file Excel đã chọn
     error: "", // State để lưu trữ thông báo lỗi
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -67,7 +70,12 @@ class ViewAllChildren extends React.Component {
       .then((response) => response.json())
       .then((data) => {
         console.log("File uploaded successfully:", data);
-        alert("File uploaded successfully!");
+        // alert("File uploaded successfully!");
+        this.setState({
+          notificationText: "File uploaded successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
 
         // Reset trạng thái sau khi upload thành công
         this.setState({ error: "", file: null }); // Reset file về null và xóa thông báo lỗi
@@ -81,12 +89,19 @@ class ViewAllChildren extends React.Component {
       })
       .catch((error) => {
         console.error("Error uploading file:", error);
-        alert("Failed to upload file. Please try again.");
+        // alert("Failed to upload file. Please try again.");
+        this.setState({
+          notificationText: "FFailed to upload file. Please try again.",
+          notificationType: "error",
+          showNotification: true
+        });
       });
   };
 
   render() {
-    const { StudentsData, error, file } = this.state;
+    const { StudentsData, error, file, showNotification, // State to control notification visibility
+      notificationText,// Text for the notification
+      notificationType } = this.state;
 
     return (
       <div
@@ -104,6 +119,15 @@ class ViewAllChildren extends React.Component {
                 { name: "View Students", navigate: "" },
               ]}
             />
+            {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <form onSubmit={this.handleSubmit}>
               <div className="form-group">
                 <label>Choose Excel File</label>
@@ -140,11 +164,27 @@ class ViewAllChildren extends React.Component {
                             // Tìm grade name dựa trên gradeId
                             const grade = this.state.Grades.find((g) => g.gradeId === student.gradeId);
                             const gradeName = grade ? grade.name : "Unknown"; // Nếu không tìm thấy thì hiển thị "Unknown"
+                            const avatar =
+                              student.avatar ||
+                              "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"; // Sử dụng ảnh mặc định nếu avatar null
 
                             return (
                               <React.Fragment key={"student" + index}>
                                 <tr>
-                                  <td>{student.fullName}</td>
+                                  <td>
+                                    <img
+                                      src={avatar}
+                                      alt="Avatar"
+                                      style={{
+                                        width: "40px",
+                                        height: "40px",
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        marginRight: "10px",
+                                      }}
+                                    />
+                                    {student.fullName}
+                                  </td>
                                   <td>{student.nickName}</td>
                                   <td>{gradeName}</td> {/* Hiển thị tên grade */}
                                   <td>
@@ -173,6 +213,7 @@ class ViewAllChildren extends React.Component {
                             );
                           })}
                         </tbody>
+
                       </table>
                     </div>
                   </div>

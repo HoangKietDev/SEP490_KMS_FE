@@ -94,7 +94,7 @@ class ServiceCreate extends React.Component {
                                                             }`}
                                                         value={serviceName} // Bind value from state
                                                         name="serviceName"
-                                                        required=""
+                                                        required
                                                         type="text"
                                                         onChange={(e) => {
                                                             this.setState({
@@ -110,8 +110,8 @@ class ServiceCreate extends React.Component {
                                                             }`}
                                                         value={servicePrice}
                                                         name="servicePrice"
-                                                        required=""
-                                                        type="text"
+                                                        required
+                                                        type="number"
                                                         onChange={(e) => {
                                                             this.setState({ [e.target.name]: e.target.value });
                                                         }}
@@ -127,7 +127,7 @@ class ServiceCreate extends React.Component {
                                                             }`}
                                                         value={serviceDes} // Bind value from state
                                                         name="serviceDes"
-                                                        required=""
+                                                        required
                                                         type="text"
                                                         onChange={(e) => {
                                                             this.setState({

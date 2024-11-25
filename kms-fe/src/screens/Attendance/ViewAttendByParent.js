@@ -68,7 +68,20 @@ class ViewAttendByParent extends React.Component {
     const { startOfCurrentWeek } = this.state;
 
     try {
+      // Lấy dữ liệu điểm danh của tuần (Attend)
       const attendanceResponse = await axios.get(
+        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        {
+          params: {
+            studentId,
+            type: "Attend",
+            date: startOfCurrentWeek.format("YYYY-MM-DD"),
+          },
+        }
+      );
+
+      // Lấy dữ liệu Checkin
+      const checkinResponse = await axios.get(
         `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
@@ -79,19 +92,43 @@ class ViewAttendByParent extends React.Component {
         }
       );
 
-      if (isMounted) {
-        // Lưu dữ liệu kèm theo imageUrl
-        const attendanceData = attendanceResponse.data.map((attendance) => ({
-          ...attendance,
-          imageUrl: attendance.attendanceDetail[0]?.imageUrl || null,
-        }));
+      // Lấy dữ liệu Checkout
+      const checkoutResponse = await axios.get(
+        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        {
+          params: {
+            studentId,
+            type: "Checkout",
+            date: startOfCurrentWeek.format("YYYY-MM-DD"),
+          },
+        }
+      );
 
+      // Gộp tất cả dữ liệu lại
+      const attendanceData = attendanceResponse.data.map((attendance) => {
+        // Tìm Checkin và Checkout tương ứng với ngày
+        const checkin = checkinResponse.data.find((item) =>
+          moment(item.createdAt).isSame(attendance.createdAt, "day")
+        );
+        const checkout = checkoutResponse.data.find((item) =>
+          moment(item.createdAt).isSame(attendance.createdAt, "day")
+        );
+
+        return {
+          ...attendance,
+          checkinImageUrl: checkin?.attendanceDetail[0]?.imageUrl || null,
+          checkoutImageUrl: checkout?.attendanceDetail[0]?.imageUrl || null,
+        };
+      });
+
+      if (isMounted) {
         this.setState({ attendanceData }, this.updateSummary);
       }
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu điểm danh:", error);
     }
   };
+
 
   handleStudentChange = (e) => {
     const studentId = e.target.value;
@@ -125,13 +162,13 @@ class ViewAttendByParent extends React.Component {
     const summary = {
       total: validAttendanceData.length,
       attended: validAttendanceData.filter(
-        (att) => att.attendanceDetail[0]?.status === "Có"
+        (att) => att.attendanceDetail[0]?.status === "Attend"
       ).length,
       late: validAttendanceData.filter(
         (att) => att.attendanceDetail[0]?.status === "Muộn"
       ).length,
       absence: validAttendanceData.filter(
-        (att) => att.attendanceDetail[0]?.status === "Vắng"
+        (att) => att.attendanceDetail[0]?.status === "Absence"
       ).length,
     };
 
@@ -168,7 +205,20 @@ class ViewAttendByParent extends React.Component {
     }
 
     try {
-      const response = await axios.get(
+      // Lấy dữ liệu Attend
+      const attendanceResponse = await axios.get(
+        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        {
+          params: {
+            studentId,
+            type: "Attend",
+            date: startOfWeek.format("YYYY-MM-DD"),
+          },
+        }
+      );
+
+      // Lấy dữ liệu Checkin
+      const checkinResponse = await axios.get(
         `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
@@ -179,37 +229,67 @@ class ViewAttendByParent extends React.Component {
         }
       );
 
-      const attendanceData = response.data;
+      // Lấy dữ liệu Checkout
+      const checkoutResponse = await axios.get(
+        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        {
+          params: {
+            studentId,
+            type: "Checkout",
+            date: startOfWeek.format("YYYY-MM-DD"),
+          },
+        }
+      );
+
+      // Tạo mảng ngày trong tuần
       const weekDays = Array.from({ length: 7 }, (_, i) =>
         startOfWeek.clone().add(i, "days").format("YYYY-MM-DD")
       );
 
+      // Gộp dữ liệu Attendance, Checkin và Checkout
       const weekAttendanceData = weekDays.map((date) => {
-        const dayAttendance = attendanceData.find((attendance) =>
-          moment(attendance.createdAt).format("YYYY-MM-DD") === date
+        const dayAttendance = attendanceResponse.data.find((attendance) =>
+          moment(attendance.createdAt).isSame(date, "day")
+        );
+        const checkin = checkinResponse.data.find((item) =>
+          moment(item.createdAt).isSame(date, "day")
+        );
+        const checkout = checkoutResponse.data.find((item) =>
+          moment(item.createdAt).isSame(date, "day")
         );
 
         let status = "No Data";
-        let imageUrl = null;
+        let checkinImageUrl = null;
+        let checkoutImageUrl = null;
+
         if (dayAttendance && dayAttendance.attendanceDetail.length > 0) {
           status = dayAttendance.attendanceDetail[0].status;
-          imageUrl = dayAttendance.attendanceDetail[0].imageUrl;
+        }
+
+        if (checkin && checkin.attendanceDetail.length > 0) {
+          checkinImageUrl = checkin.attendanceDetail[0].imageUrl;
+        }
+
+        if (checkout && checkout.attendanceDetail.length > 0) {
+          checkoutImageUrl = checkout.attendanceDetail[0].imageUrl;
         }
 
         return {
           date,
           status,
-          imageUrl,
+          checkinImageUrl,
+          checkoutImageUrl,
         };
       });
 
       if (isMounted) {
-        this.setState({ weekAttendance: weekAttendanceData, attendanceData }, this.updateSummary);
+        this.setState({ weekAttendance: weekAttendanceData, attendanceData: attendanceResponse.data }, this.updateSummary);
       }
     } catch (error) {
       console.error("Error fetching weekly attendance data:", error);
     }
   };
+
 
   toggleCalendar = () => {
     this.setState((prevState) => ({ showCalendar: !prevState.showCalendar }));
@@ -314,7 +394,7 @@ class ViewAttendByParent extends React.Component {
 
         {/* Attendance Summary */}
         <div className="row text-center mb-4">
-          <div className="col-md-3">
+          <div className="col-md-4">
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">All</h5>
@@ -322,7 +402,7 @@ class ViewAttendByParent extends React.Component {
               </div>
             </div>
           </div>
-          <div className="col-md-3">
+          <div className="col-md-4">
             <div className="card bg-success text-white">
               <div className="card-body">
                 <h5 className="card-title">Attended</h5>
@@ -330,15 +410,8 @@ class ViewAttendByParent extends React.Component {
               </div>
             </div>
           </div>
-          <div className="col-md-3">
-            <div className="card bg-info text-white">
-              <div className="card-body">
-                <h5 className="card-title">Late</h5>
-                <p className="card-text">{summary.late}</p>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
+          
+          <div className="col-md-4">
             <div className="card bg-danger text-white">
               <div className="card-body">
                 <h5 className="card-title">Absence</h5>
@@ -358,7 +431,8 @@ class ViewAttendByParent extends React.Component {
                   <th>Date</th>
                   <th>Day</th>
                   <th>Status</th>
-                  <th>Image</th> {/* Thêm cột hiển thị hình ảnh */}
+                  <th>Checkin Image</th> {/* Cột Checkin Image */}
+                  <th>Checkout Image</th> {/* Cột Checkout Image */}
                 </tr>
               </thead>
               <tbody>
@@ -367,13 +441,13 @@ class ViewAttendByParent extends React.Component {
                     <td>{moment(attendance.date).format("DD/MM/YYYY")}</td>
                     <td>{moment(attendance.date).format("dddd")}</td>
                     <td>
-                      {attendance.status === "Có" && (
+                      {attendance.status === "Attend" && (
                         <span className="badge bg-success">Attended</span>
                       )}
                       {attendance.status === "Muộn" && (
                         <span className="badge bg-warning">Late</span>
                       )}
-                      {attendance.status === "Vắng" && (
+                      {attendance.status === "Absence" && (
                         <span className="badge bg-danger">Absence</span>
                       )}
                       {attendance.status === "No Data" && (
@@ -381,10 +455,21 @@ class ViewAttendByParent extends React.Component {
                       )}
                     </td>
                     <td>
-                      {attendance.imageUrl ? (
+                      {attendance.checkinImageUrl ? (
                         <img
-                          src={attendance.imageUrl}
-                          alt="Attendance"
+                          src={attendance.checkinImageUrl}
+                          alt="Checkin"
+                          style={{ width: "100px", height: "auto" }}
+                        />
+                      ) : (
+                        "No Image"
+                      )}
+                    </td>
+                    <td>
+                      {attendance.checkoutImageUrl ? (
+                        <img
+                          src={attendance.checkoutImageUrl}
+                          alt="Checkout"
                           style={{ width: "100px", height: "auto" }}
                         />
                       ) : (
@@ -395,6 +480,7 @@ class ViewAttendByParent extends React.Component {
                 ))}
               </tbody>
             </table>
+
           </div>
         </div>
       </div>

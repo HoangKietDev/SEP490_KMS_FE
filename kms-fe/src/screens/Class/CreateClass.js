@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
-
+import Notification from "../../components/Notification";
 class CreateClass extends React.Component {
   state = {
     classId: 0,
@@ -15,10 +15,14 @@ class CreateClass extends React.Component {
     gradeId: 0,
     status: 0,
     submeet: false,
-    semesters: [], // Danh sách các semester
-    grades: [], // Danh sách các grade
-    teachers: [], // Danh sách các giáo viên
-    selectedTeachers: [], // Danh sách giáo viên được chọn
+    semesters: [],
+    grades: [],
+    teachers: [],
+    selectedTeachers: [],
+    errors: {}, // Thêm `errors` vào state
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -47,14 +51,88 @@ class CreateClass extends React.Component {
       });
   };
 
+  validateForm = () => {
+    const { className, number, semesterId, gradeId, selectedTeachers } = this.state;
+
+    const errors = {};
+
+    if (!className.trim()) errors.className = "Class name is required.";
+    if (number <= 0) errors.number = "Number of students must be greater than 0.";
+    if (semesterId === 0) errors.semesterId = "Semester must be selected.";
+    if (gradeId === 0) errors.gradeId = "Grade must be selected.";
+    if (selectedTeachers.length === 0) errors.selectedTeachers = "At least one teacher must be selected.";
+
+    this.setState({ errors, submeet: true });
+
+    return Object.keys(errors).length === 0; // Returns true if no errors
+  };
+
+  // handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   const isValid = this.validateForm();
+  //   if (!isValid) {
+  //     return;
+  //   }
+
+  //   const { className, number, isActive, schoolId, semesterId, gradeId, selectedTeachers } = this.state;
+
+  //   const newClass = {
+  //     classId: 0,
+  //     className,
+  //     number,
+  //     isActive,
+  //     schoolId,
+  //     semesterId,
+  //     gradeId,
+  //     status: 0,
+  //   };
+
+  //   fetch("http://localhost:5124/api/Class/AddClass", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify(newClass),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       const classId = data.classId;
+
+  //       this.setState({
+  //         notificationText: "Class has been added successfully!",
+  //         notificationType: "success",
+  //         showNotification: true
+  //       });
+  //       selectedTeachers.forEach((teacherId) => {
+  //         fetch(`http://localhost:5124/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //         })
+  //           .then((res) => res.json())
+  //           .then((result) => console.log(`Teacher ${teacherId} added to class successfully`, result))
+  //           .catch((error) => console.error("Error adding teacher to class:", error));
+  //       });
+
+  //       this.props.history.push("/viewclass");
+  //       this.resetForm();
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error adding class:", error);
+  //       alert("Failed to add class. Please try again.");
+  //     });
+  // };
   handleSubmit = (e) => {
     e.preventDefault();
-    const { className, number, isActive, schoolId, semesterId, gradeId, selectedTeachers } = this.state;
 
-    if (!className  || semesterId === 0 || gradeId === 0 || selectedTeachers.length === 0) {
-      this.setState({ submeet: true });
+    const isValid = this.validateForm();
+    if (!isValid) {
       return;
     }
+
+    const { className, number, isActive, schoolId, semesterId, gradeId, selectedTeachers } = this.state;
 
     const newClass = {
       classId: 0,
@@ -77,9 +155,15 @@ class CreateClass extends React.Component {
       .then((response) => response.json())
       .then((data) => {
         const classId = data.classId;
-        console.log("Class added successfully:", data);
-        alert("Class has been added successfully!");
 
+        // Hiển thị thông báo
+        this.setState({
+          notificationText: "Class has been added successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
+
+        // Thêm giáo viên vào lớp
         selectedTeachers.forEach((teacherId) => {
           fetch(`http://localhost:5124/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
             method: "POST",
@@ -88,20 +172,23 @@ class CreateClass extends React.Component {
             },
           })
             .then((res) => res.json())
-            .then((result) => {
-              console.log(`Teacher ${teacherId} added to class successfully`, result);
-            })
-            .catch((error) => {
-              console.error("Error adding teacher to class:", error);
-            });
+            .then((result) => console.log(`Teacher ${teacherId} added to class successfully`, result))
+            .catch((error) => console.error("Error adding teacher to class:", error));
         });
 
-        this.props.history.push("/viewclass");
-        this.resetForm();
+        // Trì hoãn chuyển hướng 2 giây để hiển thị thông báo
+        setTimeout(() => {
+          this.props.history.push("/viewclass");
+          this.resetForm();
+        }, 2000); // 2000ms = 2 giây
       })
       .catch((error) => {
         console.error("Error adding class:", error);
-        alert("Failed to add class. Please try again.");
+        this.setState({
+          notificationText: "Failed to add class. Please try again.",
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
 
@@ -118,20 +205,15 @@ class CreateClass extends React.Component {
       status: 0,
       submeet: false,
       selectedTeachers: [],
+      errors: {}, // Reset errors
     });
   };
 
-  handleTeacherSelection = (teacherId) => {
-    const { selectedTeachers } = this.state;
-    if (selectedTeachers.includes(teacherId)) {
-      this.setState({ selectedTeachers: selectedTeachers.filter((id) => id !== teacherId) });
-    } else {
-      this.setState({ selectedTeachers: [...selectedTeachers, teacherId] });
-    }
-  };
-
   render() {
-    const { className, number, semesterId, gradeId, semesters, grades, teachers, selectedTeachers, submeet } = this.state;
+    const { className, number, semesterId, gradeId, semesters, grades, teachers, selectedTeachers, errors, submeet, showNotification, // State to control notification visibility
+      notificationText, // Text for the notification
+      notificationType // Type of notification (success or error) 
+    } = this.state;
 
     return (
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -144,37 +226,44 @@ class CreateClass extends React.Component {
                 { name: "Create Class", navigate: "" },
               ]}
             />
+            {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <form onSubmit={this.handleSubmit}>
+              {/* Class Name */}
               <div className="form-group">
                 <label>Class Name</label>
                 <input
-                  className={`form-control ${className === "" && submeet && "parsley-error"}`}
+                  className={`form-control ${errors.className && submeet ? "is-invalid" : ""}`}
                   value={className}
-                  name="className"
                   onChange={(e) => this.setState({ className: e.target.value })}
                 />
-                {className === "" && submeet && (
-                  <ul className="parsley-errors-list filled">
-                    <li className="parsley-required">Class name is required.</li>
-                  </ul>
-                )}
+                {errors.className && submeet && <div className="invalid-feedback">{errors.className}</div>}
               </div>
 
+              {/* Number of Students */}
               <div className="form-group">
                 <label>Number of Students</label>
                 <input
                   type="number"
-                  className="form-control"
+                  className={`form-control ${errors.number && submeet ? "is-invalid" : ""}`}
                   value={number}
-                  name="number"
-                  onChange={(e) => this.setState({ number: parseInt(e.target.value) })}
+                  onChange={(e) => this.setState({ number: parseInt(e.target.value) || 0 })}
                 />
+                {errors.number && submeet && <div className="invalid-feedback">{errors.number}</div>}
               </div>
 
+              {/* Semester */}
               <div className="form-group">
                 <label>Semester</label>
                 <select
-                  className="form-control"
+                  className={`form-control ${errors.semesterId && submeet ? "is-invalid" : ""}`}
                   value={semesterId}
                   onChange={(e) => this.setState({ semesterId: parseInt(e.target.value) })}
                 >
@@ -185,12 +274,14 @@ class CreateClass extends React.Component {
                     </option>
                   ))}
                 </select>
+                {errors.semesterId && submeet && <div className="invalid-feedback">{errors.semesterId}</div>}
               </div>
 
+              {/* Grade */}
               <div className="form-group">
                 <label>Grade</label>
                 <select
-                  className="form-control"
+                  className={`form-control ${errors.gradeId && submeet ? "is-invalid" : ""}`}
                   value={gradeId}
                   onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
                 >
@@ -201,23 +292,25 @@ class CreateClass extends React.Component {
                     </option>
                   ))}
                 </select>
+                {errors.gradeId && submeet && <div className="invalid-feedback">{errors.gradeId}</div>}
               </div>
 
+              {/* Teachers */}
               <div className="form-group">
-                <label>Select Teachers</label>
-                {teachers.map((teacher) => (
-                  <div key={teacher.teacherId}>
-                    <input
-                      type="checkbox"
-                      checked={selectedTeachers.includes(teacher.teacherId)}
-                      onChange={() => this.handleTeacherSelection(teacher.teacherId)}
-                    />
-                    <label>
+                <label>Select Teacher</label>
+                <select
+                  className={`form-control ${errors.selectedTeachers && submeet ? "is-invalid" : ""}`}
+                  value={selectedTeachers[0] || ""}
+                  onChange={(e) => this.setState({ selectedTeachers: [parseInt(e.target.value)] })}
+                >
+                  <option value="">Select a Teacher</option>
+                  {teachers.map((teacher) => (
+                    <option key={teacher.teacherId} value={teacher.teacherId}>
                       {teacher.name}
-                  
-                    </label>
-                  </div>
-                ))}
+                    </option>
+                  ))}
+                </select>
+                {errors.selectedTeachers && submeet && <div className="invalid-feedback">{errors.selectedTeachers}</div>}
               </div>
 
               <br />

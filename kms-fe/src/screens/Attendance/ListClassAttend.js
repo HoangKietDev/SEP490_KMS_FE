@@ -23,7 +23,12 @@ class ListClassAttendance extends React.Component {
             fetch(`http://localhost:5124/api/Class/GetClassesByTeacherId/${teacherId}`)
                 .then((response) => response.json())
                 .then((data) => {
-                    this.setState({ ProjectsData: data });
+                    if (data.message === "No classes found for this teacher.") {
+                        console.warn(data.message);
+                        this.setState({ ProjectsData: [] }); // Để trống danh sách lớp học
+                    } else {
+                        this.setState({ ProjectsData: data }); // Cập nhật danh sách lớp học
+                    }
                 })
                 .catch((error) => {
                     console.error("Error fetching data: ", error);
@@ -41,6 +46,7 @@ class ListClassAttendance extends React.Component {
             console.error("Teacher ID không tồn tại trong localStorage.");
         }
     }
+
 
     handleEdit = (classId) => {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -90,8 +96,8 @@ class ListClassAttendance extends React.Component {
         const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData } = this.state;
 
         const filteredData = ProjectsData.filter((classData) => {
-            const statusMatch = statusFilter === '' || 
-                (statusFilter === 'active' && classData.status === 1) || 
+            const statusMatch = statusFilter === '' ||
+                (statusFilter === 'active' && classData.status === 1) ||
                 (statusFilter === 'inactive' && classData.status === 0);
 
             const gradeMatch = gradeFilter === '' || classData.gradeId === parseInt(gradeFilter);
@@ -177,35 +183,42 @@ class ListClassAttendance extends React.Component {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {filteredData.map((classData, classIndex) => (
-                                                        <React.Fragment key={"class" + classIndex}>
-                                                            <tr>
-                                                                <td>{classData.className}</td>
-                                                                <td>8:00 - 17:00</td>
-                                                                <td>{classData.number}</td>
-                                                                <td>{this.getGradeName(classData.gradeId)}</td>
-                                                                <td>
-                                                                    {classData.status === 1 ? (
-                                                                        <span className="badge badge-success">Active</span>
-                                                                    ) : (
-                                                                        <span className="badge badge-default">Inactive</span>
-                                                                    )}
-                                                                </td>
-                                                                <td className="project-actions">
-                                                                    <a
-                                                                        className="btn btn-outline-secondary mr-1"
-                                                                        onClick={() => this.handleView(classData.classId)}
-                                                                    >
-                                                                        <i className="icon-eye"></i>
-                                                                    </a>
-
-                                                                    <a className="btn btn-outline-secondary">
-                                                                        <i className="icon-trash"></i>
-                                                                    </a>
-                                                                </td>
-                                                            </tr>
-                                                        </React.Fragment>
-                                                    ))}
+                                                    {filteredData.length > 0 ? (
+                                                        filteredData.map((classData, classIndex) => (
+                                                            <React.Fragment key={"class" + classIndex}>
+                                                                <tr>
+                                                                    <td>{classData.className}</td>
+                                                                    <td>8:00 - 17:00</td>
+                                                                    <td>{classData.number}</td>
+                                                                    <td>{this.getGradeName(classData.gradeId)}</td>
+                                                                    <td>
+                                                                        {classData.status === 1 ? (
+                                                                            <span className="badge badge-success">Active</span>
+                                                                        ) : (
+                                                                            <span className="badge badge-default">Inactive</span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="project-actions">
+                                                                        <a
+                                                                            className="btn btn-outline-secondary mr-1"
+                                                                            onClick={() => this.handleView(classData.classId)}
+                                                                        >
+                                                                            <i className="icon-eye"></i>
+                                                                        </a>
+                                                                        <a className="btn btn-outline-secondary">
+                                                                            <i className="icon-trash"></i>
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            </React.Fragment>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan="6" className="text-center">
+                                                                No classes found.
+                                                            </td>
+                                                        </tr>
+                                                    )}
                                                 </tbody>
                                             </table>
                                         </div>

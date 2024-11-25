@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css"; // Import CSS của DatePic
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './Checkin.css'; // Import CSS cho hiệu ứng nút
+import Notification from "../../components/Notification";
 
 class Checkin extends React.Component {
   state = {
@@ -36,7 +37,9 @@ class Checkin extends React.Component {
     selectedClass: "Tất cả", // Giá trị mặc định để hiển thị toàn bộ danh sách
     studentClassMap: {}, // Đặt giá trị mặc định là một object rỗng
     selectedStudents: [], // Lưu danh sách học sinh đã chọn
-
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
 
@@ -110,27 +113,158 @@ class Checkin extends React.Component {
     return new File([u8arr], filename, { type: mime });
   };
 
+  // uploadFile = (file) => {
+  //   let currentAttendanceDetailID;
+  //   if (!file) {
+  //     alert("No file selected. Please select an image before uploading.");
+  //     return;
+  //   }
+
+  //   // Kiểm tra định dạng file
+  //   const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+  //   if (!validTypes.includes(file.type)) {
+  //     alert("Invalid file type. Please select a JPEG or PNG image.");
+  //     return;
+  //   }
+
+  //   // Kiểm tra kích thước file (giới hạn 5MB)
+  //   if (file.size > 5 * 1024 * 1024) {
+  //     alert("File too large. Please select a file smaller than 5MB.");
+  //     return;
+  //   }
+
+
+
+  //   // Hiển thị trạng thái đang upload
+  //   this.setState({ isUploading: true });
+
+  //   const formDataForRecognition = new FormData();
+  //   formDataForRecognition.append("photo", file); // Gửi file để nhận diện
+
+  //   // Gọi API nhận diện học sinh
+  //   fetch("http://localhost:5124/api/Luxand/RecognizePerson?collections=student", {
+  //     method: "POST",
+  //     body: formDataForRecognition,
+  //   })
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to recognize person: ${response.statusText}`);
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((recognitionData) => {
+  //       console.log("Recognition API response:", recognitionData);
+
+  //       if (recognitionData && recognitionData.length > 0) {
+  //         const recognizedName = recognitionData[0].name;
+
+  //         // Đối chiếu với studentDataCheckin
+  //         const matchedStudent = this.state.studentDataCheckin.find(
+  //           (student) => String(student.studentId) === recognizedName
+  //         );
+
+  //         if (matchedStudent) {
+  //           // alert(`Học sinh ${matchedStudent.fullName} được nhận diện thành công.`);
+  //           // console.log(recognizedName, "sdsdsds");
+  //           this.setState({
+  //             notificationText: `Học sinh ${matchedStudent.fullName} được nhận diện thành công.`,
+  //             notificationType: "success",
+  //             showNotification: true
+  //           });
+  //           // Chuẩn bị dữ liệu upload ảnh sau khi nhận diện thành công
+  //           currentAttendanceDetailID = this.getAttendanceDetailIDByStudentID(recognizedName)
+  //           console.log(currentAttendanceDetailID, "test curent");
+
+  //           const formDataForUpload = new FormData();
+  //           formDataForUpload.append("attendanceDetailID", currentAttendanceDetailID);
+  //           formDataForUpload.append("images", file);
+
+  //           // Gọi API upload ảnh
+  //           return fetch("http://localhost:5124/api/Attendance/UploadAttendanceImages", {
+  //             method: "PUT", // Hoặc POST nếu API yêu cầu
+  //             body: formDataForUpload,
+  //           }).then((uploadResponse) => {
+  //             if (!uploadResponse.ok) {
+  //               throw new Error(
+  //                 `Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`
+  //               );
+  //             }
+  //             return uploadResponse.json();
+  //           });
+  //         } else {
+  //           this.setState({
+  //             notificationText: `Không tìm thấy học sinh phù hợp.`,
+  //             notificationType: "error",
+  //             showNotification: true
+  //           });
+  //           throw new Error("Không tìm thấy học sinh phù hợp.");
+
+  //         }
+  //       } else {
+  //         this.setState({
+  //           notificationText: `Không tìm thấy dữ liệu phù hợp trong ảnh.`,
+  //           notificationType: "error",
+  //           showNotification: true
+  //         });
+  //         throw new Error("Không tìm thấy dữ liệu phù hợp trong ảnh.");
+  //       }
+  //     })
+  //     .then((uploadData) => {
+  //       console.log("Upload response:", uploadData);
+  //       this.setState({
+  //         notificationText: `Image uploaded successfully!`,
+  //         notificationType: "success",
+  //         showNotification: true
+  //       });
+  //       // Cập nhật trạng thái điểm danh
+  //       const studentId = this.getStudentIdByAttendanceDetailID(currentAttendanceDetailID);
+  //       if (studentId) {
+  //         this.handleAttendance(studentId, "Có");
+  //       }
+
+  //       // Đóng modal
+  //       this.closeImageModal();
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error:", error);
+  //       alert(`Có lỗi xảy ra: ${error.message}`);
+  //     })
+  //     .finally(() => {
+  //       // Ẩn trạng thái đang upload
+  //       this.setState({ isUploading: false });
+  //     });
+  // };
   uploadFile = (file) => {
     let currentAttendanceDetailID;
     if (!file) {
-      alert("No file selected. Please select an image before uploading.");
+      this.setState({
+        notificationText: "No file selected. Please select an image before uploading.",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
 
     // Kiểm tra định dạng file
     const validTypes = ["image/jpeg", "image/png", "image/jpg"];
     if (!validTypes.includes(file.type)) {
-      alert("Invalid file type. Please select a JPEG or PNG image.");
+      this.setState({
+        notificationText: "Invalid file type. Please select a JPEG or PNG image.",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
 
     // Kiểm tra kích thước file (giới hạn 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("File too large. Please select a file smaller than 5MB.");
+      this.setState({
+        notificationText: "File too large. Please select a file smaller than 5MB.",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
-
-
 
     // Hiển thị trạng thái đang upload
     this.setState({ isUploading: true });
@@ -150,31 +284,28 @@ class Checkin extends React.Component {
         return response.json();
       })
       .then((recognitionData) => {
-        console.log("Recognition API response:", recognitionData);
-
         if (recognitionData && recognitionData.length > 0) {
           const recognizedName = recognitionData[0].name;
 
-          // Đối chiếu với studentDataCheckin
           const matchedStudent = this.state.studentDataCheckin.find(
             (student) => String(student.studentId) === recognizedName
           );
 
           if (matchedStudent) {
-            alert(`Học sinh ${matchedStudent.fullName} được nhận diện thành công.`);
-            console.log(recognizedName, "sdsdsds");
+            this.setState({
+              notificationText: `Học sinh ${matchedStudent.fullName} được nhận diện thành công.`,
+              notificationType: "success",
+              showNotification: true,
+            });
 
-            // Chuẩn bị dữ liệu upload ảnh sau khi nhận diện thành công
-            currentAttendanceDetailID = this.getAttendanceDetailIDByStudentID(recognizedName)
-            console.log(currentAttendanceDetailID, "test curent");
+            currentAttendanceDetailID = this.getAttendanceDetailIDByStudentID(recognizedName);
 
             const formDataForUpload = new FormData();
             formDataForUpload.append("attendanceDetailID", currentAttendanceDetailID);
             formDataForUpload.append("images", file);
 
-            // Gọi API upload ảnh
             return fetch("http://localhost:5124/api/Attendance/UploadAttendanceImages", {
-              method: "PUT", // Hoặc POST nếu API yêu cầu
+              method: "PUT",
               body: formDataForUpload,
             }).then((uploadResponse) => {
               if (!uploadResponse.ok) {
@@ -185,34 +316,48 @@ class Checkin extends React.Component {
               return uploadResponse.json();
             });
           } else {
+            this.setState({
+              notificationText: "Không tìm thấy học sinh phù hợp.",
+              notificationType: "error",
+              showNotification: true,
+            });
             throw new Error("Không tìm thấy học sinh phù hợp.");
           }
         } else {
+          this.setState({
+            notificationText: "Không tìm thấy dữ liệu phù hợp trong ảnh.",
+            notificationType: "error",
+            showNotification: true,
+          });
           throw new Error("Không tìm thấy dữ liệu phù hợp trong ảnh.");
         }
       })
       .then((uploadData) => {
-        alert("Image uploaded successfully!");
-        console.log("Upload response:", uploadData);
+        this.setState({
+          notificationText: "Image uploaded successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
 
-        // Cập nhật trạng thái điểm danh
         const studentId = this.getStudentIdByAttendanceDetailID(currentAttendanceDetailID);
         if (studentId) {
-          this.handleAttendance(studentId, "Có");
+          this.handleAttendance(studentId, "Attend");
         }
 
-        // Đóng modal
         this.closeImageModal();
       })
       .catch((error) => {
-        console.error("Error:", error);
-        alert(`Có lỗi xảy ra: ${error.message}`);
+        this.setState({
+          notificationText: `Có lỗi xảy ra: ${error.message}`,
+          notificationType: "error",
+          showNotification: true,
+        });
       })
       .finally(() => {
-        // Ẩn trạng thái đang upload
         this.setState({ isUploading: false });
       });
   };
+
   handleFetchPickupPersonInfo = (uuid) => {
     fetch(`http://localhost:5124/api/PickupPerson/GetPickupPersonInfoByUUI?uuid=${uuid}`)
       .then((response) => {
@@ -232,7 +377,12 @@ class Checkin extends React.Component {
       })
       .catch((error) => {
         console.error("Error fetching pickup person info:", error);
-        alert("Không thể tải thông tin người đón.");
+        // alert("Không thể tải thông tin người đón.");
+        this.setState({
+          notificationText: "Không thể tải thông tin người đón.",
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
   renderModal = () => {
@@ -253,12 +403,22 @@ class Checkin extends React.Component {
       const { selectedStudents, selectedFile } = this.state;
 
       if (selectedStudents.length === 0) {
-        alert("Bạn chưa chọn học sinh nào.");
+        // alert("Bạn chưa chọn học sinh nào.");
+        this.setState({
+          notificationText: "Bạn chưa chọn học sinh nào.",
+          notificationType: "error",
+          showNotification: true,
+        });
         return;
       }
 
       if (!selectedFile) {
-        alert("Không có ảnh nào được chụp. Vui lòng chụp ảnh trước khi xác nhận.");
+        // alert("Không có ảnh nào được chụp. Vui lòng chụp ảnh trước khi xác nhận.");
+        this.setState({
+          notificationText: "Không có ảnh nào được chụp. Vui lòng chụp ảnh trước khi xác nhận.",
+          notificationType: "error",
+          showNotification: true,
+        });
         return;
       }
 
@@ -277,8 +437,13 @@ class Checkin extends React.Component {
       });
 
       // Reset danh sách đã chọn và đóng modal
-      this.setState({ selectedStudents: [], isModalVisible: false, isUploading: false, showImageModal:false }, () => {
-        alert("Cập nhật trạng thái 'Đã về' và upload ảnh thành công!");
+      this.setState({ selectedStudents: [], isModalVisible: false, isUploading: false, showImageModal: false }, () => {
+        // alert("Cập nhật trạng thái 'Đã về' và upload ảnh thành công!");
+        this.setState({
+          notificationText: `Cập nhật trạng thái 'Đã về' và upload ảnh thành công!`,
+          notificationType: "success",
+          showNotification: true,
+        });
       });
     };
 
@@ -389,22 +554,35 @@ class Checkin extends React.Component {
 
   uploadFileCheckout = (file) => {
     if (!file) {
-      alert("No file selected. Please select an image before uploading.");
+      this.setState({
+        notificationText: "No file selected. Please select an image before uploading.",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
 
     // Kiểm tra định dạng file
     const validTypes = ["image/jpeg", "image/png", "image/jpg"];
     if (!validTypes.includes(file.type)) {
-      alert("Invalid file type. Please select a JPEG or PNG image.");
+      this.setState({
+        notificationText: "Invalid file type. Please select a JPEG or PNG image.",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
 
     // Kiểm tra kích thước file (giới hạn 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("File too large. Please select a file smaller than 5MB.");
+      this.setState({
+        notificationText: "File too large. Please select a file smaller than 5MB.",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
+
     // Hiển thị trạng thái đang upload
     this.setState({ isUploading: true });
 
@@ -432,14 +610,28 @@ class Checkin extends React.Component {
           // Gọi hàm để lấy thông tin người đón
           this.handleFetchPickupPersonInfo(recognizedUUID);
         } else {
+          this.setState({
+            notificationText: "Không tìm thấy dữ liệu phù hợp trong ảnh.",
+            notificationType: "error",
+            showNotification: true,
+          });
           throw new Error("Không tìm thấy dữ liệu phù hợp trong ảnh.");
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert(`Có lỗi xảy ra: ${error.message}`);
+        this.setState({
+          notificationText: `Có lỗi xảy ra: ${error.message}`,
+          notificationType: "error",
+          showNotification: true,
+        });
+      })
+      .finally(() => {
+        // Kết thúc trạng thái upload
+        this.setState({ isUploading: false });
       });
   };
+
   getStudentIdByAttendanceDetailID = (attendanceDetailID) => {
     const { attendanceDetailsCheckin } = this.state;
     const detail = attendanceDetailsCheckin.find(detail => detail.attendanceDetailId === attendanceDetailID);
@@ -543,12 +735,22 @@ class Checkin extends React.Component {
     axios.post("http://localhost:5124/api/Sms/SendSms", body)
       .then((response) => {
         console.log("SMS sent successfully:", response.data);
-        alert("Tin nhắn đã được gửi thành công!");
+        // alert("Tin nhắn đã được gửi thành công!");
+        this.setState({
+          notificationText: "Tin nhắn đã được gửi thành công!",
+          notificationType: "success",
+          showNotification: true,
+        });
         this.toggleModal(); // Đóng modal sau khi gửi
       })
       .catch((error) => {
         console.error("Error sending SMS:", error);
-        alert("Có lỗi xảy ra khi gửi tin nhắn.");
+        // alert("Có lỗi xảy ra khi gửi tin nhắn.");
+        this.setState({
+          notificationText: "Có lỗi xảy ra khi gửi tin nhắn.",
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
 
@@ -579,7 +781,14 @@ class Checkin extends React.Component {
 
     Promise.all(studentPromises)
       .then((responses) => {
-        const studentData = responses.map(response => response.data);
+        const studentData = responses.map(response => {
+          const student = response.data;
+          // Gán avatar mặc định nếu avatar là null
+          student.avatar =
+            student.avatar ||
+            "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg";
+          return student;
+        });
 
         // Lấy các dịch vụ đã được tick cho mỗi học sinh
         const date = this.formatDate(this.state.selectedDate);
@@ -607,6 +816,31 @@ class Checkin extends React.Component {
       });
   };
 
+  fetchParentData = (parentIds) => {
+    const parentPromises = parentIds.map((parentId) =>
+      axios.get(`http://localhost:5124/api/User/ProfileById/${parentId}`)
+    );
+
+    Promise.all(parentPromises)
+      .then((responses) => {
+        const parentData = responses.reduce((acc, response) => {
+          const parent = response.data;
+          acc[parent.userId] = {
+            // name: `${parent.firstName || ""} ${parent.lastName || ""}`.trim(),
+            name: `${parent.firstname} ${parent.lastName}`.trim(),
+            phone: parent.phoneNumber || "Không có",
+            avatar: parent.avatar || "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg",
+          };
+          return acc;
+        }, {});
+
+        this.setState({ parentData }); // Lưu thông tin phụ huynh vào state
+      })
+      .catch((error) => {
+        console.error("Error fetching parent data:", error);
+      });
+  };
+
   fetchAttendanceData = () => {
     const { activeTab, selectedDate } = this.state;
     const type = activeTab === "checkin" ? "checkin" : "checkout";
@@ -627,6 +861,7 @@ class Checkin extends React.Component {
         const attendanceMap = {};
         const attendanceDetailMap = {};
         const studentClassMap = {}; // Map lưu tên lớp theo studentId
+        const parentIds = new Set();
 
         allDetails.forEach((detail) => {
           attendanceMap[detail.studentId] = detail.status;
@@ -636,10 +871,13 @@ class Checkin extends React.Component {
           const student = childrenData.find((child) => child.studentId === detail.studentId);
           if (student) {
             // Lấy danh sách tên lớp của học sinh
+            parentIds.add(student.parentId); // Thu thập parentId
+
             const classNames = student.classes.map((cls) => cls.className).join(", ");
             studentClassMap[detail.studentId] = classNames;
           }
         });
+        this.fetchParentData(Array.from(parentIds));
 
         const studentIds = allDetails.map((detail) => detail.studentId);
 
@@ -796,7 +1034,12 @@ class Checkin extends React.Component {
                 })
                 .catch((error) => {
                   console.error("Error updating service:", error);
-                  alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                  // alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                  this.setState({
+                    notificationText: `Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`,
+                    notificationType: "error",
+                    showNotification: true,
+                  });
                 });
             } else {
               // Thêm mới nếu chưa có trong DB
@@ -816,7 +1059,12 @@ class Checkin extends React.Component {
                 })
                 .catch((error) => {
                   console.error("Error adding service:", error);
-                  alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
+                  //alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
+                  this.setState({
+                    notificationText: `Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`,
+                    notificationType: "error",
+                    showNotification: true,
+                  });
                 });
             }
           });
@@ -841,7 +1089,12 @@ class Checkin extends React.Component {
                 })
                 .catch((error) => {
                   console.error("Error updating service:", error);
-                  alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                  //alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                  this.setState({
+                    notificationText: `Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`,
+                    notificationType: "error",
+                    showNotification: true,
+                  });
                 });
             }
           });
@@ -930,8 +1183,12 @@ class Checkin extends React.Component {
       })
       .then((data) => {
         console.log("Attendance updated successfully:", data);
-        alert("Điểm danh đã được cập nhật thành công!");
-
+        // alert("Điểm danh đã được cập nhật thành công!");
+        this.setState({
+          notificationText: `Điểm danh đã được cập nhật thành công!`,
+          notificationType: "success",
+          showNotification: true,
+        });
         // Gọi API CreateDailyCheckout sau khi cập nhật thành công
 
         fetch("http://localhost:5124/api/Attendance/CreateDailyCheckout", {
@@ -965,7 +1222,12 @@ class Checkin extends React.Component {
       })
       .catch((error) => {
         console.error("Error updating attendance: ", error);
-        alert("Có lỗi xảy ra khi cập nhật điểm danh.");
+        // alert("Có lỗi xảy ra khi cập nhật điểm danh.");
+        this.setState({
+          notificationText: `Có lỗi xảy ra khi cập nhật điểm danh.`,
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
 
@@ -981,11 +1243,22 @@ class Checkin extends React.Component {
     axios.post("http://localhost:5124/api/Sms/SendSms", body)
       .then((response) => {
         console.log(`SMS sent for student ${studentId}:`, response.data);
-        alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
+        // alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
+        this.setState({
+          notificationText: `Tin nhắn đã được gửi cho học sinh ID ${studentId}`,
+          notificationType: "success",
+          showNotification: true,
+        });
       })
       .catch((error) => {
         console.error("Error sending SMS:", error);
-        alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
+        // alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
+
+        this.setState({
+          notificationText: `Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`,
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
 
@@ -1012,7 +1285,11 @@ class Checkin extends React.Component {
       capturedImage,
       imageSrc,
       showImageModal,
-      isUploading
+      isUploading,
+      notificationType,
+      notificationText,
+      showNotification,
+
     } = this.state;
 
     const
@@ -1030,7 +1307,15 @@ class Checkin extends React.Component {
             { name: "Chi Tiết Điểm Danh", navigate: "" },
           ]}
         />
-
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div className="form-group">
           <label>Chọn Ngày:</label>
           <DatePicker
@@ -1104,7 +1389,7 @@ class Checkin extends React.Component {
                       <tr>
                         <th>Tên học sinh</th>
                         <th>Thông tin khác</th>
-                        <th>Người đưa đón</th>
+                        <th>Phụ huynh</th>
                         <th>Liên hệ</th>
                         <th>Điểm danh</th>
                         <th>Hành động</th>
@@ -1116,63 +1401,75 @@ class Checkin extends React.Component {
                           .filter(
                             (student) =>
                               this.state.selectedClass === "Tất cả" ||
-                              (this.state.studentClassMap[student.studentId] || "").includes(
-                                this.state.selectedClass
-                              )
+                              (this.state.studentClassMap[student.studentId] || "").includes(this.state.selectedClass)
                           )
-                          .map((student, index) => (
-                            <tr key={index}>
-                              <td>
-                                <div className="d-flex align-items-center">
-                                  <img
-                                    src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
-                                    alt="Profile"
-                                    className="img-fluid rounded-circle mr-2"
-                                    style={{ width: "40px", height: "40px", objectFit: "cover" }}
-                                  />
-                                  <span>{student.fullName}</span>
-                                </div>
-                              </td>
-                              <td>{this.state.studentClassMap[student.studentId] || "Không có lớp"}</td>
-                              <td></td>
-                              <td></td>
-                              <td>
-                                <button
-                                  className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Có" ? "btn-success" : ""
-                                    }`}
-                                  onClick={() => isToday && this.handleAttendance(student.studentId, "Có")}
-                                  disabled={!isToday}
-                                >
-                                  Có
-                                </button>
-                                <button
-                                  className={`btn ${attendanceDataCheckin[student.studentId] === "Vắng" ? "btn-danger" : ""
-                                    }`}
-                                  onClick={() => isToday && this.handleAttendance(student.studentId, "Vắng")}
-                                  disabled={!isToday}
-                                >
-                                  Vắng
-                                </button>
-                              </td>
-                              <td className="project-actions">
-                                <label
-                                  className="btn btn-outline-secondary mr-1"
-                                  style={{ cursor: "pointer" }}
-                                  onClick={this.toggleModal}
-                                >
-                                  <i className="icon-speech"></i>
-                                </label>
-                              </td>
-                            </tr>
-                          ))
+                          .map((student, index) => {
+                            const parent = this.state.parentData[student.parentId] || {}; // Lấy thông tin phụ huynh từ state
+                            return (
+                              <tr key={index}>
+                                <td>
+                                  <div className="d-flex align-items-center">
+                                    <img
+                                      src={student.avatar} // Avatar học sinh
+                                      alt="Profile"
+                                      className="img-fluid rounded-circle mr-2"
+                                      style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                    />
+                                    <span>{student.fullName}</span>
+                                  </div>
+                                </td>
+                                <td>{this.state.studentClassMap[student.studentId] || "Không có lớp"}</td>
+                                <td>
+                                  <div className="d-flex align-items-center">
+                                    <img
+                                      src={parent.avatar} // Avatar phụ huynh
+                                      alt="Parent Avatar"
+                                      className="img-fluid rounded-circle mr-2"
+                                      style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                    />
+                                    <span>{parent.name || "Không có tên"}</span>
+                                  </div>
+                                </td>
+                                <td>{parent.phone || "Không có số"}</td>
+                                <td>
+                                  <button
+                                    className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Attend" ? "btn-success" : ""
+                                      }`}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Attend")}
+                                    disabled={!isToday}
+                                  >
+                                    Attend
+                                  </button>
+                                  <button
+                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absence" ? "btn-danger" : ""
+                                      }`}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Absence")}
+                                    disabled={!isToday}
+                                  >
+                                    Absence
+                                  </button>
+                                </td>
+                                <td className="project-actions">
+                                  <label
+                                    className="btn btn-outline-secondary mr-1"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={this.toggleModal}
+                                  >
+                                    <i className="icon-speech"></i>
+                                  </label>
+                                </td>
+                              </tr>
+                            );
+                          })
                       ) : (
                         <tr>
-                          <td colSpan="3" className="text-center">
+                          <td colSpan="6" className="text-center">
                             Không có dữ liệu
                           </td>
                         </tr>
                       )}
                     </tbody>
+
                   </table>
                   <div className="text-right mt-3">
                     <button
@@ -1219,59 +1516,58 @@ class Checkin extends React.Component {
                         studentDataCheckout
                           .filter(
                             (student) =>
-                              attendanceDataCheckin[student.studentId] === "Có" // Chỉ hiển thị học sinh có trạng thái "Có"
+                              attendanceDataCheckin[student.studentId] === "Attend" // Chỉ hiển thị học sinh có trạng thái "Attend"
                           )
-                          .map((student, index) => (
-                            <tr key={index}>
-                              <td>
-                                <div className="d-flex align-items-center">
-                                  <img
-                                    src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
-                                    alt="Profile"
-                                    className="img-fluid rounded-circle mr-2"
-                                    style={{ width: "40px", height: "40px", objectFit: "cover" }}
-                                  />
-                                  <span>{student.fullName}</span>
-                                </div>
-                              </td>
-                              <td>{this.state.studentClassMap[student.studentId] || "Không có lớp"}</td>
-                              <td>n/a</td>
-                              <td>n/a</td>
-                              <td>n/a</td>
-                              <td>
-                                <button
-                                  className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Đã về" ? "btn-success" : ""
-                                    }`}
-                                  onClick={() => isToday && this.handleAttendance(student.studentId, "Đã về")}
-                                  disabled={!isToday}
-                                >
-                                  Đã về
-                                </button>
-                                <button
-                                  className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Chưa về" ? "btn-danger" : ""
-                                    }`}
-                                  onClick={() => isToday && this.handleAttendance(student.studentId, "Chưa về")}
-                                  disabled={!isToday}
-                                >
-                                  Chưa về
-                                </button>
-                                {/* <button
-                                  disabled={!isToday}
-                                  className="btn btn-primary mr-1"
-                                  onClick={() => this.handleAttendance(student.studentId, "Đã về")}
-                                >
-                                  Đã về
-                                </button>
-                                <button
-                                  disabled={!isToday}
-                                  className="btn btn-secondary"
-                                  onClick={() => this.handleAttendance(student.studentId, "Chưa về")}
-                                >
-                                  Chưa về
-                                </button> */}
-                              </td>
-                            </tr>
-                          ))
+                          .map((student, index) => {
+                            const parent = this.state.parentData[student.parentId] || {}; // Lấy thông tin phụ huynh từ state
+                            return (
+                              <tr key={index}>
+                                <td>
+                                  <div className="d-flex align-items-center">
+                                    <img
+                                      src={student.avatar} // Avatar học sinh
+                                      alt="Profile"
+                                      className="img-fluid rounded-circle mr-2"
+                                      style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                    />
+                                    <span>{student.fullName}</span>
+                                  </div>
+                                </td>
+                                <td>{this.state.studentClassMap[student.studentId] || "Không có lớp"}</td>
+                                <td>n/a</td>
+                                <td>
+                                  <div className="d-flex align-items-center">
+                                    <img
+                                      src={parent.avatar} // Avatar phụ huynh
+                                      alt="Parent Avatar"
+                                      className="img-fluid rounded-circle mr-2"
+                                      style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                    />
+                                    <span>{parent.name || "Không có tên"}</span>
+                                  </div>
+                                </td>
+                                <td>{parent.phone || "Không có số"}</td>
+                                <td>
+                                  <button
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Đã về" ? "btn-success" : ""
+                                      }`}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Đã về")}
+                                    disabled={!isToday}
+                                  >
+                                    Đã về
+                                  </button>
+                                  <button
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Chưa về" ? "btn-danger" : ""
+                                      }`}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Chưa về")}
+                                    disabled={!isToday}
+                                  >
+                                    Chưa về
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
                       ) : (
                         <tr>
                           <td colSpan="6" className="text-center">
@@ -1279,10 +1575,9 @@ class Checkin extends React.Component {
                           </td>
                         </tr>
                       )}
-
-
                     </tbody>
                   </table>
+
 
                   <div className="text-right mt-3">
                     <button className="btn btn-primary" onClick={this.updateAttendance} disabled={!isToday}>

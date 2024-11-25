@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-
+import Notification from "../../components/Notification";
 class UpdateClass extends React.Component {
   state = {
     classId: 0,
@@ -17,6 +17,9 @@ class UpdateClass extends React.Component {
     semesters: [],  // Lưu danh sách semester
     status: 0,
     submeet: false,
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -106,7 +109,12 @@ class UpdateClass extends React.Component {
       },
     })
       .then((response) => {
-        alert("Class has been updated successfully!");
+        // alert("Class has been updated successfully!");
+        this.setState({
+          notificationText: "Class has been updated successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
         this.props.history.push('/viewclass');
       })
       .catch((error) => {
@@ -116,7 +124,9 @@ class UpdateClass extends React.Component {
   };
 
   render() {
-    const { className, status, expireDate, submeet, grades, semesters, gradeId, semesterId } = this.state;
+    const { className, status, expireDate, submeet, grades, semesters, gradeId, semesterId,  showNotification, // State to control notification visibility
+      notificationText, // Text for the notification
+      notificationType } = this.state;
 
     return (
       <div
@@ -132,6 +142,15 @@ class UpdateClass extends React.Component {
                 { name: "Update Class", navigate: "" },
               ]}
             />
+             {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <form onSubmit={this.handleSubmit}>
               <div className="form-group">
                 <label>Class Name</label>

@@ -6,7 +6,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; // Import CSS của DatePicker
 import axios from "axios";
 import './Checkin.css'; // Import CSS cho hiệu ứng nút
-
+import Notification from "../../components/Notification";
 class Attend extends React.Component {
     state = {
         studentDataCheckin: [],
@@ -33,7 +33,9 @@ class Attend extends React.Component {
         selectedFile: null, // Lưu file ảnh đã chọn từ camera
         attendanceDetailMap: {}, // Map để lưu trữ attendanceDetailID theo studentId
         isUploading: false, // Thêm state để theo dõi trạng thái upload
-
+        showNotification: false, // State to control notification visibility
+        notificationText: "", // Text for the notification
+        notificationType: "success" // Type of notification (success or error)
     };
 
 
@@ -63,7 +65,11 @@ class Attend extends React.Component {
         const attendanceDetailID = attendanceDetailMap[studentId];
 
         if (!attendanceDetailID) {
-            alert("AttendanceDetailID is missing. Please try again.");
+            this.setState({
+                notificationText: "AttendanceDetailID is missing. Please try again.",
+                notificationType: "error",
+                showNotification: true,
+              });
             return;
         }
 
@@ -76,7 +82,12 @@ class Attend extends React.Component {
                 currentAttendanceDetailID: attendanceDetailID, // Lưu attendanceDetailID vào state
             });
         } else {
-            alert("No file selected. Please select an image.");
+           // alert("No file selected. Please select an image.");
+            this.setState({
+                notificationText: "No file selected. Please select an image.",
+                notificationType: "error",
+                showNotification: true,
+              });
         }
     };
 
@@ -111,12 +122,22 @@ class Attend extends React.Component {
         const { currentAttendanceDetailID } = this.state;
 
         if (!file) {
-            alert("No file selected. Please select an image before uploading.");
+            //alert("No file selected. Please select an image before uploading.");
+            this.setState({
+                notificationText: "No file selected. Please select an image before uploading.",
+                notificationType: "error",
+                showNotification: true,
+              });
             return;
         }
 
         if (!currentAttendanceDetailID) {
-            alert("AttendanceDetailID is missing. Please try again.");
+            //alert("AttendanceDetailID is missing. Please try again.");
+            this.setState({
+                notificationText: "AttendanceDetailID is missing. Please try again.",
+                notificationType: "error",
+                showNotification: true,
+              });
             return;
         }
 
@@ -138,7 +159,12 @@ class Attend extends React.Component {
                 return response.json();
             })
             .then(data => {
-                alert("Image uploaded successfully!");
+                // alert("Image uploaded successfully!");
+                this.setState({
+                    notificationText: "Image uploaded successfully!",
+                    notificationType: "error",
+                    showNotification: true,
+                  });
                 console.log("Upload response:", data);
                 this.closeImageModal();
 
@@ -147,12 +173,17 @@ class Attend extends React.Component {
                 console.log(studentId, "lalalala");
 
                 if (studentId) {
-                    this.handleAttendance(studentId, "Có");
+                    this.handleAttendance(studentId, "Attend");
                 }
             })
             .catch(error => {
                 console.error("Error uploading image:", error);
-                alert("Error uploading image. Please try again.");
+                // alert("Error uploading image. Please try again.");
+                this.setState({
+                    notificationText: "Error uploading image. Please try again.",
+                    notificationType: "error",
+                    showNotification: true,
+                  });
             })
             .finally(() => {
                 // Kết thúc quá trình upload, ẩn loading
@@ -242,12 +273,22 @@ class Attend extends React.Component {
         axios.post("http://localhost:5124/api/Sms/SendSms", body)
             .then((response) => {
                 console.log("SMS sent successfully:", response.data);
-                alert("Tin nhắn đã được gửi thành công!");
+                // alert("Tin nhắn đã được gửi thành công!");
+                this.setState({
+                    notificationText: "Tin nhắn đã được gửi thành công!",
+                    notificationType: "success",
+                    showNotification: true,
+                  });
                 this.toggleModal(); // Đóng modal sau khi gửi
             })
             .catch((error) => {
                 console.error("Error sending SMS:", error);
-                alert("Có lỗi xảy ra khi gửi tin nhắn.");
+                // alert("Có lỗi xảy ra khi gửi tin nhắn.");
+                this.setState({
+                    notificationText: "Có lỗi xảy ra khi gửi tin nhắn.",
+                    notificationType: "error",
+                    showNotification: true,
+                  });
             });
     };
 
@@ -494,10 +535,20 @@ class Attend extends React.Component {
                             axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
                                 .then((response) => {
                                     console.log(`Service ${serviceId} status updated to 1 for student ${studentId}:`, response.data);
+                                    this.setState({
+                                        notificationText: "Update success",
+                                        notificationType: "success",
+                                        showNotification: true,
+                                      });
                                 })
                                 .catch((error) => {
                                     console.error("Error updating service:", error);
-                                    alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                                    // alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                                    this.setState({
+                                        notificationText: "`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`",
+                                        notificationType: "success",
+                                        showNotification: true,
+                                      });
                                 });
                         } else {
                             // Thêm mới nếu chưa có trong DB
@@ -514,10 +565,20 @@ class Attend extends React.Component {
                             axios.post("http://localhost:5124/api/Service/AddCheckService", body)
                                 .then((response) => {
                                     console.log(`Service ${serviceId} added for student ${studentId}:`, response.data);
+                                    this.setState({
+                                        notificationText: "Success",
+                                        notificationType: "success",
+                                        showNotification: true,
+                                      });
                                 })
                                 .catch((error) => {
                                     console.error("Error adding service:", error);
-                                    alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
+                                    // alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
+                                    this.setState({
+                                        notificationText: `Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`,
+                                        notificationType: "error",
+                                        showNotification: true,
+                                      });
                                 });
                         }
                     });
@@ -539,10 +600,20 @@ class Attend extends React.Component {
                             axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
                                 .then((response) => {
                                     console.log(`Service ${serviceId} status updated to 0 for student ${studentId}:`, response.data);
+                                    this.setState({
+                                        notificationText: "Update Success",
+                                        notificationType: "success",
+                                        showNotification: true,
+                                      });
                                 })
                                 .catch((error) => {
                                     console.error("Error updating service:", error);
-                                    alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                                    // alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
+                                    this.setState({
+                                        notificationText: "`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`",
+                                        notificationType: "success",
+                                        showNotification: true,
+                                      });
                                 });
                         }
                     });
@@ -630,14 +701,23 @@ class Attend extends React.Component {
             })
             .then((data) => {
                 console.log("Attendance updated successfully:", data);
-                alert("Điểm danh đã được cập nhật thành công!");
-
+                // alert("Điểm danh đã được cập nhật thành công!");
+                this.setState({
+                    notificationText: "Điểm danh đã được cập nhật thành công!",
+                    notificationType: "success",
+                    showNotification: true,
+                  });
 
 
             })
             .catch((error) => {
                 console.error("Error updating attendance: ", error);
-                alert("Có lỗi xảy ra khi cập nhật điểm danh.");
+                // alert("Có lỗi xảy ra khi cập nhật điểm danh.");
+                this.setState({
+                    notificationText: "Có lỗi xảy ra khi cập nhật điểm danh.",
+                    notificationType: "error",
+                    showNotification: true,
+                  });
             });
     };
 
@@ -653,11 +733,21 @@ class Attend extends React.Component {
         axios.post("http://localhost:5124/api/Sms/SendSms", body)
             .then((response) => {
                 console.log(`SMS sent for student ${studentId}:`, response.data);
-                alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
+                // alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
+                this.setState({
+                    notificationText: "`Tin nhắn đã được gửi cho học sinh ID ${studentId}`",
+                    notificationType: "success",
+                    showNotification: true,
+                  });
             })
             .catch((error) => {
                 console.error("Error sending SMS:", error);
-                alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
+                // alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
+                this.setState({
+                    notificationText: `Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`,
+                    notificationType: "error",
+                    showNotification: true,
+                  });
             });
     };
 
@@ -684,7 +774,10 @@ class Attend extends React.Component {
             capturedImage,
             imageSrc,
             showImageModal,
-            isUploading
+            isUploading,
+            showNotification, // State to control notification visibility
+            notificationText, // Text for the notification
+            notificationType // Type of notification (success or error)
         } = this.state;
 
         const
@@ -702,7 +795,15 @@ class Attend extends React.Component {
                         { name: "Chi Tiết Điểm Danh", navigate: "" },
                     ]}
                 />
-
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div className="form-group">
                     <label>Chọn Ngày:</label>
                     <DatePicker
@@ -724,7 +825,7 @@ class Attend extends React.Component {
                                     Attendance
                                 </a>
                             </li>
-                          
+
                             <li className="nav-item">
                                 <a
                                     className={`nav-link ${activeTab === "checkService" ? "active" : ""}`}
@@ -772,23 +873,23 @@ class Attend extends React.Component {
 
                                                         <td>
                                                             <button
-                                                                className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Có" ? "btn-success" : ""}`}
-                                                                onClick={() => isToday && this.handleAttendance(student.studentId, "Có")}
+                                                                className={`btn mr-1 ${attendanceDataCheckin[student.studentId] === "Attend" ? "btn-success" : ""}`}
+                                                                onClick={() => isToday && this.handleAttendance(student.studentId, "Attend")}
                                                                 disabled={!isToday}
                                                             >
-                                                                Có
+                                                                Attend
                                                             </button>
 
                                                             <button
-                                                                className={`btn ${attendanceDataCheckin[student.studentId] === "Vắng" ? "btn-danger" : ""}`}
-                                                                onClick={() => isToday && this.handleAttendance(student.studentId, "Vắng")}
+                                                                className={`btn ${attendanceDataCheckin[student.studentId] === "Absence" ? "btn-danger" : ""}`}
+                                                                onClick={() => isToday && this.handleAttendance(student.studentId, "Absence")}
                                                                 disabled={!isToday}
                                                             >
-                                                                Vắng
+                                                                Absence
                                                             </button>
                                                         </td>
                                                         <td className="project-actions">
-                                                           
+
                                                             <label className="btn btn-outline-secondary mr-1" style={{ cursor: 'pointer' }} onClick={this.toggleModal}>
                                                                 <i className="icon-speech"></i>
                                                             </label>

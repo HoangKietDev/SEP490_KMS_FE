@@ -2,74 +2,84 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
-
+import Notification from "../../components/Notification";
 class AddPickupPerson extends React.Component {
     state = {
         name: "",
         phoneNumber: "",
         avatar: null, // Dùng để lưu file ảnh
         submeet: false,
+        showNotification: false, // State to control notification visibility
+        notificationText: "", // Text for the notification
+        notificationType: "success" // Type of notification (success or error)
     };
 
     handleSubmit = (e) => {
         e.preventDefault();
         const { name, phoneNumber, avatar } = this.state;
-      
+
         // Lấy parentId từ localStorage
         const user = JSON.parse(localStorage.getItem('user'));
         const parentId = user.user.userId;
-        
+
         if (!parentId) {
-          alert("User ID is missing in localStorage!");
-          return;
+            alert("User ID is missing in localStorage!");
+            return;
         }
-      
+
         // Kiểm tra dữ liệu trước khi gửi
         if (!name || !phoneNumber || !avatar) {
-          this.setState({ submeet: true });
-          return;
+            this.setState({ submeet: true });
+            return;
         }
-      
+
         // Xây dựng URL với query parameters
         const url = `http://localhost:5124/api/PickupPerson/AddPickupPerson?name=${encodeURIComponent(
-          name
+            name
         )}&phoneNumber=${encodeURIComponent(phoneNumber)}&parentId=${encodeURIComponent(parentId)}`;
-      
+
         // Chuẩn bị FormData để gửi file ảnh
         const formData = new FormData();
         formData.append("photo", avatar); // Thêm file ảnh vào FormData
-      
+
         // Gửi yêu cầu API
         fetch(url, {
-          method: "POST",
-          body: formData, // FormData chứa ảnh
+            method: "POST",
+            body: formData, // FormData chứa ảnh
         })
-          .then((response) => {
-            if (response.ok) {
-              alert("Pickup person has been added successfully!");
-              this.props.history.push("/viewpickup");
-              this.setState({
-                name: "",
-                phoneNumber: "",
-                avatar: null,
-                submeet: false,
-              });
-            } else {
-              return response.json().then((data) => {
-                throw new Error(data.message || "Failed to add pickup person.");
-              });
-            }
-          })
-          .catch((error) => {
-            console.error("Error adding pickup person:", error);
-            alert(error.message || "Failed to add pickup person. Please try again.");
-          });
-      };
-      
+            .then((response) => {
+                if (response.ok) {
+                    // alert("Pickup person has been added successfully!");
+                    this.setState({
+                        notificationText: "Pickup person has been added successfully!!",
+                        notificationType: "success",
+                        showNotification: true
+                      });    
+                    // this.props.history.push("/viewpickup");
+                    this.setState({
+                        name: "",
+                        phoneNumber: "",
+                        avatar: null,
+                        submeet: false,
+                    });
+                } else {
+                    return response.json().then((data) => {
+                        throw new Error(data.message || "Failed to add pickup person.");
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error adding pickup person:", error);
+                alert(error.message || "Failed to add pickup person. Please try again.");
+            });
+    };
+
 
 
     render() {
-        const { name, phoneNumber, avatar, submeet } = this.state;
+        const { name, phoneNumber, avatar, submeet, showNotification, // State to control notification visibility
+            notificationText, // Text for the notification
+            notificationType } = this.state;
 
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -81,6 +91,15 @@ class AddPickupPerson extends React.Component {
                             { name: "Add Pickup Person", navigate: "" },
                         ]}
                     />
+                    {showNotification && (
+                        <Notification
+                            type={notificationType}
+                            position="top-right"
+                            dialogText={notificationText}
+                            show={showNotification}
+                            onClose={() => this.setState({ showNotification: false })}
+                        />
+                    )} 
                     <form onSubmit={this.handleSubmit}>
                         <div className="form-group w-50">
                             <label>Name</label>

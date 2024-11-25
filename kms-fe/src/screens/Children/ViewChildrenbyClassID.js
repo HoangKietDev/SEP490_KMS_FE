@@ -69,10 +69,13 @@ class ViewChildrenByClassID extends React.Component {
       student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const getGradeName = (gradeId) => {
-      const grade = GradesData.find((g) => g.gradeId === gradeId);
-      return grade ? grade.name : "Unknown";
-    };
+    const getGradeName = (gradeID) => {
+      
+      const grade = GradesData.find((g) => g.gradeId === gradeID);
+  
+      return grade ? grade.name : "Unknown"; // Sử dụng "name" thay vì "Name"
+  };
+  
 
     return (
       <div
@@ -137,7 +140,7 @@ class ViewChildrenByClassID extends React.Component {
                                 </div>
                               </td>
                               <td>{student.nickName}</td>
-                              <td>{getGradeName(student.grade)}</td>
+                              <td>{getGradeName(student.gradeId)}</td>
                               <td>
                                 {new Date(student.dob).toLocaleDateString("vi-VN", {
                                   day: "2-digit",

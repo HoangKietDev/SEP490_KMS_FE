@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
-
+import Notification from "../../components/Notification";
 class ViewStudentById extends React.Component {
   state = {
     studentDetailId: 0,
@@ -23,6 +23,9 @@ class ViewStudentById extends React.Component {
     parentId: 0, // Parent ID được lấy từ dữ liệu fetch
     grades: [],
     submeet: false,
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -123,7 +126,20 @@ class ViewStudentById extends React.Component {
         console.log("Avatar updated successfully!", childrenImageResponse.data);
 
         // Gọi API AddPerson
-      
+        const personFormData = new FormData();
+        personFormData.append("photo", selectedFile); // Trường photo cho AddPerson
+
+        const addPersonResponse = await axios.post(
+          `http://localhost:5124/api/Luxand/AddPerson?name=${studentDetailId}&collections=student`,
+          personFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("Person added to Luxand collection successfully!", addPersonResponse.data);
       }
 
       // Chuẩn bị dữ liệu JSON để cập nhật thông tin học sinh
@@ -150,11 +166,22 @@ class ViewStudentById extends React.Component {
         },
       });
 
-      alert("Student updated successfully!");
+      // alert("Student updated successfully!");
+      this.setState({
+        notificationText: "Student updated successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
+      
       this.props.history.push("/viewallstudent");
     } catch (error) {
       console.error("Error updating student:", error.response || error.message);
-      alert("Failed to update student. Please try again.");
+      // alert("Failed to update student. Please try again.");
+      this.setState({
+        notificationText: "Failed to update student. Please try again.",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -174,6 +201,9 @@ class ViewStudentById extends React.Component {
       avatar,
       grades,
       submeet,
+      showNotification, // State to control notification visibility
+      notificationText,// Text for the notification
+      notificationType
     } = this.state;
 
     return (
@@ -190,6 +220,15 @@ class ViewStudentById extends React.Component {
                 { name: "Update Student", navigate: "" },
               ]}
             />
+            {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <div className="card shadow-lg">
               <div
                 className="card-header text-white"
@@ -224,6 +263,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Full Name</label>
                         <input
+                          required
                           type="text"
                           className={`form-control ${fullName === "" && submeet && "is-invalid"}`}
                           value={fullName}
@@ -238,6 +278,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Nick Name</label>
                         <input
+                          required
                           type="text"
                           className="form-control"
                           value={nickName}
@@ -252,6 +293,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Grade</label>
                         <select
+                          required
                           className="form-control"
                           value={gradeId}
                           onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
@@ -269,6 +311,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Date of Birth</label>
                         <input
+                          required
                           type="date"
                           className="form-control"
                           value={dob}
@@ -283,6 +326,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Gender</label>
                         <select
+                          required
                           className="form-control"
                           value={gender}
                           onChange={(e) => this.setState({ gender: parseInt(e.target.value) })}
@@ -296,6 +340,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Status</label>
                         <select
+                          required
                           className="form-control"
                           value={status}
                           onChange={(e) => this.setState({ status: parseInt(e.target.value) })}
@@ -312,6 +357,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Ethnic Groups</label>
                         <input
+                          required
                           type="text"
                           className="form-control"
                           value={ethnicGroups}
@@ -323,6 +369,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Nationality</label>
                         <input
+                          required
                           type="text"
                           className="form-control"
                           value={nationality}
@@ -337,6 +384,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Religion</label>
                         <input
+                          required
                           type="text"
                           className="form-control"
                           value={religion}
@@ -348,6 +396,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Code</label>
                         <input
+                          required
                           type="text"
                           className="form-control"
                           value={code}
