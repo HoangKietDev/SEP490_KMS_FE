@@ -77,6 +77,7 @@ class Semester extends React.Component {
   render() {
 
     const { semesters, searchText, sortDirection, filterStatus } = this.state;
+    
     const userData = getSession('user').user;
     const roleId = userData.roleId
 

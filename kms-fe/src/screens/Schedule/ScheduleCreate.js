@@ -74,8 +74,14 @@ class ScheduleCreate extends React.Component {
       }, 2000);
 
     } catch (error) {
+      console.log(error);
+      let errorMessage = "Failed to import schedule";
+      if (error.response && error.response.data && error.response.data.details) {
+        errorMessage = error.response.data.details; // Lấy thông báo từ trường details
+      }
+
       this.setState({
-        notificationText: "Schedule Create error!",
+        notificationText: errorMessage,
         notificationType: "error",
         showNotification: true
       });
@@ -86,8 +92,6 @@ class ScheduleCreate extends React.Component {
     const selectedClassId = event.target.value;
     this.setState({ classId: selectedClassId }, () => {
       const classchoose = this.state.classData.find((i) => i.classId === parseInt(this.state.classId));
-
-      console.log(classchoose);
 
       if (classchoose) {
         const relatedSemester = this.state.semesterData.filter((i) => i.semesterId === classchoose.semesterId);

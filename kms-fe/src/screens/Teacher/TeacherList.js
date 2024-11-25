@@ -3,40 +3,19 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
+import Pagination from "../../components/Common/Pagination";
 
 
 class TeacherList extends React.Component {
   state = {
-    // TeacherListData: [], // State để lưu trữ dữ liệu từ API
-    TeacherListData: [{
-      teacherId: 0,
-      firstName: "Hoang",
-      lastName: "Kiet",
-      address: "Thai Binh",
-      phone: "0323241545",
-      mail: "kiet7cvl@gmail.com",
-      gender: 1,
-      status: 1,
-      dob: "21/3/2002",
-      code: "TC101",
-      education: "string",
-      experience: "string",
-      avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png"
-    }, {
-      teacherId: 1,
-      firstName: "Hoang1",
-      lastName: "Kiet1",
-      address: "Thai Binh",
-      phone: "0323241545",
-      mail: "kiet7cvl@gmail.com",
-      gender: 1,
-      status: 1,
-      dob: "21/3/2002",
-      code: "TC101",
-      education: "string",
-      experience: "string",
-      avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png"
-    }]
+    TeacherListData: [], // State để lưu trữ dữ liệu từ API
+    filteredTeacherListData: [], // Dữ liệu sau khi lọc
+    filterPhone: "", // Bộ lọc theo số điện thoại
+    filterCode: "", // Bộ lọc theo mã
+    filterStatus: "", // Bộ lọc theo trạng thái
+
+    currentPage: 1,
+    itemsPerPage: 10,
   };
 
   componentDidMount() {
@@ -46,7 +25,7 @@ class TeacherList extends React.Component {
       try {
         const TeacherResponse = await axios.get('http://localhost:5124/api/Teacher/GetAllTeachers');
         const Teacherdata = TeacherResponse.data;
-        this.setState({ TeacherListData: Teacherdata })
+        this.setState({ TeacherListData: Teacherdata, filteredTeacherListData: Teacherdata })
 
         // // Fetch student by ParentID
         // const user = localStorage.getItem("user")
@@ -62,6 +41,29 @@ class TeacherList extends React.Component {
     fetchData();
   }
 
+  filterTeacherList = () => {
+    const { TeacherListData, filterPhone, filterCode, filterStatus } = this.state;
+    const filteredData = TeacherListData.filter((teacher) => {
+      const matchesPhone = filterPhone === "" || teacher.phoneNumber.includes(filterPhone);
+      const matchesCode = filterCode === "" || teacher.code.includes(filterCode.toLocaleUpperCase());
+      const matchesStatus = filterStatus === "" || teacher.status === parseInt(filterStatus);
+      return matchesPhone && matchesCode && matchesStatus;
+    });
+    this.setState({ filteredTeacherListData: filteredData });
+  };
+
+  handleFilterPhoneChange = (e) => {
+    this.setState({ filterPhone: e.target.value }, this.filterTeacherList);
+  };
+
+  handleFilterCodeChange = (e) => {
+    this.setState({ filterCode: e.target.value }, this.filterTeacherList);
+  };
+
+  handleFilterStatusChange = (e) => {
+    this.setState({ filterStatus: e.target.value }, this.filterTeacherList);
+  };
+
   handleEdit = (teacherId) => {
     // Chuyển hướng đến trang cập nhật thông tin học sinh
     this.props.history.push(`/teacher-update/${teacherId}`);
@@ -72,8 +74,18 @@ class TeacherList extends React.Component {
     this.props.history.push(`/teacher-detail/${teacherId}`);
   };
 
+  handlePageChange = (pageNumber) => {
+    this.setState({ currentPage: pageNumber });
+  };
+
   render() {
-    const { TeacherListData } = this.state;
+    const { filteredTeacherListData } = this.state;
+
+    // phan trang
+    const { currentPage, itemsPerPage } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredTeacherListData.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
       <div
@@ -97,6 +109,35 @@ class TeacherList extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Teacher Manager</h2>
+                    <div className="col-md-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Filter by Phone"
+                        value={this.state.filterPhone}
+                        onChange={this.handleFilterPhoneChange}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Filter by Code"
+                        value={this.state.filterCode}
+                        onChange={this.handleFilterCodeChange}
+                      />
+                    </div>
+                    <div className="col-md-3">
+                      <select
+                        className="form-control"
+                        value={this.state.filterStatus}
+                        onChange={this.handleFilterStatusChange}
+                      >
+                        <option value="">All Status</option>
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -105,19 +146,20 @@ class TeacherList extends React.Component {
                   <div className="body project_report">
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
-                        <thead className="thead-light">
-                          <tr>
+                        <thead className="">
+                          <tr className="theme-color">
                             <th>#</th>
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Phone</th>
                             <th>Gender</th>
                             <th>Code</th>
+                            <th>Status</th>
                             <th>Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {TeacherListData?.map((teacher, index) => (
+                          {currentItems?.map((teacher, index) => (
                             <React.Fragment key={"teacher" + index}>
                               <tr>
                                 <td>{index + 1}</td>
@@ -136,6 +178,16 @@ class TeacherList extends React.Component {
                                   )}
                                 </td>
                                 <td>{teacher.code}</td>
+
+                                <td>
+                                  {teacher?.status === 1 ? (
+                                    <span className="badge badge-success">Active</span>
+                                  ) : teacher?.status === 0 ? (
+                                    <span className="badge badge-default">InActive</span>
+                                  ) : null}
+                                </td>
+
+
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"
                                     onClick={() => this.handleDetail(teacher.teacherId)} // Gọi hàm handleEdit
@@ -154,6 +206,14 @@ class TeacherList extends React.Component {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                    <div className="pt-4">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalItems={filteredTeacherListData.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={this.handlePageChange}
+                      />
                     </div>
                   </div>
                 </div>

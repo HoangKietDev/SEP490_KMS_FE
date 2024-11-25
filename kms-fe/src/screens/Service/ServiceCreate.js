@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
+import Notification from "../../components/Notification";
 
 class ServiceCreate extends React.Component {
 
@@ -12,7 +13,11 @@ class ServiceCreate extends React.Component {
         serviceName: "",
         servicePrice: "",
         serviceDes: "",
-        categoryServiceId: ""
+        categoryServiceId: 0,
+
+        showNotification: false, // Để hiển thị thông báo
+        notificationText: "", // Nội dung thông báo
+        notificationType: "success", // Loại thông báo (success/error)
     };
 
     componentDidMount() {
@@ -37,10 +42,7 @@ class ServiceCreate extends React.Component {
             serviceDes: this.state.serviceDes,
             categoryServiceId: this.state.categoryServiceId,
             schoolId: 1,
-            categoryService: {
-                categoryServiceId: this.state.categoryServiceId,
-                categoryName: this.state.categories.find(cat => cat.categoryServiceId === this.state.categoryServiceId)?.categoryName,
-            }
+            status: 0,
         };
 
         console.log(newService);
@@ -48,19 +50,29 @@ class ServiceCreate extends React.Component {
             const response = await axios.post(
                 "http://localhost:5124/api/Service/AddService", newService
             );
-            console.log("Tạo service thành công:", response.data);
-            alert("Tạo service thành công!"); // User-friendly success message
-            this.props.history.push('/service'); // Redirect to category list after successful update
-
+            this.setState({
+                notificationText: "Service create successfully!",
+                notificationType: "success",
+                showNotification: true,
+            });
+            setTimeout(() => {
+                if (this.state.showNotification) {
+                    this.props.history.push('/service');
+                }
+            }, 1000);
         } catch (error) {
-            console.error("Lỗi khi tạo service:", error);
-            alert("Lỗi khi tạo service!"); // User-friendly error message
+            this.setState({
+                notificationText: "Service create error!",
+                notificationType: "error",
+                showNotification: true,
+            });
         }
     };
 
     render() {
 
         const { categories, serviceName, servicePrice, serviceDes, categoryServiceId } = this.state;
+        const { showNotification, notificationText, notificationType } = this.state;
 
         return (
             <div
@@ -69,6 +81,15 @@ class ServiceCreate extends React.Component {
                     document.body.classList.remove("offcanvas-active");
                 }}
             >
+                {showNotification && (
+                    <Notification
+                        type={notificationType}
+                        position="top-right"
+                        dialogText={notificationText}
+                        show={showNotification}
+                        onClose={() => this.setState({ showNotification: false })}
+                    />
+                )}
                 <div>
                     <div className="container-fluid">
                         <PageHeader
@@ -142,7 +163,7 @@ class ServiceCreate extends React.Component {
                                                         className="form-control"
                                                         value={categoryServiceId} // Bind categoryServiceId directly
                                                         name="categoryServiceId"
-                                                        required=""
+                                                        required
                                                         onChange={(e) => this.setState({ categoryServiceId: e.target.value })}
                                                     >
                                                         <option value="">Select Category</option>

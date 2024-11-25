@@ -39,7 +39,6 @@ class NavbarMenu extends React.Component {
     this.activeMenutabwhenNavigate("/" + activeKey);
     console.log(getSession('user')?.user.avatar, "test avt");
 
-
     const user = getSession('user')?.user
     this.getNotifications(user?.userId);
     this.fetchPaymentData(user?.userId)
@@ -333,9 +332,9 @@ class NavbarMenu extends React.Component {
 
     const { notiData, notiPayment } = this.state;
     const myNoti = notiData.filter(i => i?.usernotifications[0]?.status === 'Unread')
-
-    console.log(notiPayment);
-
+    const showNoti = notiData
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Sắp xếp theo thời gian giảm dần
+    // .slice(0, 4); // Lấy 5 phần tử đầu tiên
 
     return (
       <div>
@@ -402,7 +401,7 @@ class NavbarMenu extends React.Component {
                 <ul className="nav navbar-nav">
                   <li>
                     <a
-                      href="appcalendar"
+                      href="listschedule"
                       className="icon-menu d-none d-sm-block d-md-none d-lg-block"
                     >
                       <i className="icon-calendar"></i>
@@ -425,7 +424,7 @@ class NavbarMenu extends React.Component {
                       }}
                     >
                       <i className="icon-bell"></i>
-                      <span className={myNoti.length !== 0 ? `notification - dot` : 'd-none'}></span>
+                      <span className={myNoti.length !== 0 ? `notification-dot` : 'd-none'}></span>
                     </a>
                     <ul
                       className={
@@ -433,13 +432,14 @@ class NavbarMenu extends React.Component {
                           ? "dropdown-menu notifications show"
                           : "dropdown-menu notifications"
                       }
+                      style={{ maxHeight: "350px", overflowY: "auto" }} // Thêm cuộn cho ul khi số lượng thông báo vượt quá 4
                     >
                       <li className="header text-light">
                         <strong>You have {myNoti.length} new Notifications</strong>
                       </li>
-                      {myNoti && myNoti.map(item => {
+                      {showNoti && showNoti?.map((item, index) => {
                         return (
-                          <li>
+                          <li key={index}>
                             <a>
                               <div className="media">
                                 <div className="media-left">
@@ -459,10 +459,11 @@ class NavbarMenu extends React.Component {
                           </li>
                         );
                       })}
-                      <li className="footer">
+                      {/* <li className="footer">
                         <a className="more">See all notifications</a>
-                      </li>
+                      </li> */}
                     </ul>
+
                   </li>
                   <li>
                     <div className="icon-menu" onClick={this.handleLogOut}>
@@ -699,7 +700,7 @@ class NavbarMenu extends React.Component {
                     ) : null} */}
 
                     {/* Services */}
-                    {roleId === 2 || roleId === 3 ? (
+                    {roleId === 4 || roleId === 3 ? (
                       <li id="ServiceContainer" className="">
                         <a
                           href="#!"
@@ -799,6 +800,42 @@ class NavbarMenu extends React.Component {
                         </ul>
                       </li>
                     ) : null}
+
+                    {/* Daily Schedule */}
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
+                      <li id="scheduleContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/listschedule");
+                            this.activeMenutabContainer("scheduleContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Daily Schedule</span>
+                        </a>
+                      </li>
+                    ) : null}
+
+
+                    {/* Albums */}
+                    {roleId === 2 || roleId === 3 || roleId === 5 ? (
+                      <li id="AlbumContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault(); // Ngăn chặn hành vi mặc định
+                            this.props.history.push("/album"); // Chuyển hướng đến route /grade
+                            this.activeMenutabContainer("AlbumContainer"); // Gọi hàm tùy chỉnh
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Albums Manager</span>
+                        </a>
+                      </li>
+                    ) : null}
+
 
                     {/* Children */}
                     {roleId === 3 ? (
@@ -902,68 +939,20 @@ class NavbarMenu extends React.Component {
                       </li>
                     ) : null}
 
-                    {/* Albums */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 ? (
-                      <li id="AlbumContainer" className="">
-                        <a
-                          href="#!"
-                          className="has-arrow"
-                          onClick={(e) => {
-                            e.preventDefault(); // Ngăn chặn hành vi mặc định
-                            this.props.history.push("/album"); // Chuyển hướng đến route /grade
-                            this.activeMenutabContainer("AlbumContainer"); // Gọi hàm tùy chỉnh
-                          }}
-                        >
-                          <i className="icon-grid"></i> <span>Albums Manager</span>
-                        </a>
-                      </li>
-                    ) : null}
-
-
-                    {/* Daily Schedule */}
-                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
-                      <li id="scheduleContainer" className="">
-                        <a
-                          href="#!"
-                          className="has-arrow"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            this.props.history.push("/listschedule");
-                            this.activeMenutabContainer("scheduleContainer");
-                          }}
-                        >
-                          <i className="icon-grid"></i> <span>Daily Schedule</span>
-                        </a>
-                      </li>
-                    ) : null}
-
                     {/* Payment */}
-                    {roleId === 2 || roleId === 3 ? (
+                    {roleId === 2 ? (
                       <li id="PaymentContainer" className="">
                         <a
                           href="#!"
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
+                            this.props.history.push("/payment");
                             this.activeMenutabContainer("PaymentContainer");
                           }}
                         >
                           <i className="icon-grid"></i> <span>Payment Manager</span>
                         </a>
-                        <ul className="collapse">
-                          <li
-                            className={activeKey === "payment" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/payment">Payment</Link>
-                          </li>
-                          <li
-                            className={activeKey === "payment-history" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/payment-history">History</Link>
-                          </li>
-                        </ul>
                       </li>
                     ) : null}
 
