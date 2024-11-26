@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
+    color: 'red'
   },
   subtitle: {
     fontSize: 14,
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   table: {
     width: "100%",
@@ -60,6 +61,9 @@ const styles = StyleSheet.create({
   bold: {
     fontWeight: "bold",
   },
+  red: {
+    color: "red", // Thêm màu đỏ cho tiêu đề section
+  },
   total: {
     marginTop: 20,
     alignItems: "flex-end",
@@ -68,6 +72,7 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 14,
     fontWeight: "bold",
+    color: 'red'
   },
   notes: {
     marginTop: 30,
@@ -198,46 +203,60 @@ class PaymentHistory extends React.Component {
           {/* Tiêu đề hóa đơn */}
           <View style={styles.header}>
             <Text style={styles.title}>Payment Invoice</Text>
-            <Text style={styles.subtitle}>Thank you for your payment!</Text>
+            {/* <Text style={styles.subtitle}>Thank you for your payment!</Text> */}
+            <Text style={styles.subtitle}>{item?.paymentDate} {item?.paymentName}</Text>
+          </View>
+
+          {/* Thông tin đơn vị */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seller : ABC Kid Education</Text>
+            <Text>Tax code:  </Text>
+            <Text>Address: {item?.paymentName || "Hoa Lac High-Tech Park, Thach That, Hanoi"}</Text>
+            <Text>Phone: {"0812341241"}</Text>
+            <Text>Bank account number: {"00006969002 at VietcomBank"}</Text>
           </View>
 
           {/* Thông tin người thanh toán */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Customer Information : {this.removeDiacritics(fullName)}</Text>
-            <Text>Children Name:  {this.removeDiacritics(item?.childName)}</Text>
-            <Text>Payment Date: {item?.paymentDate || "example@example.com"}</Text>
-            <Text>Payment Name: {item?.paymentName || "DD/MM/YYYY"}</Text>
+            <Text>Address:  ABC Kid Education</Text>
+            <Text>Payment method:  Banking</Text>
+            <Text>Children Name:  {item?.childName}</Text>
           </View>
-
+          <hr></hr>
           {/* Chi tiết thanh toán */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Payment Details</Text>
             <View style={styles.table}>
               <View style={styles.tableRow}>
-                <Text style={[styles.tableCell, styles.bold]}>#</Text>
+                <Text style={[styles.tableCell, styles.bold]}>No(STT)</Text>
                 <Text style={[styles.tableCell, styles.bold]}>Item</Text>
                 <Text style={[styles.tableCell, styles.bold]}>Price</Text>
                 <Text style={[styles.tableCell, styles.bold]}>Quantity</Text>
+                <Text style={[styles.tableCell, styles.bold]}>Discount</Text>
                 <Text style={[styles.tableCell, styles.bold]}>Total</Text>
               </View>
+              <View style={styles.tableRow}>
+                <Text style={styles.tableCell}>1</Text>
+                <Text style={styles.tableCell}>{item.paymentName}</Text>
+                <Text style={styles.tableCell}>{item.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN')}</Text>
+                <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.number} Months</Text>
+                <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.discount1} %</Text>
+                <Text style={styles.tableCell}>{(item.tuitionDetails?.discountDetails?.number * item?.tuitionDetails?.tuitionFee)?.toLocaleString('vi-VN')}</Text>
+              </View>
+
               {item?.services?.map((item1, index) => (
                 <View style={styles.tableRow} key={index}>
-                  <Text style={styles.tableCell}>{index + 1}</Text>
+                  <Text style={styles.tableCell}>{index + 2}</Text>
                   <Text style={styles.tableCell}>{item1.serviceName}</Text>
-                  <Text style={styles.tableCell}>{item1.servicePrice?.toLocaleString('vi-VN')} VND</Text>
+                  <Text style={styles.tableCell}>{item1.servicePrice?.toLocaleString('vi-VN')} </Text>
                   <Text style={styles.tableCell}>{item1.quantity}</Text>
-                  <Text style={styles.tableCell}>{(item1.quantity * item1.servicePrice)?.toLocaleString('vi-VN')} VND</Text>
+                  <Text style={styles.tableCell}></Text>
+                  <Text style={styles.tableCell}>{(item1.quantity * item1.servicePrice)?.toLocaleString('vi-VN')} </Text>
                 </View>
               ))}
-            </View>
-          </View>
 
-          {/* Thông tin tuition */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tuition Information</Text>
-            <Text>Start Date:  {item?.tuitionDetails?.startDate?.split("T")[0] || "DD/MM/YYYY"}</Text>
-            <Text>End Date : {item?.tuitionDetails?.endDate?.split("T")[0] || "DD/MM/YYYY"}</Text>
-            <Text>Tuition Fee : {item?.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN') || ""} VND</Text>
+            </View>
           </View>
 
           {/* Tổng cộng */}
@@ -251,7 +270,7 @@ class PaymentHistory extends React.Component {
             <Text>This is an automatically generated invoice. Please keep it for your records.</Text>
           </View>
         </Page>
-      </Document>
+      </Document >
 
     );
   };
