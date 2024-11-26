@@ -6,6 +6,9 @@ import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
 import { Modal, Button, Form } from "react-bootstrap";
 import Notification from "../../components/Notification";
+import Resizer from 'react-image-file-resizer'; // Import thư viện nén ảnh
+import { Bars } from 'react-loader-spinner';
+
 
 class AlbumDetail extends React.Component {
   state = {
@@ -29,6 +32,8 @@ class AlbumDetail extends React.Component {
     showImageModal: false, // Modal visibility for the clicked image
     selectedImage: null,   // Store the clicked image
     isEditMode: false,  // Quản lý chế độ sửa album
+    isUploading: false,  // Biến để theo dõi trạng thái upload
+
 
     showNotification: false, // State to control notification visibility
     notificationText: "", // Text for the notification
@@ -105,46 +110,78 @@ class AlbumDetail extends React.Component {
     this.setState({ newImages: [...event.target.files] });
   };
 
-  // Xử lý khi người dùng nhấn nút "Lưu Album"
   handleSaveAlbum = async () => {
     const { albumId, newImages, caption } = this.state;
+    this.setState({ isUploading: true });  // Bật loading khi bắt đầu upload
 
-    const formData = new FormData();
-    formData.append("albumId", albumId); // Thêm albumId vào FormData
-    formData.append("caption", caption); // Hoặc có thể truyền một caption khác nếu cần
-
-    // Thêm từng ảnh vào FormData
-    newImages.forEach((image) => {
-      formData.append("images", image); // API của bạn nhận `images` là một field với nhiều file
-    });
+    // Mảng chứa các ảnh đã được nén
+    const resizedImages = [];
 
     try {
+      // Nén từng ảnh trước khi upload
+      for (let i = 0; i < newImages.length; i++) {
+        const image = newImages[i];
+
+        // Sử dụng thư viện Resizer để nén ảnh
+        const resizedImage = await new Promise((resolve, reject) => {
+          Resizer.imageFileResizer(
+            image,  // File ảnh gốc
+            800,    // Chiều rộng ảnh sau khi nén
+            600,    // Chiều cao ảnh sau khi nén
+            'JPEG', // Định dạng ảnh (có thể là 'JPEG', 'PNG', 'WEBP'...)
+            80,     // Chất lượng ảnh (0-100)
+            0,      // Rotate, nếu cần xoay ảnh (0: không xoay)
+            (uri) => resolve(uri),  // Callback trả về ảnh đã nén
+            'base64', // Loại dữ liệu trả về (base64)
+          );
+        });
+
+        // Chuyển base64 về dạng Blob hoặc File nếu cần (ví dụ: base64 -> Blob)
+        const resizedBlob = await fetch(resizedImage).then(res => res.blob());
+        const resizedFile = new File([resizedBlob], image.name, { type: image.type });
+
+        resizedImages.push(resizedFile);  // Thêm ảnh đã nén vào mảng
+      }
+
+      // Chuẩn bị FormData để upload
+      const formData = new FormData();
+      formData.append("albumId", albumId); // Thêm albumId vào FormData
+      formData.append("caption", caption); // Thêm caption vào FormData
+
+      // Thêm tất cả ảnh đã nén vào FormData
+      resizedImages.forEach((image) => {
+        formData.append("images", image); // API nhận `images` là một field với nhiều file
+      });
+
+      // Gửi request upload ảnh
       await axios.post("http://localhost:5124/api/Images/CreateImages", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-
       this.handleClose(); // Đóng modal sau khi tải lên thành công
       this.setState({
         notificationText: "Images Upload Successfully!",
         notificationType: "success",
-        showNotification: true
+        showNotification: true,
       });
 
       setTimeout(async () => {
-        await this.fetchAlbumImages();
-      }, 2000); 
+        await this.fetchAlbumImages(); // Fetch lại danh sách ảnh sau khi upload
+      }, 2000);
 
     } catch (error) {
       console.error("Lỗi khi tải lên ảnh:", error);
       this.setState({
         notificationText: "Images Upload Error!",
         notificationType: "error",
-        showNotification: true
+        showNotification: true,
       });
+    } finally {
+      this.setState({ isUploading: false });  // Tắt loader sau khi tải lên xong
     }
+
   };
 
 
@@ -215,6 +252,7 @@ class AlbumDetail extends React.Component {
       const response = await axios.delete(`http://localhost:5124/api/Images/DeleteImage/${imageId}`);
 
       if (response.status === 200) {
+
         // Hiển thị thông báo ngay lập tức
         this.setState({
           notificationText: "Image deleted successfully!",
@@ -237,10 +275,11 @@ class AlbumDetail extends React.Component {
         notificationType: "error",
         showNotification: true,
       });
+    } finally {
+      // Tắt loader sau khi tải lên xong
+      this.setState({ isUploading: false });
     }
   };
-
-
 
 
   render() {
@@ -262,6 +301,12 @@ class AlbumDetail extends React.Component {
             show={showNotification}
             onClose={() => this.setState({ showNotification: false })}
           />
+        )}
+        {/* Hiển thị loader khi đang tải ảnh */}
+        {this.state.isUploading && (
+          <div className="loading-overlay">
+            <Bars color="#00BFFF" height={100} width={100} />
+          </div>
         )}
 
         <div className="container-fluid">
