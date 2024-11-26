@@ -274,7 +274,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/locationActivity`}
                   component={LocationActivityList}
-                  allowedRoles={[3,4]}
+                  allowedRoles={[3, 4]}
                 />
 
                 <ProtectedRoute
@@ -300,7 +300,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewclass`}
                   component={viewclass}
-                  allowedRoles={[3,4]}
+                  allowedRoles={[3, 4]}
                 />
                 <ProtectedRoute
                   exact
@@ -355,7 +355,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/schedule`}
                   component={Schedule}
-                  allowedRoles={[2, 3, 4]}
+                  allowedRoles={[2, 3, 4, 5]}
                 />
 
                 <ProtectedRoute

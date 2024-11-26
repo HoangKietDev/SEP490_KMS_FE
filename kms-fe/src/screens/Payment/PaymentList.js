@@ -158,44 +158,38 @@ class PaymentList extends React.Component {
 
   handleQuantityChange = (quantity) => {
     this.setState((prevState) => {
-      // Lưu giá gốc để khi quay lại 1 tháng thì giá trị học phí không bị ảnh hưởng
       const basePrice = prevState.tuition.basePrice || prevState.tuition.price;
 
       // Tìm discount phù hợp dựa trên quantity
       const selectedDiscount = prevState.Dicounts.find(discount => discount.number == quantity);
-      console.log(selectedDiscount);
-
-      // Nếu có discount thì tính giá sau discount, nếu không thì dùng giá gốc
       const discountPrice = selectedDiscount
-        ? (basePrice * (1 - selectedDiscount.discount1 / 100)) // Áp dụng discount
-        : basePrice; // Giá trị gốc khi không có discount
+        ? (basePrice * (1 - selectedDiscount.discount1 / 100))
+        : basePrice;
 
-      // Tính toán lại tổng thanh toán
       const newTuitionTotal = quantity * discountPrice;
 
-      // Tính toán lại tổng thanh toán cho các dịch vụ đã chọn
-      const totalServicesCost = prevState.ServiceListData.reduce((total, item) => {
-        return total + (item.quantity * item.price);
+      // Tính toán lại tổng thanh toán cho dịch vụ đã chọn
+      const totalServicesCost = prevState.selectedServices.reduce((total, service) => {
+        return total + (service.quantity * service.price);
       }, 0);
 
-      let totalPayment = 0;
-      if (this.state.selectedTuition === true) {
-        totalPayment = newTuitionTotal + totalServicesCost; // Tổng thanh toán mới
-      }
+      // Nếu học phí được chọn thì cộng học phí vào tổng thanh toán
+      const totalPayment = (prevState.selectedTuition ? newTuitionTotal : 0) + totalServicesCost;
 
       return {
         tuition: {
           ...prevState.tuition,
-          quantity: quantity, // Cập nhật lại số lượng học phí
-          price: discountPrice, // Cập nhật lại giá học phí sau discount
-          basePrice: basePrice, // Lưu giá gốc để sử dụng cho các lần thay đổi
+          quantity: quantity,
+          price: discountPrice,
+          basePrice: basePrice,
         },
         totalPayment, // Cập nhật lại tổng thanh toán
-        selectedQuantity: quantity, // Cập nhật lại quantity đã chọn
-        selectedDiscount: selectedDiscount, // Lưu discount hiện tại
+        selectedQuantity: quantity,
+        selectedDiscount: selectedDiscount,
       };
     });
   };
+
 
 
 
@@ -205,7 +199,6 @@ class PaymentList extends React.Component {
     switch (type) {
       case "tuition":
         updatedState.selectedTuition = value;
-        updatedState.totalPayment += value ? this.state.tuition.quantity * this.state.tuition.price : -this.state.tuition.quantity * this.state.tuition.price;
         break;
       case "serviceAll":
         updatedState.selectedServices = value.checked ? this.state.ServiceListData : [];
@@ -213,18 +206,24 @@ class PaymentList extends React.Component {
       case "service":
         const selectedServices = value.checked
           ? [...updatedState.selectedServices, value.service]
-          : updatedState.selectedServices.filter(service => service !== value.service);
+          : updatedState.selectedServices.filter(service => service.service !== value.service.service);
         updatedState.selectedServices = selectedServices;
         break;
       default:
         break;
     }
 
-    updatedState.totalPayment = (updatedState.selectedTuition ? (this.state.tuition.quantity * this.state.tuition.price) : 0) +
-      updatedState.selectedServices.reduce((total, service) => total + (service.quantity * service.price), 0);
+    // Tính toán lại tổng thanh toán
+    const tuitionTotal = updatedState.selectedTuition ? this.state.tuition.quantity * this.state.tuition.price : 0;
+    const totalServicesCost = updatedState.selectedServices.reduce((total, service) => {
+      return total + (service.quantity * service.price);
+    }, 0);
+
+    updatedState.totalPayment = tuitionTotal + totalServicesCost;
 
     this.setState(updatedState);
   };
+
 
   // Hàm gọi API thanh toán
   handlePayment = () => {
@@ -242,12 +241,12 @@ class PaymentList extends React.Component {
       serviceId: selectedServices ? selectedServices.map(service => (service.service)) : [],
 
       paymentName: (selectedTuition && selectedServices && selectedServices.length > 0)
-        ? `Payment fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu cả 2 được chọn
+        ? `Tuiton and services ${month < 10 ? `0${month}` : month}/${year}` // Nếu cả 2 được chọn
         : selectedTuition
           ? `Tuition fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedTuition
           : (selectedServices && selectedServices.length > 0)
             ? `Service fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedServices
-            : `Payment fee ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có gì
+            : `Tuiton and services ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có gì
 
       tuitionAmount: ChildrenPayment?.tuition[0]?.tuitionFee || 0,
       month: selectedDiscount?.number - 1 || 0,
@@ -282,7 +281,8 @@ class PaymentList extends React.Component {
 
   render() {
     const { ServiceListData, UserListData, tuition, showServices, Children, Class, selectedChild, Payment, ChildrenPayment } = this.state;
-    const userData = JSON.parse(localStorage.getItem("user")).user;
+    const userData = getSession('user').user
+
     const roleId = userData.roleId
     const parentId = userData?.userId;
 

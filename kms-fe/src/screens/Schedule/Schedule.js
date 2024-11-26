@@ -152,6 +152,8 @@ class Schedule extends React.Component {
           `http://localhost:5124/api/ScheduleDetail/GetAllScheduleDetailsByScheduleId/${scheduleId}`
         );
         const scheduleDetails = detailResponse.data;
+        console.log(scheduleDetails);
+
         const weekdate = startDate + '-' + endDate
         let newscheduleData = scheduleDetails.filter(i => i.weekdate === weekdate)
         console.log(newscheduleData);
@@ -400,6 +402,7 @@ class Schedule extends React.Component {
     const userData = (getSession("user")).user;
     const roleId = userData.roleId;
 
+    console.log(scheduleDetails);
     // Lấy các ngày của tuần hiện tại
     const { weekDates } = this.getWeekStartEnd(selectedWeek);
 
@@ -430,71 +433,82 @@ class Schedule extends React.Component {
             <div className="row clearfix">
               <div className="col-lg-12 col-md-12">
                 <div className="card planned_task">
-                  <div className="header d-flex justify-content-between">
-                    <div className=" d-inline-flex">
-                      <input
-                        type="week"
-                        value={this.state.selectedWeek}
-                        onChange={(event) => this.handleChange("week", event)}
-                        className="week-input"
-                      />
-                      <div className="ml-4" style={{ width: "200px" }}>
-                        <select
-                          className="form-control"
-                          value={selectId}
-                          name="selectId"
-                          required
-                          onChange={(event) => this.handleChange("class", event)}
-                        >
-                          {classData.map((option) => (
-                            <option key={option.classId} value={option.classId}>
-                              {option.className}
-                            </option>
-                          ))}
-                        </select>
+                  <div className="header">
+                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                      {/* Week and Class Select */}
+                      <div className="d-flex flex-column flex-sm-row align-items-center mb-3 mb-sm-0">
+                        <input
+                          type="week"
+                          value={this.state.selectedWeek}
+                          onChange={(event) => this.handleChange("week", event)}
+                          className="week-input"
+                        />
+                        <div className="ml-sm-4 mt-2 mt-sm-0">
+                          <select
+                            className="form-control"
+                            value={selectId}
+                            name="selectId"
+                            required
+                            onChange={(event) => this.handleChange("class", event)}
+                          >
+                            {classData.map((option) => (
+                              <option key={option.classId} value={option.classId}>
+                                {option.className}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Export and Import buttons */}
+                      <div className="d-flex flex-column flex-sm-row align-items-center">
+                        {roleId === 2 ? (
+                          <a
+                            onClick={this.handleFileUpload}
+                            className="btn btn-success text-white mb-2 mb-sm-0"
+                          >
+                            <i className="icon-arrow-down mr-2"></i>Export Excel
+                          </a>
+                        ) : null}
+
+                        {roleId === 3 ? (
+                          <div className="d-flex flex-column flex-sm-row align-items-center">
+                            <a
+                              onClick={() => {
+                                this.handleDownload();
+                              }}
+                              className="btn btn-success text-white mb-2 mb-sm-0 mr-sm-4"
+                            >
+                              <i className="icon-arrow-down mr-2"></i>Download Template
+                            </a>
+                            <a
+                              onClick={() => this.fileInput.click()}
+                              className="btn btn-primary text-white mb-2 mb-sm-0 mr-sm-4"
+                            >
+                              <i className="icon-arrow-up mr-2"></i>Import Excel
+                            </a>
+                            <input
+                              type="file"
+                              ref={(input) => (this.fileInput = input)}
+                              style={{ display: 'none' }}
+                              accept=".xlsx, .xls"
+                              onChange={this.handleImportSchedule}
+                            />
+
+                            <a
+                              onClick={() => {
+                                this.handleCreateSchedule(selectId);
+                              }}
+                              className="btn btn-success text-white mb-2 mb-sm-0"
+                            >
+                              <i className="icon-plus mr-2"></i>Add Schedule Detail
+                            </a>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
-                    {roleId === 2 ? (
-                      <a
-                        onClick={this.handleFileUpload}
-                        className="btn btn-success text-white"
-                      >
-                        <i className="icon-arrow-down mr-2"></i>Export Excel
-                      </a>) : <></>}
-                    {roleId === 3 ? (
-                      <div>
-                        <a
-                          onClick={() => {
-                            this.handleDownload()
-                          }}
-                          className="btn btn-success text-white mr-4"
-                        >
-                          <i className="icon-arrow-down mr-2"></i>Dowload Template
-                        </a>
-                        <a onClick={() => this.fileInput.click()} // Khi nhấn vào thẻ <a>, sẽ mở dialog chọn file
-                          className="btn btn-primary text-white mr-4">
-                          <i className="icon-arrow-up mr-2"></i>Import Excel
-                        </a>
-                        <input
-                          type="file"
-                          ref={(input) => (this.fileInput = input)} // Lưu tham chiếu tới input file
-                          style={{ display: 'none' }} // Ẩn input file
-                          accept=".xlsx, .xls" // Chỉ chấp nhận file Excel
-                          onChange={this.handleImportSchedule} // Gọi hàm khi người dùng chọn file
-                        />
-
-                        <a
-                          onClick={() => {
-                            this.handleCreateSchedule(selectId)
-                          }}
-                          className="btn btn-success text-white"
-                        >
-                          <i className="icon-plus mr-2"></i>Add Schedule Detail
-                        </a>
-                      </div>
-
-                    ) : null}
                   </div>
+
                 </div>
               </div>
               <div className="col-lg-12">

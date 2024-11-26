@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
 import { Modal, Button, Form } from "react-bootstrap";
+import Notification from "../../components/Notification";
 
 class AlbumDetail extends React.Component {
   state = {
@@ -24,6 +25,14 @@ class AlbumDetail extends React.Component {
     showModal: false, // Để quản lý hiển thị của modal
     caption: "", // Title mới cho album
     newImages: [], // Mảng để chứa hình ảnh được chọn từ máy
+
+    showImageModal: false, // Modal visibility for the clicked image
+    selectedImage: null,   // Store the clicked image
+    isEditMode: false,  // Quản lý chế độ sửa album
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   fetchAlbumImages = async () => {
@@ -71,7 +80,11 @@ class AlbumDetail extends React.Component {
 
     } catch (error) {
       console.error("Error fetching data: ", error);
-      alert("Failed to fetch data. Please try again.");
+      this.setState({
+        notificationText: "Failed to fetch data.!",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   }
 
@@ -111,12 +124,26 @@ class AlbumDetail extends React.Component {
           "Content-Type": "multipart/form-data",
         },
       });
-      alert("Ảnh đã được tải lên thành công!");
+
+
       this.handleClose(); // Đóng modal sau khi tải lên thành công
-      this.fetchAlbumImages();
+      this.setState({
+        notificationText: "Images Upload Successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
+
+      setTimeout(async () => {
+        await this.fetchAlbumImages();
+      }, 2000); 
+
     } catch (error) {
       console.error("Lỗi khi tải lên ảnh:", error);
-      alert("Đã xảy ra lỗi khi tải lên ảnh.");
+      this.setState({
+        notificationText: "Images Upload Error!",
+        notificationType: "error",
+        showNotification: true
+      });
     }
   };
 
@@ -168,19 +195,75 @@ class AlbumDetail extends React.Component {
     }
   }
 
+  handleImageClick = (imageUrl) => {
+    this.setState({ selectedImage: imageUrl, showImageModal: true });
+  };
+
+  handleImageModalClose = () => {
+    this.setState({ showImageModal: false, selectedImage: null });
+  };
+
+
+  toggleEditMode = () => {
+    this.setState((prevState) => ({
+      isEditMode: !prevState.isEditMode,
+    }));
+  };
+
+  handleDeleteImage = async (imageId) => {
+    try {
+      const response = await axios.delete(`http://localhost:5124/api/Images/DeleteImage/${imageId}`);
+
+      if (response.status === 200) {
+        // Hiển thị thông báo ngay lập tức
+        this.setState({
+          notificationText: "Image deleted successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
+
+        // Đặt một khoảng delay 2 giờ (7200 giây) trước khi fetch lại dữ liệu
+        setTimeout(async () => {
+          await this.fetchAlbumImages();
+        }, 2000);
+      } else {
+        throw new Error("Failed to delete image from server.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa ảnh:", error);
+
+      this.setState({
+        notificationText: "Failed to delete image!",
+        notificationType: "error",
+        showNotification: true,
+      });
+    }
+  };
+
+
+
+
   render() {
-    const { title, description, imageData, timePost, teacherListData, createBy, showModal, caption } = this.state;
+    const { title, description, imageData, timePost, teacherListData, createBy, showModal, caption, showImageModal, selectedImage } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     const userData = getSession('user')?.user;
-    const roleId = userData?.roleId
+    const roleId = userData?.roleId;
     const groupedImages = this.groupImagesByPostedAt(imageData);
     const timeKeys = Object.keys(groupedImages);
 
-
     return (
-      <div
-        style={{ flex: 1 }}
-        onClick={() => document.body.classList.remove("offcanvas-active")}
-      >
+      <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
+
         <div className="container-fluid">
           <PageHeader
             HeaderText="Album Management"
@@ -211,10 +294,18 @@ class AlbumDetail extends React.Component {
                       </div>
                       <div className="form-group col-md-6 d-flex justify-content-end align-items-start">
                         {roleId === 5 && (
-                          <button onClick={(e) => {
-                            e.preventDefault(); // Ngăn hành động mặc định
-                            this.handleShow();
-                          }} className="btn btn-success text-white">Đăng Album Ảnh</button>
+                          <>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                this.toggleEditMode(); // Toggle chế độ sửa
+                              }}
+                              className="btn btn-warning text-white mr-4 "
+                            >
+                              Sửa Album
+                            </button>
+                            <button onClick={(e) => { e.preventDefault(); this.handleShow(); }} className="btn btn-success text-white">Đăng Album Ảnh</button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -244,19 +335,40 @@ class AlbumDetail extends React.Component {
                         </div>
                       ) : (
                         Object.entries(groupedImages).map(([postedAt, imagesAtPostedTime]) => (
-                          <div key={postedAt} id={postedAt.split(' ')[0]} className="timeline-item">
-                            <div className="timeline-time d-flex align-items-center mb-3">
-                              <h5 className="bg-primary text-white p-2 rounded">{postedAt}</h5>
-                              <h5 className="pl-4">{imagesAtPostedTime[0].caption}</h5>
-                            </div>
+                          <div key={postedAt} id={postedAt.split(' ')[0]} className="timeline-item" date-is={postedAt + ' - ' + imagesAtPostedTime[0].caption}>
+                            <div className=" d-flex align-items-center mb-3"></div>
                             <div className="row">
                               {imagesAtPostedTime.map((image) => (
                                 <div key={image.id} className="col-md-3 mb-4">
-                                  <div className="card shadow-sm">
-                                    <img src={image.imgUrl} alt={`Image ${image.caption}`} className="card-img-top" />
+                                  <div className="card shadow-sm position-relative">
+                                    <img
+                                      src={image.imgUrl}
+                                      alt={`Image ${image.caption}`}
+                                      className="card-img-top"
+                                      style={{ cursor: 'pointer' }}
+                                      onClick={() => this.handleImageClick(image.imgUrl)} // On click, open the modal
+                                    />
+
+                                    {/* Nếu đang ở chế độ sửa album, hiển thị nút "X" để xóa ảnh */}
+                                    {this.state.isEditMode && (
+                                      <button
+                                        className="btn btn-danger btn-sm position-absolute"
+                                        style={{ top: '10px', right: '10px' }}
+                                        onClick={(e) => {
+                                          e.stopPropagation(); // Ngừng sự kiện click lan truyền
+                                          this.handleDeleteImage(image.imageId); // Xóa ảnh
+                                        }}
+                                      >
+                                        X
+                                      </button>
+                                    )}
+
                                     <div className="card-body text-center">
                                       <p className="card-text">
-                                        Đã thêm bởi: {teacherListData && teacherListData.find(item => item.teacherId === createBy)?.name}
+                                        Đã thêm bởi: {(() => {
+                                          const teacher = teacherListData?.find(item => item.teacherId === createBy);
+                                          return teacher ? `${teacher.firstname} ${teacher.lastName}` : '';
+                                        })()}
                                       </p>
                                     </div>
                                   </div>
@@ -275,7 +387,24 @@ class AlbumDetail extends React.Component {
             </div>
           </div>
 
-          {/* Modal thêm album */}
+          {/* Modal for showing enlarged image */}
+          {showImageModal && (
+            <Modal show={showImageModal} onHide={this.handleImageModalClose} size="lg">
+              <Modal.Header closeButton>
+                <Modal.Title>Enlarged Image</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <img src={selectedImage} alt="Enlarged" style={{ width: '100%', height: 'auto' }} />
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={this.handleImageModalClose}>
+                  Close
+                </Button>
+              </Modal.Footer>
+            </Modal>
+          )}
+
+          {/* Modal for adding new album */}
           <Modal show={showModal} onHide={this.handleClose}>
             <Modal.Header closeButton>
               <Modal.Title>Thêm Album Image Mới</Modal.Title>
@@ -313,6 +442,7 @@ class AlbumDetail extends React.Component {
       </div>
     );
   }
+
 }
 
 const mapStateToProps = ({ ioTReducer }) => ({
