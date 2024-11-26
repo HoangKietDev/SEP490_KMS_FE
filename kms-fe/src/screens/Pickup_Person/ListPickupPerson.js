@@ -17,7 +17,7 @@ class ListPickUpPerson extends React.Component {
 
         // Lấy parentID từ user trong session
 
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(sessionStorage.getItem("user"));
         const parentId = user?.user?.userId;
 
         if (parentId) {

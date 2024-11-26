@@ -544,7 +544,7 @@ class Checkin extends React.Component {
       })
       .then((data) => {
         console.log(`Ảnh đã được upload thành công cho attendanceDetailID: ${attendanceDetailID}`, data);
-        this.handleAttendance(studentID, "Đã về");
+        this.handleAttendance(studentID, "Arrived");
       })
       .catch((error) => {
         console.error(`Có lỗi xảy ra khi upload ảnh cho attendanceDetailID: ${attendanceDetailID}`, error);
@@ -1300,13 +1300,14 @@ class Checkin extends React.Component {
     return (
       <div className="container-fluid">
         <PageHeader
-          HeaderText={`Violet | Check In - Teacher: ${teacherName}`}
+          HeaderText={`Check In - Teacher: ${teacherName}`}
           Breadcrumb={[
-            { name: "Học Thuật", navigate: "" },
-            { name: "Quản Lý Điểm Danh", navigate: "" },
-            { name: "Chi Tiết Điểm Danh", navigate: "" },
+            { name: "Academics", navigate: "" },
+            { name: "Attendance Management", navigate: "" },
+            { name: "Attendance Details", navigate: "" },
           ]}
         />
+
         {showNotification && (
           <Notification
             type={notificationType}
@@ -1317,7 +1318,7 @@ class Checkin extends React.Component {
           />
         )}
         <div className="form-group">
-          <label>Chọn Ngày:</label>
+          <label>Select Date:</label>
           <DatePicker
             selected={selectedDate}
             onChange={this.handleDateChange}
@@ -1326,7 +1327,7 @@ class Checkin extends React.Component {
           />
         </div>
         <div className="form-group">
-          <label>Chọn Lớp:</label>
+          <label>Select Class:</label>
           <select
             className="form-control"
             value={this.state.selectedClass}
@@ -1374,7 +1375,7 @@ class Checkin extends React.Component {
                     className="btn btn-outline-secondary mr-1"
                     style={{ cursor: "pointer" }}
                   >
-                    <i className="icon-camera"></i> Chụp Ảnh
+                    <i className="icon-camera"></i> Take Photo
                     <input
                       id="cameraFileInput"
                       type="file"
@@ -1387,13 +1388,14 @@ class Checkin extends React.Component {
                   <table className="table table-hover mt-3">
                     <thead className="thead-light">
                       <tr>
-                        <th>Tên học sinh</th>
-                        <th>Thông tin khác</th>
-                        <th>Phụ huynh</th>
-                        <th>Liên hệ</th>
-                        <th>Điểm danh</th>
-                        <th>Hành động</th>
+                        <th>Student Name</th>
+                        <th>Other Information</th>
+                        <th>Parent</th>
+                        <th>Contact</th>
+                        <th>Attendance</th>
+                        <th>Action</th>
                       </tr>
+
                     </thead>
                     <tbody>
                       {attendanceDetailsCheckin.length > 0 ? (
@@ -1477,7 +1479,7 @@ class Checkin extends React.Component {
                       onClick={this.updateAttendance}
                       disabled={!isToday}
                     >
-                      Xác Nhận Điểm Danh
+                      Confirm Attendance
                     </button>
                   </div>
                 </>
@@ -1490,7 +1492,7 @@ class Checkin extends React.Component {
                     className="btn btn-outline-secondary mr-1"
                     style={{ cursor: "pointer" }}
                   >
-                    <i className="icon-camera"></i> Chụp Ảnh
+                    <i className="icon-camera"></i> Take Photo
                     <input
                       id="cameraFileInput"
                       type="file"
@@ -1503,13 +1505,14 @@ class Checkin extends React.Component {
                   <table className="table table-hover mt-3">
                     <thead className="thead-light">
                       <tr>
-                        <th>Tên học sinh</th>
-                        <th>Lớp</th>
-                        <th>Thời gian đến</th>
-                        <th>Người đưa đón</th>
-                        <th>Liên hệ</th>
-                        <th>Trạng thái</th>
+                        <th>Student Name</th>
+                        <th>Class</th>
+                        <th>Arrival Time</th>
+                        <th>Pick-up Person</th>
+                        <th>Contact</th>
+                        <th>Status</th>
                       </tr>
+
                     </thead>
                     <tbody>
                       {attendanceDetailsCheckout.length > 0 ? (
@@ -1549,20 +1552,20 @@ class Checkin extends React.Component {
                                 <td>{parent.phone || "Không có số"}</td>
                                 <td>
                                   <button
-                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Đã về" ? "btn-success" : ""
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Arrived" ? "btn-success" : ""
                                       }`}
-                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Đã về")}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Arrived")}
                                     disabled={!isToday}
                                   >
-                                    Đã về
+                                    Arrived
                                   </button>
                                   <button
-                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Chưa về" ? "btn-danger" : ""
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Arrived" ? "btn-danger" : ""
                                       }`}
-                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Chưa về")}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Not Arrived")}
                                     disabled={!isToday}
                                   >
-                                    Chưa về
+                                    Not Arrived
                                   </button>
                                 </td>
                               </tr>
@@ -1571,7 +1574,7 @@ class Checkin extends React.Component {
                       ) : (
                         <tr>
                           <td colSpan="6" className="text-center">
-                            Không có dữ liệu cho ngày này
+                            No data for this day
                           </td>
                         </tr>
                       )}
@@ -1581,7 +1584,7 @@ class Checkin extends React.Component {
 
                   <div className="text-right mt-3">
                     <button className="btn btn-primary" onClick={this.updateAttendance} disabled={!isToday}>
-                      Xác Nhận Điểm Danh
+                      Confirm Attendance
                     </button>
                   </div>
                 </>

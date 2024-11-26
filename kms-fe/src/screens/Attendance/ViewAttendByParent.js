@@ -32,7 +32,7 @@ class ViewAttendByParent extends React.Component {
     isMounted = true; // Đặt isMounted thành true khi component mount
     window.scrollTo(0, 0);
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     const parentID = user?.user?.userId;
 
     if (!parentID) {

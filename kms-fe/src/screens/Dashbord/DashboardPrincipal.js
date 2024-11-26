@@ -401,17 +401,27 @@ class DashboardPrincipal extends React.Component {
 
           {/* Biểu đồ Class Gender Distribution */}
           <div className="row clearfix">
-            <div className="col-lg-6">
+            <div className="col-lg-4">
               <div className="card">
                 <div className="header">
-                  <h2>Class Gender Distribution</h2>
+                  <h2>Teacher Class Distribution (Pie Chart)</h2>
                 </div>
                 <div className="body" style={{ overflowX: 'auto' }}>
-                  <ReactEcharts option={classSummaryData} style={{ height: '400px' }} opts={{ renderer: "svg" }} />
+                  <ReactEcharts option={teacherPieData} style={{ height: '400px' }} opts={{ renderer: "svg" }} />
                 </div>
               </div>
             </div>
-            <div className="col-lg-6">
+            <div className="col-lg-4">
+              <div className="card">
+                <div className="header">
+                  <h2>Teacher Classification by Class Count (Bar Chart)</h2>
+                </div>
+                <div className="body" style={{ overflowX: 'auto' }}>
+                  <ReactEcharts option={teacherBarData} style={{ height: '400px' }} opts={{ renderer: "svg" }} />
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4">
               <div className="card">
                 <div className="header">
                   <h2>Monthly Enrollment Statistics</h2>
@@ -423,13 +433,10 @@ class DashboardPrincipal extends React.Component {
             </div>
           </div>
 
-          {/* Biểu đồ Monthly Enrollment Statistics */}
-          <div className="row clearfix">
-
-          </div>
+        
 
           {/* Biểu đồ hình tròn - Tỷ lệ giáo viên có và không có lớp */}
-          <div className="row clearfix">
+          {/* <div className="row clearfix">
             <div className="col-lg-6">
               <div className="card">
                 <div className="header">
@@ -450,7 +457,7 @@ class DashboardPrincipal extends React.Component {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="row clearfix">
 
 

@@ -172,8 +172,8 @@ class ViewStudentById extends React.Component {
         notificationType: "success",
         showNotification: true
       });
-      
-      this.props.history.push("/viewallstudent");
+
+      // this.props.history.push("/viewallstudent");
     } catch (error) {
       console.error("Error updating student:", error.response || error.message);
       // alert("Failed to update student. Please try again.");
@@ -396,7 +396,7 @@ class ViewStudentById extends React.Component {
                       <div className="form-group">
                         <label>Code</label>
                         <input
-                          required
+                          disabled
                           type="text"
                           className="form-control"
                           value={code}

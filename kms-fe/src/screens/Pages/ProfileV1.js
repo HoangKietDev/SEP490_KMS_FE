@@ -36,7 +36,7 @@ class ProfileV1Page extends React.Component {
 
   fetchUserData = async () => {
     try {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const storedUser = JSON.parse(sessionStorage.getItem("user"));
       const userId = storedUser.user.userId;
 
       const response = await fetch(`http://localhost:5124/api/User/ProfileById/${userId}`);
@@ -95,7 +95,7 @@ class ProfileV1Page extends React.Component {
 
   handleUpdate = async () => {
     const { updatedUserData, selectedFile } = this.state;
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
     const formData = new FormData();
     formData.append("userId", storedUser.user.userId);
@@ -175,7 +175,7 @@ class ProfileV1Page extends React.Component {
       return;
     }
 
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedUser = JSON.parse(sessionStorage.getItem("user"));
     const userId = storedUser.user.userId;
 
     try {
@@ -363,7 +363,7 @@ class ProfileV1Page extends React.Component {
                                 <label>Phone Number</label>
                                 <input
                                   className="form-control"
-                                  type="text"
+                                  type="number"
                                   name="phoneNumber"
                                   value={updatedUserData.phoneNumber || ""}
                                   onChange={this.handleChange}

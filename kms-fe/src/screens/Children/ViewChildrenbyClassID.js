@@ -111,6 +111,7 @@ class ViewChildrenByClassID extends React.Component {
                         <tr>
                           <th>Full Name</th>
                           <th>Nick Name</th>
+                          <th>Code</th>
                           <th>Grade</th>
                           <th>Date of birth</th>
                           <th>Status</th>
@@ -140,6 +141,7 @@ class ViewChildrenByClassID extends React.Component {
                                 </div>
                               </td>
                               <td>{student.nickName}</td>
+                              <td>{student.code}</td>
                               <td>{getGradeName(student.gradeId)}</td>
                               <td>
                                 {new Date(student.dob).toLocaleDateString("vi-VN", {

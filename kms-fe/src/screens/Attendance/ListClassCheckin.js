@@ -15,7 +15,7 @@ class ListClassCheckin extends React.Component {
 
     componentDidMount() {
         window.scrollTo(0, 0);
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(sessionStorage.getItem("user"));
         const teacherId = user ? user.user.userId : null;
 
         if (teacherId) {
@@ -43,7 +43,7 @@ class ListClassCheckin extends React.Component {
     }
 
     handleEdit = (classId) => {
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(sessionStorage.getItem("user"));
         if (user && user.user.roleId === 3) {
             this.props.history.push(`/updateclass/${classId}`);
         } else if (user && user.user.roleId === 4) {

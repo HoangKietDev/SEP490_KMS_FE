@@ -154,6 +154,7 @@ class ViewAllChildren extends React.Component {
                           <tr>
                             <th>Full Name</th>
                             <th>Nick Name</th>
+                            <th>Code</th>
                             <th>Grade</th>
                             <th>Status</th>
                             <th>Action</th>
@@ -186,6 +187,7 @@ class ViewAllChildren extends React.Component {
                                     {student.fullName}
                                   </td>
                                   <td>{student.nickName}</td>
+                                  <td>{student.code}</td>
                                   <td>{gradeName}</td> {/* Hiển thị tên grade */}
                                   <td>
                                     {student.status === 1 ? (

@@ -253,7 +253,7 @@ class ListMenu extends React.Component {
 
                         {/* Dinner */}
                         <tr>
-                            <td className="sticky-col"><strong>Dinner</strong></td>
+                            <td className="sticky-col"><strong>Snack</strong></td>
                             {daysOfWeek.map((day, index) => {
                                 const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                                 return (

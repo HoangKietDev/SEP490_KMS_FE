@@ -70,7 +70,7 @@ class Login extends React.Component {
       };
   
       // Lưu lại vào localStorage và sessionStorage
-      localStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
+      // localStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
       sessionStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
   
       // Chuyển hướng dựa trên roleId

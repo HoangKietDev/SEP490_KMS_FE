@@ -127,13 +127,12 @@ class CreateChildren extends React.Component {
       // Bước 1: Gọi API để tạo học sinh
       const newStudent = {
         studentId,
-        code,
+        code: "",
         fullName,
         nickName,
         gradeId: grade,
         dob,
         gender,
-        status,
         ethnicGroups,
         nationality,
         religion,
@@ -194,7 +193,7 @@ class CreateChildren extends React.Component {
             }
           );
           console.log("Person added successfully:", addPersonResponse.data);
-          
+
           // Cập nhật thông báo thành công
           this.setState({
             notificationText: "Person added successfully!",
@@ -203,7 +202,7 @@ class CreateChildren extends React.Component {
           });
         } catch (error) {
           console.error("Error adding person:", error);
-          
+
           // Cập nhật thông báo lỗi
           this.setState({
             notificationText: `Error adding person: ${error.response?.data?.message || error.message}`,
@@ -211,8 +210,8 @@ class CreateChildren extends React.Component {
             showNotification: true,
           });
         }
-        
-        
+
+
 
 
       }
@@ -354,23 +353,12 @@ class CreateChildren extends React.Component {
                   </div>
 
                   <div className="row">
-                    <div className="col-md-6">
-                      <div className="form-group">
-                        <label>Code</label>
-                        <input
-                        required
-                          type="text"
-                          className="form-control"
-                          value={code}
-                          onChange={(e) => this.setState({ code: e.target.value })}
-                        />
-                      </div>
-                    </div>
+
                     <div className="col-md-6">
                       <div className="form-group">
                         <label>Date of Birth</label>
                         <input
-                        required
+                          required
                           type="date"
                           className="form-control"
                           value={dob}
@@ -378,88 +366,11 @@ class CreateChildren extends React.Component {
                         />
                       </div>
                     </div>
-                  </div>
-
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="form-group">
-                        <label>Grade</label>
-                        <select
-                        required
-                          className="form-control"
-                          value={grade}
-                          onChange={(e) => this.setState({ grade: parseInt(e.target.value) })}
-                        >
-                          <option value={0}>Select Grade</option>
-                          {grades.map((grade) => (
-                            <option key={grade.gradeId} value={grade.gradeId}>
-                              {grade.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="form-group">
-                        <label>Gender</label>
-                        <select
-                        required
-                          className="form-control"
-                          value={gender}
-                          onChange={(e) => this.setState({ gender: parseInt(e.target.value) })}
-                        >
-                          <option value={0}>Female</option>
-                          <option value={1}>Male</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="form-group">
-                        <label>Nationality</label>
-                        <input
-                        required
-                          type="text"
-                          className="form-control"
-                          value={nationality}
-                          onChange={(e) => this.setState({ nationality: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="form-group">
-                        <label>Religion</label>
-                        <input
-                        required
-                          type="text"
-                          className="form-control"
-                          value={religion}
-                          onChange={(e) => this.setState({ religion: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="row">
-                    <div className="col-md-6">
-                      <div className="form-group">
-                        <label>Ethnic Groups</label>
-                        <input
-                        required
-                          type="text"
-                          className="form-control"
-                          value={ethnicGroups}
-                          onChange={(e) => this.setState({ ethnicGroups: e.target.value })}
-                        />
-                      </div>
-                    </div>
                     <div className="col-md-6">
                       <div className="form-group">
                         <label>Parent ID (Search by Name)</label>
                         <input
-                        required
+                          required
                           type="text"
                           className="form-control"
                           value={parentSearch}
@@ -490,17 +401,85 @@ class CreateChildren extends React.Component {
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select
-                      className="form-control"
-                      value={status}
-                      onChange={(e) => this.setState({ status: parseInt(e.target.value) })}
-                    >
-                      <option value={0}>Inactive</option>
-                      <option value={1}>Active</option>
-                    </select>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Grade</label>
+                        <select
+                          required
+                          className="form-control"
+                          value={grade}
+                          onChange={(e) => this.setState({ grade: parseInt(e.target.value) })}
+                        >
+                          <option value={0}>Select Grade</option>
+                          {grades.map((grade) => (
+                            <option key={grade.gradeId} value={grade.gradeId}>
+                              {grade.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Gender</label>
+                        <select
+                          required
+                          className="form-control"
+                          value={gender}
+                          onChange={(e) => this.setState({ gender: parseInt(e.target.value) })}
+                        >
+                          <option value={0}>Female</option>
+                          <option value={1}>Male</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Nationality</label>
+                        <input
+                          required
+                          type="text"
+                          className="form-control"
+                          value={nationality}
+                          onChange={(e) => this.setState({ nationality: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Religion</label>
+                        <input
+                          required
+                          type="text"
+                          className="form-control"
+                          value={religion}
+                          onChange={(e) => this.setState({ religion: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Ethnic Groups</label>
+                        <input
+                          required
+                          type="text"
+                          className="form-control"
+                          value={ethnicGroups}
+                          onChange={(e) => this.setState({ ethnicGroups: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                  </div>
+
+
 
                   <div className="text-right">
                     <button type="submit" className="btn btn-primary">

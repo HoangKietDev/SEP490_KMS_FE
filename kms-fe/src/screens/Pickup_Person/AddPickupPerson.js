@@ -19,7 +19,7 @@ class AddPickupPerson extends React.Component {
         const { name, phoneNumber, avatar } = this.state;
 
         // Lấy parentId từ localStorage
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(sessionStorage.getItem('user'));
         const parentId = user.user.userId;
 
         if (!parentId) {

@@ -180,7 +180,7 @@ class UpdateMenu extends React.Component {
         const mealLabels = {
             BS: "Breakfast",
             BT: "Lunch",
-            BC: "Dinner",
+            BC: "Snack",
         };
         return mealLabels[mealCode];
     };

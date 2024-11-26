@@ -34,7 +34,7 @@ class ViewClass extends React.Component {
   }
 
   handleEdit = (classId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(sessionStorage.getItem('user'));
     if (user && user.user.roleId === 3) {
       this.props.history.push(`/updateclass/${classId}`);
     } else if (user && user.user.roleId === 4) {

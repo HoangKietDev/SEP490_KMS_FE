@@ -17,7 +17,7 @@ class ChooseService extends React.Component {
     componentDidMount() {
         window.scrollTo(0, 0);
 
-        const user = JSON.parse(localStorage.getItem("user"));
+        const user = JSON.parse(sessionStorage.getItem("user"));
         const parentID = user?.user?.userId;
 
         if (!parentID) {
