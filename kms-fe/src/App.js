@@ -467,7 +467,8 @@ class App extends React.Component {
                   path={`${process.env.PUBLIC_URL}/chooseservice`}
                   component={ChooseService}
                   allowedRoles={[2]}
-                /> 
+                />
+               
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/dashboardprin`}

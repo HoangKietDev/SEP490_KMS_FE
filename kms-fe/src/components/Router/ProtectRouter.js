@@ -22,9 +22,9 @@ const ProtectedRoute = ({ component: Component, allowedRoles, ...rest }) => {
                 user && allowedRoles.includes(roleId) ? (
                     <Component {...props} />
                 ) : !user ? (
-                    <Redirect to={`${process.env.REACT_APP_PUBLIC_URL}/login`} /> // Not authenticated
+                    <Redirect to={`${process.env.PUBLIC_URL}/login`} /> // Not authenticated
                 ) : (
-                    <Redirect to={`${process.env.REACT_APP_PUBLIC_URL}/page404`} /> // Authenticated but role not allowed
+                    <Redirect to={`${process.env.PUBLIC_URL}/page404`} /> // Authenticated but role not allowed
                 )
             }
         />

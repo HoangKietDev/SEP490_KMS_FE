@@ -202,7 +202,7 @@ class Login extends React.Component {
                       <div className="bottom">
                         <span className="helper-text m-b-10">
                           <i className="fa fa-lock"></i>{" "}
-                          <a href={`${process.env.REACT_APP_PUBLIC_URL}/forgotpassword`}
+                          <a href={`${process.env.PUBLIC_URL}/forgotpassword`}
                           >
                             Forgot password?
                           </a>
