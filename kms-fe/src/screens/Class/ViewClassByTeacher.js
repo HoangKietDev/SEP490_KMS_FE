@@ -92,48 +92,9 @@ class ViewClassByTeacher extends React.Component {
     this.setState({ showConfirmModal: true });
   };
 
-  handleConfirmSendMail = async () => {
-    this.setState({ showConfirmModal: false });
-
-    const { ProjectsData } = this.state; // Giả sử 'nameFilter' là classId
-
-    // Lấy classId từ nameFilter hoặc một nguồn khác
-    const classId = ProjectsData[0].classId; // Thay đổi nếu cần thiết
-    console.log(classId);
-
-    try {
-      // API call sử dụng fetch
-      const response = await fetch(`http://localhost:5124/api/Class/SendMailToParentsByClassId/${classId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        this.setState({
-          notificationText: "Mail sent successfully!",
-          notificationType: "success",
-          showNotification: true
-        });
-      }
-    } catch (error) {
-      this.setState({
-        notificationText: "Mail sent Error!",
-        notificationType: "error",
-        showNotification: true
-      });
-    }
-  };
-
-
-  // Hàm đóng popup confirm
-  handleCloseConfirmModal = () => {
-    this.setState({ showConfirmModal: false });
-  };
 
   render() {
-    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData, showConfirmModal } = this.state;
+    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
 
@@ -223,32 +184,6 @@ class ViewClassByTeacher extends React.Component {
                           placeholder="Enter class name"
                         />
                       </div>
-
-                      {/* Button để gửi email */}
-                      <button
-                        className="btn btn-primary ml-3"
-                        onClick={this.handleSendMailNotification}
-                      >
-                        Send Mail Notification
-                      </button>
-
-                      {/* Modal confirm */}
-                      <Modal show={showConfirmModal} onHide={this.handleCloseConfirmModal}>
-                        <Modal.Header closeButton>
-                          <Modal.Title>Confirm Mail Notification</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          Are you sure you want to send mail notifications with the current filters?
-                        </Modal.Body>
-                        <Modal.Footer>
-                          <Button variant="secondary" onClick={this.handleCloseConfirmModal}>
-                            Cancel
-                          </Button>
-                          <Button variant="primary" onClick={this.handleConfirmSendMail}>
-                            Confirm
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
                     </div>
 
                     <div className="table-responsive">

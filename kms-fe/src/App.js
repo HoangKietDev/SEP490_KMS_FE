@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Route, Switch, withRouter } from "react-router-dom";
+import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import Login from "./screens/Login";
-import dashboard from "./screens/Dashbord/Dashbord";
+import DashboardAdmin from "./screens/Dashbord/Dashbord";
 import demographic from "./screens/Dashbord/Demographic";
 import ioT from "./screens/Dashbord/IoT";
 import NavbarMenu from "./components/NavbarMenu";
@@ -71,6 +71,8 @@ import SemesterUpdate from "./screens/Semester/SemesterUpdate";
 import SemesterCreate from "./screens/Semester/SemesterCreate";
 import UserList from "./screens/User/UserList";
 import UserCreate from "./screens/User/UserCreate";
+import PaymentAllStaff from "./screens/Payment/PaymentAllStaff";
+import PaymentTuition from "./screens/Payment/PaymentTuition";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -88,7 +90,21 @@ class App extends React.Component {
     res = res.split("/");
     res = res.length > 0 ? res[baseUrl.length] : "/";
     res = res ? res : "/";
+    console.log(res);
+
     const activeKey1 = res;
+
+
+    const allowedUrls = [
+      "/dashboard",
+      "/category",
+      "/create-category",
+      "/category-detail", // Danh sách các URL hợp lệ cho NavbarMenu
+    ];
+
+    // Kiểm tra xem activeKey1 có nằm trong danh sách các URL cho phép không
+    const showNavbar = allowedUrls.includes(activeKey1);
+
 
     return (
       <div id="wrapper">
@@ -106,8 +122,10 @@ class App extends React.Component {
             <Route exact path={`${process.env.PUBLIC_URL}/resetpassword`} component={resetpassword} />
             <Route exact path={`${process.env.PUBLIC_URL}/page404`} component={page404} />
             <Route exact path={`${process.env.PUBLIC_URL}/maintanance`} component={maintanance} />
+            <Route path="*" component={page404} />
           </Switch>
         ) : (
+
           <>
             <NavbarMenu history={this.props.history} activeKey={activeKey1} />
             <div id="main-content">
@@ -115,8 +133,8 @@ class App extends React.Component {
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/dashboard`}
-                  component={dashboard}
-                  allowedRoles={[1, 3]}
+                  component={DashboardAdmin}
+                  allowedRoles={[1]}
                 />
                 <ProtectedRoute
                   exact
@@ -242,19 +260,19 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/semester`}
                   component={Semester}
-                  allowedRoles={[3]}
+                  allowedRoles={[4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/semester-update/:semesterId`}
                   component={SemesterUpdate}
-                  allowedRoles={[3]}
+                  allowedRoles={[4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/create-semester`}
                   component={SemesterCreate}
-                  allowedRoles={[3]}
+                  allowedRoles={[4]}
                 />
 
                 <ProtectedRoute
@@ -464,6 +482,18 @@ class App extends React.Component {
                 />
                 <ProtectedRoute
                   exact
+                  path={`${process.env.PUBLIC_URL}/paymentAll`}
+                  component={PaymentAllStaff}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/tuition`}
+                  component={PaymentTuition}
+                  allowedRoles={[3,4]}
+                />
+                <ProtectedRoute
+                  exact
                   path={`${process.env.PUBLIC_URL}/chooseservice`}
                   component={ChooseService}
                   allowedRoles={[2]}
@@ -484,6 +514,7 @@ class App extends React.Component {
                   component={AddPickupPerson}
                   allowedRoles={[2]}
                 />
+                <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
               </Switch>
             </div>
           </>

@@ -302,12 +302,6 @@ class AlbumDetail extends React.Component {
             onClose={() => this.setState({ showNotification: false })}
           />
         )}
-        {/* Hiển thị loader khi đang tải ảnh */}
-        {this.state.isUploading && (
-          <div className="loading-overlay">
-            <Bars color="#00BFFF" height={100} width={100} />
-          </div>
-        )}
 
         <div className="container-fluid">
           <PageHeader
@@ -319,7 +313,10 @@ class AlbumDetail extends React.Component {
           />
           <div className="row clearfix">
             <div className="col-md-12">
-              <div className="card">
+              <div className="card shadow-lg">
+                <div className="card-header text-white theme-colorbg">
+                  <h4 className="mb-0">Detail Album</h4>
+                </div>
                 <div className="body">
                   <form className="update-teacher-form">
                     <div className="row justify-content-between">
@@ -472,13 +469,19 @@ class AlbumDetail extends React.Component {
                     onChange={this.handleImageChange}
                   />
                 </Form.Group>
+                {/* Hiển thị loader khi đang tải ảnh */}
+                {this.state.isUploading && (
+                  <div className="loading-overlay">
+                    <Bars color="#00BFFF" height={100} width={100} />
+                  </div>
+                )}
               </Form>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={this.handleClose}>
                 Hủy
               </Button>
-              <Button variant="primary" onClick={this.handleSaveAlbum}>
+              <Button variant="primary"  onClick={this.handleSaveAlbum} disabled={this.state.isUploading}>
                 Lưu Album Image
               </Button>
             </Modal.Footer>

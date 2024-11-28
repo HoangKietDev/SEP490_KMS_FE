@@ -50,7 +50,10 @@ class GradeDetail extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Detail Grade</h4>
+                                    </div>
                                     <div className="body">
                                         <form className="ng-untouched ng-dirty ng-invalid">
                                             <div className="form-group">
@@ -58,6 +61,14 @@ class GradeDetail extends React.Component {
                                                 <input
                                                     className={`form-control`}
                                                     value={GradesDetail?.name}
+                                                    name="categoryname"
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Grade Desciption</label>
+                                                <input
+                                                    className={`form-control`}
+                                                    value={GradesDetail?.description}
                                                     name="categoryname"
                                                 />
                                             </div>

@@ -121,10 +121,6 @@ class ScheduleList extends React.Component {
       }
       await axios.put(`http://localhost:5124/api/Schedule/UpdateSchedule`, formdata);
 
-      // tao thong bao moi
-      addNotificationByUserId('UserId', 'content', 21);
-      // addNotificationByRoleId('RoleId', 'content', 3);
-
       // Update the state locally after a successful API call
       this.setState((prevState) => ({
         ScheduleListData: prevState.ScheduleListData.map(schedule =>

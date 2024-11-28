@@ -101,9 +101,9 @@ class ServiceCreate extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
-                                    <div className="header text-center">
-                                        <h4>Create new Service</h4>
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Create Service</h4>
                                     </div>
                                     <div className="body">
                                         <form className="ng-untouched ng-dirty ng-invalid" onSubmit={this.handleCreatService}>
@@ -111,8 +111,7 @@ class ServiceCreate extends React.Component {
                                                 <div className="form-group col-md-6">
                                                     <label>Service Name</label>
                                                     <input
-                                                        className={`form-control ${serviceName === "" && "parsley-error"
-                                                            }`}
+                                                        className={`form-control`}
                                                         value={serviceName} // Bind value from state
                                                         name="serviceName"
                                                         required
@@ -127,8 +126,7 @@ class ServiceCreate extends React.Component {
                                                 <div className="form-group col-md-6">
                                                     <label>Service Price</label>
                                                     <input
-                                                        className={`form-control ${servicePrice === "" && "parsley-error"
-                                                            }`}
+                                                        className={`form-control`}
                                                         value={servicePrice}
                                                         name="servicePrice"
                                                         required
@@ -144,8 +142,7 @@ class ServiceCreate extends React.Component {
                                                 <div className="form-group col-md-6">
                                                     <label>Service Description</label>
                                                     <input
-                                                        className={`form-control ${serviceDes === "" && "parsley-error"
-                                                            }`}
+                                                        className={`form-control`}
                                                         value={serviceDes} // Bind value from state
                                                         name="serviceDes"
                                                         required
@@ -176,9 +173,8 @@ class ServiceCreate extends React.Component {
                                                 </div>
                                             </div>
                                             <br />
-                                            <button type="submit" className="btn btn-success text-center">
-                                                Create
-                                            </button>
+                                            <a href="/service" className="btn btn-success text-center">Back to Service List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Create Service</button>
                                         </form>
 
                                     </div>

@@ -62,9 +62,9 @@ class TeacherDetail extends React.Component {
             />
             <div className="row clearfix">
               <div className="col-md-12">
-                <div className="card">
-                  <div className="header text-center">
-                    <h4>Teacher Detail</h4>
+                <div className="card shadow-lg">
+                  <div className="card-header text-white theme-colorbg">
+                    <h4 className="mb-0">Detail Teacher</h4>
                   </div>
                   <div className="body">
                     <form className="update-teacher-form">
@@ -197,6 +197,10 @@ class TeacherDetail extends React.Component {
                       </div>
                       <br />
                     </form>
+                  </div>
+
+                  <div className="text-center pb-4">
+                    <a href="/teacher" class="btn btn-success text-white">Back to list Teacher</a>
                   </div>
                 </div>
               </div>

@@ -105,7 +105,7 @@ class RequestCreate extends React.Component {
                     this.props.history.push('/request');
                 }
             }, 1000);
-        } catch (error) { 
+        } catch (error) {
             const errorMessage = error.response?.data?.message || "Failed to create request!";
             this.setState({
                 notificationText: errorMessage,
@@ -148,9 +148,9 @@ class RequestCreate extends React.Component {
                             </div>
                         </div>
                         <div className="col-md-12">
-                            <div className="card">
-                                <div className="header text-center">
-                                    <h4>Create New Request</h4>
+                            <div className="card shadow-lg">
+                                <div className="card-header text-white theme-colorbg">
+                                    <h4 className="mb-0">Create Request</h4>
                                 </div>
                                 <div className="body">
                                     <form onSubmit={this.handleCreateRequest}>

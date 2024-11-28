@@ -48,7 +48,10 @@ class ServiceDetail extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Detail Service</h4>
+                                    </div>
                                     <div className="body">
                                         <form className="ng-untouched ng-dirty ng-invalid">
                                             <div className="row">

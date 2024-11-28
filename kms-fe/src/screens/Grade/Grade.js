@@ -6,6 +6,7 @@ import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import { getSession } from '../../components/Auth/Auth';
 import Notification from "../../components/Notification";
+import Pagination from "../../components/Common/Pagination";
 
 
 class Grade extends React.Component {
@@ -16,6 +17,9 @@ class Grade extends React.Component {
     showNotification: false, // Để hiển thị thông báo
     notificationText: "", // Nội dung thông báo
     notificationType: "success", // Loại thông báo (success/error)
+
+    currentPage: 1,
+    itemsPerPage: 10,
   };
   componentDidMount() {
     window.scrollTo(0, 0);
@@ -76,14 +80,24 @@ class Grade extends React.Component {
     }
   };
 
+  
+  handlePageChange = (pageNumber) => {
+    this.setState({ currentPage: pageNumber });
+};
+
 
   render() {
     const { showNotification, notificationText, notificationType } = this.state;
 
-
     const { grades } = this.state;
     const userData = getSession('user').user;
     const roleId = userData.roleId
+
+    // phan trang
+    const { currentPage, itemsPerPage } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = grades.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
       <div
@@ -145,25 +159,32 @@ class Grade extends React.Component {
                         <tr>
                           <th>#</th>
                           <th>Grade</th>
+                          <th>Description</th>
                           <th>BaseTuitionFee</th>
-                          {/* <th>Status</th> */}
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {grades.map((item, i) => {
+                        {currentItems.map((item, i) => {
                           return (
                             <tr key={"dihf" + i}>
 
                               <td className="project-title">
                                 <th scope="row">{i + 1}</th>
                               </td>
+
                               <td>
                                 {item?.name}
                               </td>
+
+                              <td>
+                                {item?.description}
+                              </td>
+
                               <td>
                                 {item?.baseTuitionFee}
                               </td>
+
                               {/* <td>
                                 {item?.status === "Active" ? (
                                   <span className="badge badge-success">Active</span>
@@ -184,6 +205,14 @@ class Grade extends React.Component {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                  <div className="pt-4">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalItems={grades.length}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={this.handlePageChange}
+                    />
                   </div>
                 </div>
               </div>

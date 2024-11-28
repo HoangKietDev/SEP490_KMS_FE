@@ -146,11 +146,20 @@ class NavbarMenu extends React.Component {
       activeKey === "/service" ||
       activeKey === "/create-service" ||
       activeKey === "/chooservice"
-
-
     ) {
       this.activeMenutabContainer("ServiceContainer");
     }
+    else if (
+      activeKey === "/grade"
+    ) {
+      this.activeMenutabContainer("GradeContainer");
+    }
+    else if (
+      activeKey === "/semester"
+    ) {
+      this.activeMenutabContainer("SemesterContainer");
+    }
+
     else if (
       activeKey === "/classviewclass" ||
       activeKey === "/viewclass" ||
@@ -240,22 +249,6 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("MapsContainer");
     }
   }
-
-  // activeMenutabContainer(id) {
-  //   var parents = document.getElementById("main-menu");
-  //   var activeMenu = document.getElementById(id);
-
-  //   for (let index = 0; index < parents.children.length; index++) {
-  //     if (parents.children[index].id !== id) {
-  //       parents.children[index].classList.remove("active");
-  //       parents.children[index].children[1].classList.remove("in");
-  //     }
-  //   }
-  //   setTimeout(() => {
-  //     activeMenu.classList.toggle("active");
-  //     activeMenu.children[1].classList.toggle("in");
-  //   }, 10);
-  // }
   activeMenutabContainer(id) {
     const parents = document.getElementById("main-menu");
     const activeMenu = document.getElementById(id);
@@ -302,8 +295,8 @@ class NavbarMenu extends React.Component {
 
   render() {
     const userData = getSession('user')?.user;
-    const roleId = userData.roleId
-    const username = userData.firstname + " " + userData.lastName || "User"; // Thay "User" bằng tên mặc định nếu không có
+    const roleId = userData?.roleId
+    const username = userData?.firstname + " " + userData?.lastName || "User"; // Thay "User" bằng tên mặc định nếu không có
 
     const {
       addClassactive,
@@ -327,22 +320,6 @@ class NavbarMenu extends React.Component {
 
     return (
       <div>
-        {/* {isToastMessage ? (
-          <Toast
-            id="toast-container"
-            show={isToastMessage}
-            onClose={() => {
-              this.props.tostMessageLoad(false);
-            }}
-            className="toast-info toast-top-right"
-            autohide={true}
-            delay={5000}
-          >
-            <Toast.Header className="toast-info mb-0">
-              Hello, welcome to KMS
-            </Toast.Header>
-          </Toast>
-        ) : null} */}
         <nav className="navbar navbar-fixed-top">
           <div className="container-fluid">
             <div className="navbar-btn">
@@ -548,28 +525,12 @@ class NavbarMenu extends React.Component {
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
+                            this.props.history.push("/dashboard");
                             this.activeMenutabContainer("dashboradContainer");
                           }}
                         >
                           <i className="icon-home"></i> <span>Dashboard</span>
                         </a>
-                        <ul className="collapse">
-                          <li
-                            className={activeKey === "dashboard" ? "active" : ""}
-                          >
-                            <Link to="dashboard">Analytical</Link>
-                          </li>
-                          <li
-                            className={
-                              activeKey === "demographic" ? "active" : ""
-                            }
-                          >
-                            <Link to="demographic">Demographic</Link>
-                          </li>
-                          <li className={activeKey === "ioT" ? "active" : ""}>
-                            <Link to="ioT">IoT</Link>
-                          </li>
-                        </ul>
                       </li>
                     ) : null}
 
@@ -711,7 +672,7 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Semester */}
-                    {roleId === 3 ? (
+                    {roleId === 4 ? (
                       <li id="SemesterContainer" className="">
                         <a
                           href="#!"
@@ -897,14 +858,19 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Payment */}
-                    {roleId === 2 ? (
+                    {roleId === 2 || roleId === 3 ? (
                       <li id="PaymentContainer" className="">
                         <a
                           href="#!"
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
-                            this.props.history.push("/payment");
+                            // Điều hướng theo roleId
+                            if (roleId === 2) {
+                              this.props.history.push("/payment");
+                            } else if (roleId === 3) {
+                              this.props.history.push("/paymentAll");
+                            }
                             this.activeMenutabContainer("PaymentContainer");
                           }}
                         >
@@ -912,6 +878,25 @@ class NavbarMenu extends React.Component {
                         </a>
                       </li>
                     ) : null}
+
+                    {/* Tuition Payment */}
+                    {roleId === 4 || roleId === 3 ? (
+                      <li id="TuitionContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.preventDefault(); // Ngăn chặn hành vi mặc định
+                            this.props.history.push("/tuition");
+                            this.activeMenutabContainer("TuitionContainer"); // Gọi hàm tùy chỉnh
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Tuition Manager</span>
+                        </a>
+                      </li>
+                    ) : null}
+
 
                     {/* Check in/out */}
                     {roleId === 5 ? (

@@ -14,6 +14,7 @@ const getAuthDetails = () => {
 // Higher-order component to protect routes based on role
 const ProtectedRoute = ({ component: Component, allowedRoles, ...rest }) => {
     const { user, roleId } = getAuthDetails();
+    console.log(user);
 
     return (
         <Route

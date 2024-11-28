@@ -117,7 +117,7 @@ class Semester extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Semester Manager</h2>
-                    {roleId === 3 ? (
+                    {roleId === 4 ? (
                       <div>
                         <a onClick={() => this.handleCreateSemester()} class="btn btn-success text-white">Create New Semester</a>
                       </div>
@@ -162,8 +162,8 @@ class Semester extends React.Component {
                         <tr className="theme-color">
                           <th>#</th>
                           <th>Semester Name</th>
-                          <th>startDate</th>
-                          <th>endDate</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
                           <th>Status</th>
                           <th>Action</th>
                         </tr>

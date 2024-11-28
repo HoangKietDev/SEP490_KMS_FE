@@ -77,7 +77,7 @@ class AlbumCreate extends React.Component {
                 notificationType: "success",
                 showNotification: true
             });
-            
+
             // Set timeout để chuyển hướng sau 2 giây
             setTimeout(() => {
                 this.props.history.push('/album');
@@ -118,9 +118,9 @@ class AlbumCreate extends React.Component {
                     />
                     <div className="row clearfix">
                         <div className="col-md-12">
-                            <div className="card">
-                                <div className="header text-center">
-                                    <h4>Create New Album</h4>
+                            <div className="card shadow-lg">
+                                <div className="card-header text-white theme-colorbg">
+                                    <h4 className="mb-0">Create New Album</h4>
                                 </div>
                                 <div className="body">
                                     <form onSubmit={this.handleCreateRequest}>

@@ -11,6 +11,7 @@ class CategoryUpdate extends React.Component {
         gradeDetail: null,
         errorMessage: "",
         name: "", // Initialize with empty string
+        description: "", // Initialize with empty string
         baseTuitionFee: "", // Initialize with empty string
 
         showNotification: false, // Để hiển thị thông báo
@@ -28,6 +29,7 @@ class CategoryUpdate extends React.Component {
                 this.setState({
                     gradeDetail: data,
                     name: data.name, // Set initial state from fetched data
+                    description: data.description, // Set initial state from fetched data
                     baseTuitionFee: data.baseTuitionFee, // Set initial state from fetched data
                 });
             } catch (error) {
@@ -49,6 +51,7 @@ class CategoryUpdate extends React.Component {
         const updatedGrade = {
             gradeId: this.state.gradeDetail?.gradeId,
             name: this.state.name, // Use state instead of event target
+            description: this.state.description, // Set initial state from fetched data
             baseTuitionFee: this.state.baseTuitionFee, // Use state instead of event target
         };
 
@@ -78,7 +81,7 @@ class CategoryUpdate extends React.Component {
     };
 
     render() {
-        const { gradeDetail, name, baseTuitionFee } = this.state;
+        const { gradeDetail, name, description, baseTuitionFee } = this.state;
         const { showNotification, notificationText, notificationType } = this.state;
 
         return (
@@ -103,7 +106,10 @@ class CategoryUpdate extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Update Grade</h4>
+                                    </div>
                                     <div className="body">
                                         <form onSubmit={this.handleSubmit}>
                                             <div className="form-group">
@@ -112,6 +118,20 @@ class CategoryUpdate extends React.Component {
                                                     className={`form-control`}
                                                     value={name} // Bind value from state
                                                     name="name"
+                                                    required
+                                                    onChange={(e) => {
+                                                        this.setState({
+                                                            [e.target.name]: e.target.value,
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Grade Description</label>
+                                                <input
+                                                    className={`form-control`}
+                                                    value={description} // Bind value from state
+                                                    name="description"
                                                     required
                                                     onChange={(e) => {
                                                         this.setState({
@@ -135,8 +155,8 @@ class CategoryUpdate extends React.Component {
                                                 />
                                             </div>
                                             <br />
-                                            <button type="submit" className="btn btn-primary mr-4">Update Grade</button>
                                             <a href="grade" className="btn btn-success text-center">Back to Grade List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Update Grade</button>
                                         </form>
                                     </div>
                                 </div>

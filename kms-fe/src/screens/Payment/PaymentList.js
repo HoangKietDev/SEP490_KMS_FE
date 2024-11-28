@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
 import { Modal, Button, Alert } from "react-bootstrap"; // Thêm modal từ react-bootstrap
+import Notification from "../../components/Notification";
 
 class PaymentList extends React.Component {
   state = {
@@ -31,6 +32,10 @@ class PaymentList extends React.Component {
     selectedQuantity: 1,
 
     showModal: false, // State để kiểm soát hiển thị modal
+
+    showNotification: false,
+    notificationText: "",
+    notificationType: "success",
 
   };
 
@@ -243,7 +248,7 @@ class PaymentList extends React.Component {
       paymentName: (selectedTuition && selectedServices && selectedServices.length > 0)
         ? `Tuiton and services ${month < 10 ? `0${month}` : month}/${year}` // Nếu cả 2 được chọn
         : selectedTuition
-          ? `Tuition fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedTuition
+          ? `Tuition fee ${month < 9 ? `0${month + 1}` : month + 1}/${year}` // Nếu chỉ có selectedTuition
           : (selectedServices && selectedServices.length > 0)
             ? `Service fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedServices
             : `Tuiton and services ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có gì
@@ -255,7 +260,11 @@ class PaymentList extends React.Component {
 
     console.log(paymentData);
     if (totalPayment === 0) {
-      alert("You need to choose Payment");
+      this.setState({
+        notificationText: "You need to choose Payment!",
+        notificationType: "info",
+        showNotification: true,
+      });
     }
     else {
       // Gọi API thanh toán
@@ -266,13 +275,21 @@ class PaymentList extends React.Component {
             window.location.href = response.data.url;
 
           } else {
-            alert("Failed to get payment URL. Please try again.");
+            this.setState({
+              notificationText: "Failed to get payment URL!",
+              notificationType: "error",
+              showNotification: true,
+            });
           }
           // Cập nhật lại UI nếu cần
         })
         .catch(error => {
           console.error("Payment failed", error);
-          alert("Payment failed. Please try again.");
+          this.setState({
+            notificationText: "Payment failed. Please try again.",
+            notificationType: "error",
+            showNotification: true,
+          });
         });
     }
 
@@ -281,6 +298,8 @@ class PaymentList extends React.Component {
 
   render() {
     const { ServiceListData, UserListData, tuition, showServices, Children, Class, selectedChild, Payment, ChildrenPayment } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     const userData = getSession('user').user
 
     const roleId = userData.roleId
@@ -305,6 +324,15 @@ class PaymentList extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader

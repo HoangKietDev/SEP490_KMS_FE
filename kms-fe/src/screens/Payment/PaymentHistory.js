@@ -5,7 +5,9 @@ import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import { getSession } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
+
 import Pagination from "../../components/Common/Pagination";
+
 
 // Import PDF generation utilities
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
@@ -77,6 +79,28 @@ const styles = StyleSheet.create({
   notes: {
     marginTop: 30,
   },
+
+  signatureSection: {
+    marginTop: 50,
+    alignItems: "flex-end",
+    marginRight: 50,
+  },
+  signatureTitle: {
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "right",
+    marginBottom: 10,
+  },
+  signatureLine: {
+    width: 150,
+    height: 1,
+    backgroundColor: "#000",
+    marginBottom: 5,
+  },
+  signatureName: {
+    fontSize: 12,
+    textAlign: "right",
+  },
 });
 
 class PaymentHistory extends React.Component {
@@ -92,16 +116,117 @@ class PaymentHistory extends React.Component {
     itemsPerPage: 10,
   };
 
+  // async componentDidMount() {
+  //   window.scrollTo(0, 0);
+  //   this.loadData();
+  // }
+
+  // componentDidUpdate(prevProps) {
+  //   // Kiểm tra nếu URL thay đổi
+  //   if (this.props.location.search !== prevProps.location.search) {
+  //     const queryParams = new URLSearchParams(this.props.location.search);
+  //     const paymentSuccess = queryParams.get('paymentSuccess');
+
+  //     if (paymentSuccess) {
+  //       // Nếu thanh toán thành công, hiển thị thông báo thành công
+  //       this.setState({
+  //         notificationText: "Payment successfully!",
+  //         notificationType: "success",
+  //         showNotification: true,
+  //       });
+
+  //       // Xóa query parameter paymentSuccess khỏi URL để tránh hiển thị thông báo lại khi refresh
+  //       const cleanUrl = window.location.pathname;
+  //       window.history.replaceState({}, '', cleanUrl); // Xóa query parameter paymentSuccess
+  //     }
+
+  //     this.loadData(); // Tải lại dữ liệu khi URL thay đổi
+  //   }
+  // }
+
+
+  // loadData = async () => {
+  //   const userData = getSession('user')?.user;
+  //   const parentId = userData?.userId; // Giá trị thực tế của parentId
+
+  //   if (!parentId) {
+  //     console.error("Parent ID is missing");
+  //     return;
+  //   }
+
+  //   // Lấy tất cả các tham số từ URL
+  //   const queryParams = new URLSearchParams(window.location.search);
+  //   const mydata = {};
+  //   queryParams.forEach((value, key) => {
+  //     mydata[key] = value;
+  //   });
+
+  //   console.log("All query parameters:", mydata);
+
+  //   // Kiểm tra nếu có redirect từ VNPAY
+  //   if (mydata.vnp_TxnRef && mydata.vnp_ResponseCode && mydata.vnp_SecureHash) {
+  //     try {
+  //       const response = await axios.post("http://localhost:5124/api/Payment/payment-callback", {
+  //         data: mydata,
+  //       });
+
+  //       console.log("Payment Callback Response:", response.data);
+
+  //       this.setState({
+  //         notificationText: "Payment successfully!!",
+  //         notificationType: "success",
+  //         showNotification: true,
+  //       });
+
+  //       // Reload trang với URL sạch
+  //       window.location.href = "/payment-history"; // Điều hướng về URL sạch
+
+  //     } catch (error) {
+  //       console.error("Error in Payment Callback:", error);
+
+  //       this.setState({
+  //         notificationText: "Payment Cancel!",
+  //         notificationType: "error",
+  //         showNotification: true,
+  //       });
+  //     }
+  //   }
+
+  //   // Tải PaymentHistory
+  //   try {
+  //     await this.getPaymentHistory(parentId);
+  //   } catch (error) {
+  //     console.error("Error fetching payment history:", error);
+  //   }
+
+  //   // Tải danh sách Children
+  //   try {
+  //     const response = await axios.get("http://localhost:5124/api/Children/GetAllChildren");
+  //     const myChildren = response.data.filter((i) => i.parentId === parentId);
+  //     this.setState({ myChildren });
+  //   } catch (error) {
+  //     console.error("Error fetching children data:", error);
+  //   }
+  // };
+
   async componentDidMount() {
     window.scrollTo(0, 0);
-    this.loadData();
-  }
 
-  componentDidUpdate(prevProps) {
-    // Kiểm tra nếu URL thay đổi
-    if (this.props.location.search !== prevProps.location.search) {
-      this.loadData(); // Tải lại dữ liệu khi URL thay đổi
+    // Kiểm tra và hiển thị thông báo từ sessionStorage nếu có
+    const savedNotification = sessionStorage.getItem('paymentNotification');
+    if (savedNotification) {
+      const notification = JSON.parse(savedNotification);
+      this.setState({
+        notificationText: notification.text,
+        notificationType: notification.type,
+        showNotification: true,
+      });
+
+      // Xóa thông báo đã lưu trong sessionStorage sau khi hiển thị
+      sessionStorage.removeItem('paymentNotification');
     }
+
+    this.loadData(); // Tải lại dữ liệu
   }
 
   loadData = async () => {
@@ -131,19 +256,25 @@ class PaymentHistory extends React.Component {
 
         console.log("Payment Callback Response:", response.data);
 
-        this.setState({
-          notificationText: "Payment successfully!",
-          notificationType: "success",
-          showNotification: true,
-        });
+        // Lưu thông báo thành công vào sessionStorage
+        sessionStorage.setItem('paymentNotification', JSON.stringify({
+          text: "Payment successfully!",
+          type: "success",
+        }));
+
+        // Reload trang với URL sạch
+        window.location.href = "/payment-history"; // Điều hướng về URL sạch
       } catch (error) {
         console.error("Error in Payment Callback:", error);
 
-        this.setState({
-          notificationText: "Payment Cancel!",
-          notificationType: "error",
-          showNotification: true,
-        });
+        // Lưu thông báo thất bại vào sessionStorage
+        sessionStorage.setItem('paymentNotification', JSON.stringify({
+          text: "Payment failed. Please try again.",
+          type: "error",
+        }));
+
+        // Reload trang với URL sạch
+        window.location.href = "/payment-history"; // Điều hướng về URL sạch
       }
     }
 
@@ -163,7 +294,6 @@ class PaymentHistory extends React.Component {
       console.error("Error fetching children data:", error);
     }
   };
-
 
   getPaymentHistory = async (parentId) => {
     if (!parentId) {
@@ -190,6 +320,9 @@ class PaymentHistory extends React.Component {
   };
 
   removeDiacritics = (str) => {
+    if (typeof str !== "string") {
+      return ""; // Trả về chuỗi rỗng nếu đầu vào không phải là chuỗi
+    }
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
 
@@ -262,6 +395,13 @@ class PaymentHistory extends React.Component {
           {/* Tổng cộng */}
           <View style={styles.total}>
             <Text style={styles.totalText}>Grand Total: {item?.totalAmount?.toLocaleString('vi-VN')} VND</Text>
+          </View>
+
+          {/* Chữ ký hiệu trưởng */}
+          <View style={styles.signatureSection}>
+            <Text style={styles.signatureTitle}>Principal's Signature</Text>
+            <View style={styles.signatureLine}></View>
+            <Text style={styles.signatureName}>Nguyen Van A</Text>
           </View>
 
           {/* Ghi chú */}
