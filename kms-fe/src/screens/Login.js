@@ -39,7 +39,7 @@ class Login extends React.Component {
     evt.preventDefault();
     try {
       // Gọi API để đăng nhập
-      const loginResponse = await axios.post("http://localhost:5124/api/Account/login", {
+      const loginResponse = await axios.post(`${process.env.REACT_APP_API_URL}/api/Account/login`, {
         email: this.props.email,
         password: this.props.password,
       });
@@ -54,7 +54,7 @@ class Login extends React.Component {
       const userId = loginData.user.userId;
   
       // Gọi API để lấy thông tin chi tiết người dùng (bao gồm avatar)
-      const profileResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${userId}`);
+      const profileResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${userId}`);
   
       if (profileResponse.status !== 200) {
         throw new Error("Failed to fetch user profile");
@@ -202,7 +202,7 @@ class Login extends React.Component {
                       <div className="bottom">
                         <span className="helper-text m-b-10">
                           <i className="fa fa-lock"></i>{" "}
-                          <a href={`${process.env.PUBLIC_URL}/forgotpassword`}
+                          <a href={`${process.env.REACT_APP_PUBLIC_URL}/forgotpassword`}
                           >
                             Forgot password?
                           </a>

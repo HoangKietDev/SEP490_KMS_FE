@@ -27,7 +27,7 @@ class ViewMenuByTeacherAndParent extends React.Component {
         }
 
         // Gọi API để lấy danh sách con theo parentID
-        axios.get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentID}`)
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentID}`)
             .then(response => {
                 this.setState({ childerParent: response.data });
             })
@@ -36,7 +36,7 @@ class ViewMenuByTeacherAndParent extends React.Component {
             });
 
         // Gọi API để lấy danh sách grade
-        axios.get("http://localhost:5124/api/Grade")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Grade`)
             .then(response => {
                 this.setState({ GradesData: response.data });
             })
@@ -49,7 +49,7 @@ class ViewMenuByTeacherAndParent extends React.Component {
         const studentId = e.target.value;
         this.setState({ studentId });
         try {
-            const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${studentId}`);
+            const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${studentId}`);
             const classData = classResponse.data;
             this.setState({ studentClasses: classData });
         } catch (error) {

@@ -19,10 +19,11 @@ class ListPickUpPerson extends React.Component {
 
         const user = JSON.parse(sessionStorage.getItem("user"));
         const parentId = user?.user?.userId;
+        const apiUrl = process.env.REACT_APP_API_URL;
 
         if (parentId) {
             // Gọi API để lấy thông tin người đón
-            fetch(`http://localhost:5124/api/PickupPerson/GetPickupPersonInfoByParentId?parentId=${parentId}`)
+            fetch(`${process.env.REACT_APP_API_URL}/api/PickupPerson/GetPickupPersonInfoByParentId?parentId=${parentId}`)
                 .then((response) => response.json())
                 .then((data) => {
                     this.setState({ PickupPersonData: data });

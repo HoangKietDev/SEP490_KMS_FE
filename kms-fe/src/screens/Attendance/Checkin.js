@@ -142,7 +142,7 @@ class Checkin extends React.Component {
   //   formDataForRecognition.append("photo", file); // Gửi file để nhận diện
 
   //   // Gọi API nhận diện học sinh
-  //   fetch("http://localhost:5124/api/Luxand/RecognizePerson?collections=student", {
+  //   fetch("${process.env.REACT_APP_API_URL}/api/Luxand/RecognizePerson?collections=student", {
   //     method: "POST",
   //     body: formDataForRecognition,
   //   })
@@ -180,7 +180,7 @@ class Checkin extends React.Component {
   //           formDataForUpload.append("images", file);
 
   //           // Gọi API upload ảnh
-  //           return fetch("http://localhost:5124/api/Attendance/UploadAttendanceImages", {
+  //           return fetch("${process.env.REACT_APP_API_URL}/api/Attendance/UploadAttendanceImages", {
   //             method: "PUT", // Hoặc POST nếu API yêu cầu
   //             body: formDataForUpload,
   //           }).then((uploadResponse) => {
@@ -273,7 +273,7 @@ class Checkin extends React.Component {
     formDataForRecognition.append("photo", file); // Gửi file để nhận diện
 
     // Gọi API nhận diện học sinh
-    fetch("http://localhost:5124/api/Luxand/RecognizePerson?collections=student", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/Luxand/RecognizePerson?collections=student`, {
       method: "POST",
       body: formDataForRecognition,
     })
@@ -304,7 +304,7 @@ class Checkin extends React.Component {
             formDataForUpload.append("attendanceDetailID", currentAttendanceDetailID);
             formDataForUpload.append("images", file);
 
-            return fetch("http://localhost:5124/api/Attendance/UploadAttendanceImages", {
+            return fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/UploadAttendanceImages`, {
               method: "PUT",
               body: formDataForUpload,
             }).then((uploadResponse) => {
@@ -359,7 +359,7 @@ class Checkin extends React.Component {
   };
 
   handleFetchPickupPersonInfo = (uuid) => {
-    fetch(`http://localhost:5124/api/PickupPerson/GetPickupPersonInfoByUUI?uuid=${uuid}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/PickupPerson/GetPickupPersonInfoByUUI?uuid=${uuid}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch pickup person info: ${response.statusText}`);
@@ -532,7 +532,7 @@ class Checkin extends React.Component {
     formData.append("attendanceDetailID", attendanceDetailID);
     formData.append("images", file);
 
-    fetch("http://localhost:5124/api/Attendance/UploadAttendanceImages", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/UploadAttendanceImages`, {
       method: "PUT",
       body: formData,
     })
@@ -590,7 +590,7 @@ class Checkin extends React.Component {
     formDataForRecognition.append("photo", file); // Gửi file để nhận diện
 
     // Gọi API nhận diện học sinh
-    fetch("http://localhost:5124/api/Luxand/RecognizePerson?collections=Pickupperson", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/Luxand/RecognizePerson?collections=Pickupperson`, {
       method: "POST",
       body: formDataForRecognition,
     })
@@ -672,7 +672,7 @@ class Checkin extends React.Component {
     const { classId, selectedDate } = this.state;
     const formattedDate = this.formatDate(selectedDate);
 
-    fetch("http://localhost:5124/api/Attendance/CreateDailyCheckin", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -704,7 +704,7 @@ class Checkin extends React.Component {
 
   fetchServiceData = () => {
     axios
-      .get("http://localhost:5124/api/Service/GetAllServices")
+      .get(`${process.env.REACT_APP_API_URL}/api/Service/GetAllServices`)
       .then((response) => {
         this.setState({ serviceData: response.data });
       })
@@ -732,7 +732,7 @@ class Checkin extends React.Component {
       body: messageBody,
     };
 
-    axios.post("http://localhost:5124/api/Sms/SendSms", body)
+    axios.post(`${process.env.REACT_APP_API_URL}/api/Sms/SendSms`, body)
       .then((response) => {
         console.log("SMS sent successfully:", response.data);
         // alert("Tin nhắn đã được gửi thành công!");
@@ -755,7 +755,7 @@ class Checkin extends React.Component {
   };
 
   fetchCheckedServices = (studentId, date) => {
-    return axios.get(`http://localhost:5124/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`)
+    return axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`)
       .then((response) => {
         // Lọc chỉ những dịch vụ có status là 1
         const checkedServices = response.data
@@ -776,7 +776,7 @@ class Checkin extends React.Component {
     }
 
     const studentPromises = studentIds.map(studentId =>
-      axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentId}`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetChildrenByChildrenId/${studentId}`)
     );
 
     Promise.all(studentPromises)
@@ -818,7 +818,7 @@ class Checkin extends React.Component {
 
   fetchParentData = (parentIds) => {
     const parentPromises = parentIds.map((parentId) =>
-      axios.get(`http://localhost:5124/api/User/ProfileById/${parentId}`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${parentId}`)
     );
 
     Promise.all(parentPromises)
@@ -848,8 +848,8 @@ class Checkin extends React.Component {
 
     // Gọi đồng thời cả hai API
     Promise.all([
-      axios.get(`http://localhost:5124/api/Attendance/GetAttendanceByTypeAndDate?type=${type}&date=${formattedDate}`),
-      axios.get(`http://localhost:5124/api/Children/GetAllChildren`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByTypeAndDate?type=${type}&date=${formattedDate}`),
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`)
     ])
       .then(([attendanceResponse, childrenResponse]) => {
         const attendanceData = attendanceResponse.data;
@@ -948,24 +948,28 @@ class Checkin extends React.Component {
   };
 
   handleAttendance = (studentId, status) => {
+    // Mặc định status là "Absence" nếu không có giá trị status
+    const finalStatus = status || "Absence";
+
     this.setState((prevState) => {
       if (this.state.activeTab === "checkin") {
         return {
           attendanceDataCheckin: {
             ...prevState.attendanceDataCheckin,
-            [studentId]: status,
+            [studentId]: finalStatus,
           },
         };
       } else {
         return {
           attendanceDataCheckout: {
             ...prevState.attendanceDataCheckout,
-            [studentId]: status,
+            [studentId]: finalStatus,
           },
         };
       }
     });
   };
+
 
   handleServiceSelection = (studentId, serviceId) => {
     this.setState((prevState) => {
@@ -992,7 +996,7 @@ class Checkin extends React.Component {
       const studentId = student.studentId;
 
       // Gọi API để lấy các dịch vụ đã có trong DB cho học sinh và ngày hiện tại
-      axios.get(`http://localhost:5124/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${formattedDate}`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${formattedDate}`)
         .then((response) => {
           const existingServices = response.data.map(service => ({
             serviceId: service.serviceId,
@@ -1028,7 +1032,7 @@ class Checkin extends React.Component {
 
               console.log('Updating service status to 1:', body);
 
-              axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
+              axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateCheckService`, body)
                 .then((response) => {
                   console.log(`Service ${serviceId} status updated to 1 for student ${studentId}:`, response.data);
                 })
@@ -1053,7 +1057,7 @@ class Checkin extends React.Component {
 
               console.log('Adding service:', body);
 
-              axios.post("http://localhost:5124/api/Service/AddCheckService", body)
+              axios.post(`${process.env.REACT_APP_API_URL}/api/Service/AddCheckService`, body)
                 .then((response) => {
                   console.log(`Service ${serviceId} added for student ${studentId}:`, response.data);
                 })
@@ -1083,7 +1087,7 @@ class Checkin extends React.Component {
 
               console.log('Updating service status to 0:', body);
 
-              axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
+              axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateCheckService`, body)
                 .then((response) => {
                   console.log(`Service ${serviceId} status updated to 0 for student ${studentId}:`, response.data);
                 })
@@ -1165,7 +1169,7 @@ class Checkin extends React.Component {
     console.log(data);
 
     fetch(
-      `http://localhost:5124/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"
+      `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"
       }`,
       {
         method: "PUT",
@@ -1191,7 +1195,7 @@ class Checkin extends React.Component {
         });
         // Gọi API CreateDailyCheckout sau khi cập nhật thành công
 
-        fetch("http://localhost:5124/api/Attendance/CreateDailyCheckout", {
+        fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1240,7 +1244,7 @@ class Checkin extends React.Component {
       body: messageBody,
     };
 
-    axios.post("http://localhost:5124/api/Sms/SendSms", body)
+    axios.post(`${process.env.REACT_APP_API_URL}/api/Sms/SendSms`, body)
       .then((response) => {
         console.log(`SMS sent for student ${studentId}:`, response.data);
         // alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
@@ -1420,7 +1424,7 @@ class Checkin extends React.Component {
                                     <span>{student.fullName}</span>
                                   </div>
                                 </td>
-                                <td>{this.state.studentClassMap[student.studentId] || "Không có lớp"}</td>
+                                <td>{this.state.studentClassMap[student.studentId] || "Math 1"}</td>
                                 <td>
                                   <div className="d-flex align-items-center">
                                     <img
@@ -1443,7 +1447,7 @@ class Checkin extends React.Component {
                                     Attend
                                   </button>
                                   <button
-                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absence" ? "btn-danger" : ""
+                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absence" || !attendanceDataCheckin[student.studentId] ? "btn-danger" : ""
                                       }`}
                                     onClick={() => isToday && this.handleAttendance(student.studentId, "Absence")}
                                     disabled={!isToday}
@@ -1451,6 +1455,7 @@ class Checkin extends React.Component {
                                     Absence
                                   </button>
                                 </td>
+
                                 <td className="project-actions">
                                   <label
                                     className="btn btn-outline-secondary mr-1"
@@ -1560,7 +1565,7 @@ class Checkin extends React.Component {
                                     Arrived
                                   </button>
                                   <button
-                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Arrived" ? "btn-danger" : ""
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Arrived" || !attendanceDataCheckout[student.studentId] ? "btn-danger" : ""? "btn-danger" : ""
                                       }`}
                                     onClick={() => isToday && this.handleAttendance(student.studentId, "Not Arrived")}
                                     disabled={!isToday}

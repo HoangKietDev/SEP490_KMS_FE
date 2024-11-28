@@ -26,7 +26,7 @@ class RequestDetail extends React.Component {
 
     try {
       // Fetch request details
-      const response = await axios.get(`http://localhost:5124/api/Request/GetRequestById/${requestId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetRequestById/${requestId}`);
       const data = response.data;
 
       // Update state with request details
@@ -42,12 +42,12 @@ class RequestDetail extends React.Component {
       });
 
       // Fetch student information
-      const studentResponse = await axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${data.studentId}`);
+      const studentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetChildrenByChildrenId/${data.studentId}`);
       const studentData = studentResponse.data;
       this.setState({ studentName: studentData?.fullName });
 
       // Fetch user information
-      const userResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${data.createBy}`);
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${data.createBy}`);
       const userData = userResponse.data;
       this.setState({ createByName: `${userData?.firstname} ${userData?.lastName}` });
 

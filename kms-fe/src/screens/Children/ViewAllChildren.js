@@ -19,7 +19,7 @@ class ViewAllChildren extends React.Component {
     window.scrollTo(0, 0);
 
     // Gọi API để lấy danh sách học sinh
-    fetch("http://localhost:5124/api/Children/GetAllChildren")
+    fetch(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ StudentsData: data });
@@ -29,7 +29,7 @@ class ViewAllChildren extends React.Component {
       });
 
     // Gọi API để lấy danh sách grades
-    fetch("http://localhost:5124/api/Grade")
+    fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ Grades: data });
@@ -63,7 +63,7 @@ class ViewAllChildren extends React.Component {
     const formData = new FormData();
     formData.append("file", file); // Thêm file vào form data
 
-    fetch("http://localhost:5124/api/Children/ImportChildrenExcel", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/Children/ImportChildrenExcel`, {
       method: "POST",
       body: formData,
     })
@@ -81,7 +81,7 @@ class ViewAllChildren extends React.Component {
         this.setState({ error: "", file: null }); // Reset file về null và xóa thông báo lỗi
 
         // Cập nhật danh sách học sinh sau khi upload
-        return fetch("http://localhost:5124/api/Children/GetAllChildren");
+        return fetch(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
       })
       .then((response) => response.json())
       .then((data) => {

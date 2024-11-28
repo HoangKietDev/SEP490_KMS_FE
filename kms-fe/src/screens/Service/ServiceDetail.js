@@ -14,7 +14,7 @@ class ServiceDetail extends React.Component {
         this.setState({ serviceId: parseInt(serviceId) }); // Cập nhật classId vào state
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/Service/GetServiceById/${serviceId}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetServiceById/${serviceId}`);
                 const data = response.data;
                 this.setState({ serviceDetail: data });
                 console.log(data);

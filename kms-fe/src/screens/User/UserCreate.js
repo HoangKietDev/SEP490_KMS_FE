@@ -37,7 +37,7 @@ class UserCreate extends React.Component {
         };
         try {
             const response = await axios.post(
-                "http://localhost:5124/api/Account/register", values
+                `${process.env.REACT_APP_API_URL}/api/Account/register`, values
             );
             this.setState({
                 notificationText: "Account User Create successfully!",

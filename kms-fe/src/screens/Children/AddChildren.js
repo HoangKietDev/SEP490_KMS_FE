@@ -35,7 +35,7 @@ class CreateChildren extends React.Component {
     window.scrollTo(0, 0);
 
     // Fetch grades
-    fetch("http://localhost:5124/api/Grade")
+    fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((res) => res.json())
       .then((grades) => {
         this.setState({ grades });
@@ -46,7 +46,7 @@ class CreateChildren extends React.Component {
       });
 
     // Fetch users with roleId = 3
-    fetch("http://localhost:5124/api/User")
+    fetch(`${process.env.REACT_APP_API_URL}/api/User`)
       .then((res) => res.json())
       .then((users) => {
         const usersWithRole3 = users.filter((user) => user.roleId === 2);
@@ -140,7 +140,7 @@ class CreateChildren extends React.Component {
         avatar: "", // Tạm thời để trống, sẽ được cập nhật qua API AddChildrenImage
       };
 
-      const createStudentResponse = await fetch("http://localhost:5124/api/Children/AddChildren", {
+      const createStudentResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/Children/AddChildren`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +163,7 @@ class CreateChildren extends React.Component {
         childrenImageFormData.append("image", selectedFile);
 
         const addImageResponse = await fetch(
-          `http://localhost:5124/api/Children/AddChildrenImage?studentId=${newStudentId}`,
+          `${process.env.REACT_APP_API_URL}/api/Children/AddChildrenImage?studentId=${newStudentId}`,
           {
             method: "POST",
             body: childrenImageFormData,
@@ -184,7 +184,7 @@ class CreateChildren extends React.Component {
         console.log(selectedFile, "sd");
         try {
           const addPersonResponse = await axios.post(
-            `http://localhost:5124/api/Luxand/AddPerson?name=${newStudentId}&collections=student`,
+            `${process.env.REACT_APP_API_URL}/api/Luxand/AddPerson?name=${newStudentId}&collections=student`,
             personFormData,
             {
               headers: {

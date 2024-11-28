@@ -62,8 +62,8 @@ class ViewMenu extends React.Component {
     const endDate = this.formatDate(endOfWeek);
 
     try {
-      const response1 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
-      const response2 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
+      const response1 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
+      const response2 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
 
       const menuData1 = await response1.json();
       const menuData2 = await response2.json();
@@ -122,7 +122,7 @@ class ViewMenu extends React.Component {
     formData.append("file", selectedFile);
 
     try {
-      const response = await axios.post("http://localhost:5124/api/Menu/ImportMenuExcel", formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Menu/ImportMenuExcel`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

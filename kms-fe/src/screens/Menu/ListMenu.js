@@ -65,8 +65,8 @@ class ListMenu extends React.Component {
         const endDate = this.formatDate(endOfWeek);
 
         try {
-            const response1 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
-            const response2 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
+            const response1 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
+            const response2 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
 
             const menuData1 = await response1.json();
             const menuData2 = await response2.json();
@@ -89,7 +89,7 @@ class ListMenu extends React.Component {
         const startDate = this.formatDate(selectedWeek.startOfWeek);
         const endDate = this.formatDate(selectedWeek.endOfWeek);
 
-        const response1 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=${gradeID}`);
+        const response1 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=${gradeID}`);
         const menuData1 = await response1.json();
 
         const { selectedStatus0_3, selectedStatus3_6 } = this.state;
@@ -114,7 +114,7 @@ class ListMenu extends React.Component {
         };
 
         try {
-            const response = await axios.put("http://localhost:5124/api/Menu/UpdateMenuStatus", payload);
+            const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Menu/UpdateMenuStatus`, payload);
             if (response.status === 200) {
                 // alert(`Successfully updated the menu status for age group ${gradeID === 1 ? "0-3" : "3-6"}!`);
                 this.setState({
@@ -157,7 +157,7 @@ class ListMenu extends React.Component {
         formData.append("file", selectedFile);
 
         try {
-            const response = await axios.post("http://localhost:5124/api/Menu/ImportMenuExcel", formData, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Menu/ImportMenuExcel`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

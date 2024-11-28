@@ -35,7 +35,7 @@ class DashboardPrincipal extends React.Component {
 
   // loadFinancialData = async (year) => {
   //   try {
-  //     const response = await axios.get(`http://localhost:5124/api/Dashboard/GetFinancialSummaryForYear/${year}`);
+  //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetFinancialSummaryForYear/${year}`);
   //     const data = response.data;
 
   //     // Lấy dữ liệu các tháng
@@ -190,7 +190,7 @@ class DashboardPrincipal extends React.Component {
 
   loadClassSummaryData = async () => {
     try {
-      const response = await axios.get("http://localhost:5124/api/Dashboard/GetDashboardSummary");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetDashboardSummary`);
       const data = response.data;
 
       const classNames = data.classSummaries.map((cls) => cls.classId);
@@ -254,7 +254,7 @@ class DashboardPrincipal extends React.Component {
 
   loadEnrollmentData = async () => {
     try {
-      const response = await axios.get("http://localhost:5124/api/Dashboard/GetEnrollmentStatistics");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetEnrollmentStatistics`);
       const data = response.data;
 
       const months = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
@@ -296,7 +296,7 @@ class DashboardPrincipal extends React.Component {
 
   loadTeacherData = async () => {
     try {
-      const response = await axios.get("http://localhost:5124/api/Dashboard/GetTeacherWithTotal");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetTeacherWithTotal`);
       const data = response.data;
 
       this.setState({ originalTeacherData: data.teachers }, () => {

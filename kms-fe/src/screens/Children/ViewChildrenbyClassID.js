@@ -18,7 +18,7 @@ class ViewChildrenByClassID extends React.Component {
     const classId = this.props.match.params.classId;
 
     // Gọi API để lấy danh sách học sinh
-    fetch(`http://localhost:5124/api/Class/GetChildrenByClassId/${classId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetChildrenByClassId/${classId}`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ StudentsData: data });
@@ -28,7 +28,7 @@ class ViewChildrenByClassID extends React.Component {
       });
 
     // Gọi API để lấy danh sách grade
-    fetch(`http://localhost:5124/api/Grade`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ GradesData: data });

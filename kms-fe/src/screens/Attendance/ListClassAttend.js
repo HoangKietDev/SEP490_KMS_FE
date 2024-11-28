@@ -21,7 +21,7 @@ class ListClassAttendance extends React.Component {
 
         if (teacherId) {
             // Gọi API và cập nhật state
-            fetch(`http://localhost:5124/api/Class/GetClassesByTeacherId/${teacherId}`)
+            fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${teacherId}`)
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.message === "No classes found for this teacher.") {
@@ -36,7 +36,7 @@ class ListClassAttendance extends React.Component {
                 });
 
             // Gọi API lấy danh sách grade
-            axios.get("http://localhost:5124/api/Grade")
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Grade`)
                 .then(response => {
                     this.setState({ GradesData: response.data });
                 })
@@ -62,7 +62,7 @@ class ListClassAttendance extends React.Component {
 
     handleView = async (classId) => {
         try {
-            const response = await axios.post("http://localhost:5124/api/Attendance/CreateDailyCheckin");
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckin`);
             console.log("Daily check-in created successfully:", response.data);
         } catch (error) {
             if (error.response && error.response.status === 500) {

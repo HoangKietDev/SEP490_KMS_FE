@@ -26,7 +26,7 @@ class Service extends React.Component {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5124/api/Service/GetAllServices');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetAllServices`);
         const data = response.data;
         this.setState({ services: data, filteredServices: data });
         console.log(data);
@@ -86,7 +86,7 @@ class Service extends React.Component {
     }
     console.log(data);
     try {
-      const response = await axios.put(`http://localhost:5124/api/Service/UpdateService`, data);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateService`, data);
       console.log("Status updated successfully:", response.data);
       this.setState({
         notificationText: "Status update successfully!",

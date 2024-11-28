@@ -34,7 +34,7 @@ class ViewStudentById extends React.Component {
 
     // Fetch student details
     axios
-      .get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentID}`)
+      .get(`${process.env.REACT_APP_API_URL}/api/Children/GetChildrenByChildrenId/${studentID}`)
       .then((response) => {
         const data = response.data;
         this.setState({
@@ -59,7 +59,7 @@ class ViewStudentById extends React.Component {
 
     // Fetch grades
     axios
-      .get("http://localhost:5124/api/Grade")
+      .get(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => {
         this.setState({ grades: response.data });
       })
@@ -114,7 +114,7 @@ class ViewStudentById extends React.Component {
         childrenImageFormData.append("image", selectedFile); // Trường image cho AddChildrenImage
 
         const childrenImageResponse = await axios.post(
-          `http://localhost:5124/api/Children/AddChildrenImage?studentId=${studentDetailId}`,
+          `${process.env.REACT_APP_API_URL}/api/Children/AddChildrenImage?studentId=${studentDetailId}`,
           childrenImageFormData,
           {
             headers: {
@@ -130,7 +130,7 @@ class ViewStudentById extends React.Component {
         personFormData.append("photo", selectedFile); // Trường photo cho AddPerson
 
         const addPersonResponse = await axios.post(
-          `http://localhost:5124/api/Luxand/AddPerson?name=${studentDetailId}&collections=student`,
+          `${process.env.REACT_APP_API_URL}/api/Luxand/AddPerson?name=${studentDetailId}&collections=student`,
           personFormData,
           {
             headers: {
@@ -160,7 +160,7 @@ class ViewStudentById extends React.Component {
       };
 
       // Gọi API UpdateChildren
-      await axios.put("http://localhost:5124/api/Children/UpdateChildren", updatedStudent, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/Children/UpdateChildren`, updatedStudent, {
         headers: {
           "Content-Type": "application/json",
         },

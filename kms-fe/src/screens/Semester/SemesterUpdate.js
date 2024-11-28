@@ -23,7 +23,7 @@ class SemesterUpdate extends React.Component {
         const { semesterId } = this.props.match.params; // Get categoryServiceId from URL
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/Semester/GetAllSemester`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`);
                 const data = response.data;
                 const dataDetail = data?.find(i => i.semesterId == semesterId)
                 console.log(dataDetail);
@@ -57,7 +57,7 @@ class SemesterUpdate extends React.Component {
 
 
         try {
-            await axios.put(`http://localhost:5124/api/Semester/UpdateSemester`, updatedSemester, {
+            await axios.put(`${process.env.REACT_APP_API_URL}/api/Semester/UpdateSemester`, updatedSemester, {
                 headers: {
                     "Content-Type": "application/json",
                 },

@@ -30,7 +30,7 @@ class ViewClassByTeacher extends React.Component {
 
     if (teacherId) {
       // Gọi API lấy danh sách class theo teacherId
-      fetch(`http://localhost:5124/api/Class/GetClassesByTeacherId/${teacherId}`)
+      fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${teacherId}`)
         .then((response) => response.json())
         .then((data) => {
           const activeClasses = data.filter(classData => classData.status === 1);
@@ -41,7 +41,7 @@ class ViewClassByTeacher extends React.Component {
         });
 
       // Gọi API lấy danh sách grade
-      fetch("http://localhost:5124/api/Grade")
+      fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
         .then((response) => response.json())
         .then((data) => {
           this.setState({ GradesData: data });
@@ -103,7 +103,7 @@ class ViewClassByTeacher extends React.Component {
 
     try {
       // API call sử dụng fetch
-      const response = await fetch(`http://localhost:5124/api/Class/SendMailToParentsByClassId/${classId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Class/SendMailToParentsByClassId/${classId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

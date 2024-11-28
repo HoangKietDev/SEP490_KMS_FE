@@ -28,7 +28,7 @@ class UpdateClass extends React.Component {
     this.setState({ classId: parseInt(classId) });
 
     // Gọi API để lấy thông tin lớp học
-    axios.get(`http://localhost:5124/api/Class/GetClassById/${classId}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassById/${classId}`)
       .then((response) => {
         const data = response.data;
         const formattedExpireDate = data.expireDate ? new Date(data.expireDate).toISOString().slice(0, 16) : "";
@@ -49,7 +49,7 @@ class UpdateClass extends React.Component {
       });
 
     // Gọi API lấy danh sách Grade
-    axios.get("http://localhost:5124/api/Grade")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => {
         this.setState({ grades: response.data });
       })
@@ -58,7 +58,7 @@ class UpdateClass extends React.Component {
       });
 
     // Gọi API lấy danh sách Semester
-    axios.get("http://localhost:5124/api/Semester")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Semester`)
       .then((response) => {
         this.setState({ semesters: response.data });
       })
@@ -103,7 +103,7 @@ class UpdateClass extends React.Component {
     };
 
     // Gọi API để cập nhật lớp học
-    axios.put("http://localhost:5124/api/Class/UpdateClass", updatedClass, {
+    axios.put(`${process.env.REACT_APP_API_URL}/api/Class/UpdateClass`, updatedClass, {
       headers: {
         "Content-Type": "application/json",
       },

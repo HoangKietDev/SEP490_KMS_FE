@@ -28,7 +28,7 @@ class GradeCreate extends React.Component {
         };
         try {
             const response = await axios.post(
-                "http://localhost:5124/api/Grade/AddGrade", values
+                `${process.env.REACT_APP_API_URL}/api/Grade/AddGrade`, values
             );
             this.setState({
                 notificationText: "Grade create successfully!",

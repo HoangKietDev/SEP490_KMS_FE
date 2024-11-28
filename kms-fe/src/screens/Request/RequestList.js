@@ -23,7 +23,7 @@ class RequestList extends React.Component {
 
     // Gọi API lấy dữ liệu request
     axios
-      .get("http://localhost:5124/api/Request/GetAllRequests")
+      .get(`${process.env.REACT_APP_API_URL}/api/Request/GetAllRequests`)
       .then((response) => {
         const { data } = response;
         const userData = getSession("user")?.user;
@@ -53,7 +53,7 @@ class RequestList extends React.Component {
 
     // Gọi API lấy dữ liệu người dùng
     axios
-      .get("http://localhost:5124/api/User")
+      .get(`${process.env.REACT_APP_API_URL}/api/User`)
       .then((response) => {
         this.setState({ UserListData: response.data });
       })

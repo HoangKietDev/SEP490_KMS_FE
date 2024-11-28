@@ -34,7 +34,7 @@ class AddPickupPerson extends React.Component {
         }
 
         // Xây dựng URL với query parameters
-        const url = `http://localhost:5124/api/PickupPerson/AddPickupPerson?name=${encodeURIComponent(
+        const url = `${process.env.REACT_APP_API_URL}/api/PickupPerson/AddPickupPerson?name=${encodeURIComponent(
             name
         )}&phoneNumber=${encodeURIComponent(phoneNumber)}&parentId=${encodeURIComponent(parentId)}`;
 
@@ -54,7 +54,7 @@ class AddPickupPerson extends React.Component {
                         notificationText: "Pickup person has been added successfully!!",
                         notificationType: "success",
                         showNotification: true
-                      });    
+                    });
                     // this.props.history.push("/viewpickup");
                     this.setState({
                         name: "",
@@ -81,78 +81,176 @@ class AddPickupPerson extends React.Component {
             notificationText, // Text for the notification
             notificationType } = this.state;
 
+        // return (
+        //     <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
+        //         <div className="container my-5">
+        //             <PageHeader
+        //                 HeaderText="Pickup Management"
+        //                 Breadcrumb={[
+        //                     { name: "Pickup Management", navigate: "/viewpickup" },
+        //                     { name: "Add Pickup Person", navigate: "" },
+        //                 ]}
+        //             />
+        //             {showNotification && (
+        //                 <Notification
+        //                     type={notificationType}
+        //                     position="top-right"
+        //                     dialogText={notificationText}
+        //                     show={showNotification}
+        //                     onClose={() => this.setState({ showNotification: false })}
+        //                 />
+        //             )} 
+        //             <form onSubmit={this.handleSubmit}>
+        //                 <div className="form-group w-50">
+        // <label>Name</label>
+        // <input
+        //     className={`form-control ${name === "" && submeet && "parsley-error"}`}
+        //     value={name}
+        //     onChange={(e) => this.setState({ name: e.target.value })}
+        // />
+        // {name === "" && submeet && (
+        //     <ul className="parsley-errors-list filled">
+        //         <li className="parsley-required">Name is required.</li>
+        //     </ul>
+        // )}
+        //                 </div>
+
+        //                 <div className="form-group w-50">
+        // <label>Phone Number</label>
+        // <input
+        //     type="tel"
+        //     className={`form-control ${phoneNumber === "" && submeet && "parsley-error"}`}
+        //     value={phoneNumber}
+        //     onChange={(e) => this.setState({ phoneNumber: e.target.value })}
+        // />
+        // {phoneNumber === "" && submeet && (
+        //     <ul className="parsley-errors-list filled">
+        //         <li className="parsley-required">Phone number is required.</li>
+        //     </ul>
+        // )}
+        //                 </div>
+
+        //                 <div className="form-group w-50">
+        // <label>Choose File (Image)</label>
+        // <input
+        //     type="file"
+        //     className="form-control"
+        //     accept="image/*"
+        //     onChange={(e) => this.setState({ avatar: e.target.files[0] })}
+        // />
+        // {avatar && (
+        //     <img
+        //         src={URL.createObjectURL(avatar)}
+        //         alt="Preview"
+        //         className="img-thumbnail mt-3"
+        //         style={{ maxHeight: "150px" }}
+        //     />
+        // )}
+        //                 </div>
+
+        //                 <br />
+        //                 <button type="submit" className="btn btn-primary">
+        //                     Add Pickup Person
+        //                 </button>
+        //             </form>
+        //         </div>
+        //     </div>
+        // );
+
         return (
             <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
-                <div className="container my-5">
-                    <PageHeader
-                        HeaderText="Pickup Management"
-                        Breadcrumb={[
-                            { name: "Pickup Management", navigate: "/viewpickup" },
-                            { name: "Add Pickup Person", navigate: "" },
-                        ]}
-                    />
-                    {showNotification && (
-                        <Notification
-                            type={notificationType}
-                            position="top-right"
-                            dialogText={notificationText}
-                            show={showNotification}
-                            onClose={() => this.setState({ showNotification: false })}
+                <div>
+                    <div className="container-fluid">
+                        <PageHeader
+                            HeaderText="Pickup Person Management"
+                            Breadcrumb={[
+                                { name: "Pickup Management", navigate: "/listpickupperson" },
+                                { name: "Add Pickup Person", navigate: "" },                            ]}
                         />
-                    )} 
-                    <form onSubmit={this.handleSubmit}>
-                        <div className="form-group w-50">
-                            <label>Name</label>
-                            <input
-                                className={`form-control ${name === "" && submeet && "parsley-error"}`}
-                                value={name}
-                                onChange={(e) => this.setState({ name: e.target.value })}
+                        {showNotification && (
+                            <Notification
+                                type={notificationType}
+                                position="top-right"
+                                dialogText={notificationText}
+                                show={showNotification}
+                                onClose={() => this.setState({ showNotification: false })}
                             />
-                            {name === "" && submeet && (
-                                <ul className="parsley-errors-list filled">
-                                    <li className="parsley-required">Name is required.</li>
-                                </ul>
-                            )}
-                        </div>
+                        )}
 
-                        <div className="form-group w-50">
-                            <label>Phone Number</label>
-                            <input
-                                type="tel"
-                                className={`form-control ${phoneNumber === "" && submeet && "parsley-error"}`}
-                                value={phoneNumber}
-                                onChange={(e) => this.setState({ phoneNumber: e.target.value })}
-                            />
-                            {phoneNumber === "" && submeet && (
-                                <ul className="parsley-errors-list filled">
-                                    <li className="parsley-required">Phone number is required.</li>
-                                </ul>
-                            )}
-                        </div>
+                        <div className="card shadow-lg">
+                            <div className="card-header text-white" style={{ backgroundColor: "#48C3B4" }}>
+                                <h4 className="mb-0">Create Pickup Person</h4>
+                            </div>
+                            <div className="card-body">
+                                <form onSubmit={this.handleSubmit}>
 
-                        <div className="form-group w-50">
-                            <label>Choose File (Image)</label>
-                            <input
-                                type="file"
-                                className="form-control"
-                                accept="image/*"
-                                onChange={(e) => this.setState({ avatar: e.target.files[0] })}
-                            />
-                            {avatar && (
-                                <img
-                                    src={URL.createObjectURL(avatar)}
-                                    alt="Preview"
-                                    className="img-thumbnail mt-3"
-                                    style={{ maxHeight: "150px" }}
-                                />
-                            )}
-                        </div>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="form-group">
+                                                <label>Name</label>
+                                                <input
+                                                    className={`form-control ${name === "" && submeet && "parsley-error"}`}
+                                                    value={name}
+                                                    onChange={(e) => this.setState({ name: e.target.value })}
+                                                />
+                                                {name === "" && submeet && (
+                                                    <ul className="parsley-errors-list filled">
+                                                        <li className="parsley-required">Name is required.</li>
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="form-group">
+                                                <label>Phone Number</label>
+                                                <input
+                                                    type="tel"
+                                                    className={`form-control ${phoneNumber === "" && submeet && "parsley-error"}`}
+                                                    value={phoneNumber}
+                                                    onChange={(e) => this.setState({ phoneNumber: e.target.value })}
+                                                />
+                                                {phoneNumber === "" && submeet && (
+                                                    <ul className="parsley-errors-list filled">
+                                                        <li className="parsley-required">Phone number is required.</li>
+                                                    </ul>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <br />
-                        <button type="submit" className="btn btn-primary">
-                            Add Pickup Person
-                        </button>
-                    </form>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="form-group">
+                                                <label>Choose File (Image)</label>
+                                                <input
+                                                    type="file"
+                                                    className="form-control"
+                                                    accept="image/*"
+                                                    onChange={(e) => this.setState({ avatar: e.target.files[0] })}
+                                                />
+                                                {avatar && (
+                                                    <img
+                                                        src={URL.createObjectURL(avatar)}
+                                                        alt="Preview"
+                                                        className="img-thumbnail mt-3"
+                                                        style={{ maxHeight: "150px" }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div className="text-right">
+                                        <button type="submit" className="btn btn-primary">
+                                            Add Pickup Person
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

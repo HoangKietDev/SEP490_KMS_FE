@@ -47,7 +47,7 @@ class NavbarMenu extends React.Component {
   // GET all noti by userId
   async getNotifications(userId) {
     try {
-      const response = await axios.get(`http://localhost:5124/api/Notification/GetNotificationByUserId`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Notification/GetNotificationByUserId`, {
         params: { userId: userId }
       });
       // Cập nhật state với dữ liệu thông báo nhận được
@@ -67,7 +67,7 @@ class NavbarMenu extends React.Component {
       try {
         const userNotificationId = myNoti[index]?.usernotifications[0]?.userNotificationId;
         if (userNotificationId) {
-          await axios.get(`http://localhost:5124/api/Notification/UpdateNotificationStatus`, {
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/Notification/UpdateNotificationStatus`, {
             params: { UserNotificationID: userNotificationId }
           });
         }
@@ -79,7 +79,7 @@ class NavbarMenu extends React.Component {
 
   async fetchPaymentData(parentId) {
     try {
-      const response = await axios.get(`http://localhost:5124/api/Tuition/parent/${parentId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Tuition/parent/${parentId}`);
 
       // Kiểm tra mảng tuition trong từng sinh viên
       const hasTuition = response.data.some(payment => payment.tuition && payment.tuition.length > 0);

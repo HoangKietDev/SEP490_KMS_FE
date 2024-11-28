@@ -97,16 +97,16 @@ class Schedule extends React.Component {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5124/api/Class/GetAllClass`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`);
         const data = response.data;
 
         const urlParams = new URLSearchParams(this.props.location.search);
         const defaultClassId = urlParams.get('classId') || '';
 
-        const activityrespone = await axios.get(`http://localhost:5124/api/Schedule/GetAllActivities`);
+        const activityrespone = await axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetAllActivities`);
         const activitydata = activityrespone.data;
 
-        const locationrespone = await axios.get(`http://localhost:5124/api/Schedule/GetAllLocations`);
+        const locationrespone = await axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetAllLocations`);
         const locationdata = locationrespone.data;
 
         // Update state with the default class and then fetch schedule data
@@ -130,7 +130,7 @@ class Schedule extends React.Component {
   fetchScheduleData = async (startDate, endDate, selectId) => {
     try {
       const response = await axios.get(
-        `http://localhost:5124/api/Schedule/GetSchedulesByClassId?classId=${selectId}`
+        `${process.env.REACT_APP_API_URL}/api/Schedule/GetSchedulesByClassId?classId=${selectId}`
       );
       const scheduleData = response.data;
       const userData = getSession("user").user;
@@ -149,7 +149,7 @@ class Schedule extends React.Component {
         // }
 
         const detailResponse = await axios.get(
-          `http://localhost:5124/api/ScheduleDetail/GetAllScheduleDetailsByScheduleId/${scheduleId}`
+          `${process.env.REACT_APP_API_URL}/api/ScheduleDetail/GetAllScheduleDetailsByScheduleId/${scheduleId}`
         );
         const scheduleDetails = detailResponse.data;
         console.log(scheduleDetails);
@@ -228,7 +228,7 @@ class Schedule extends React.Component {
 
     try {
       // Make the PUT request to update the slot with selected activity and location IDs
-      await axios.put(`http://localhost:5124/api/ScheduleDetail/UpdateScheduleDetailById/${selectedSlot.id}`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/ScheduleDetail/UpdateScheduleDetailById/${selectedSlot.id}`, {
         timeSlotId: selectedSlot.timeSlotId,
         note: selectedSlot.note,
         day: selectedSlot.day,
@@ -322,7 +322,7 @@ class Schedule extends React.Component {
     formData.append('file', file); // Thêm file vào FormData
 
     try {
-      const response = await axios.post(`http://localhost:5124/api/Schedule/Import/${classId}`, formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Schedule/Import/${classId}`, formData, {
         headers: {
           'accept': '*/*', // Chỉ để header này
         },

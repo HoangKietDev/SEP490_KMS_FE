@@ -125,7 +125,7 @@ class PaymentHistory extends React.Component {
     // Kiểm tra nếu có redirect từ VNPAY
     if (mydata.vnp_TxnRef && mydata.vnp_ResponseCode && mydata.vnp_SecureHash) {
       try {
-        const response = await axios.post("http://localhost:5124/api/Payment/payment-callback", {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Payment/payment-callback`, {
           data: mydata,
         });
 
@@ -156,7 +156,7 @@ class PaymentHistory extends React.Component {
 
     // Tải danh sách Children
     try {
-      const response = await axios.get("http://localhost:5124/api/Children/GetAllChildren");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
       const myChildren = response.data.filter((i) => i.parentId === parentId);
       this.setState({ myChildren });
     } catch (error) {
@@ -171,7 +171,7 @@ class PaymentHistory extends React.Component {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:5124/api/Payment/history/${parentId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Payment/history/${parentId}`);
       this.setState({ historyPayment: response.data });
       console.log('Updated Payment History:', response.data);
     } catch (error) {

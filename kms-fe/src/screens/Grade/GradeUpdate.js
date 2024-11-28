@@ -22,7 +22,7 @@ class CategoryUpdate extends React.Component {
         const { gradeId } = this.props.match.params; // Get categoryServiceId from URL
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/Grade/GetGradeById/${gradeId}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Grade/GetGradeById/${gradeId}`);
                 const data = response.data;
 
                 this.setState({
@@ -53,7 +53,7 @@ class CategoryUpdate extends React.Component {
         };
 
         try {
-            await axios.put(`http://localhost:5124/api/Grade/UpdateGrade`, updatedGrade, {
+            await axios.put(`${process.env.REACT_APP_API_URL}/api/Grade/UpdateGrade`, updatedGrade, {
                 headers: {
                     "Content-Type": "application/json",
                 },

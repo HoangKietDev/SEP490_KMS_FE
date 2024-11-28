@@ -32,8 +32,8 @@ class ScheduleCreate extends React.Component {
   async fetchData() {
     try {
       const [classResponse, semesterResponse] = await Promise.all([
-        axios.get('http://localhost:5124/api/Class/GetAllClass'),
-        axios.get('http://localhost:5124/api/Semester/GetAllSemester')
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`)
       ]);
 
       this.setState({
@@ -59,7 +59,7 @@ class ScheduleCreate extends React.Component {
 
     try {
       // Make POST request to create the new schedule
-      const response = await axios.post(`http://localhost:5124/api/Schedule/AddSchedule`, scheduleData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Schedule/AddSchedule`, scheduleData);
       console.log('Schedule created successfully:', response.data);
 
       this.setState({

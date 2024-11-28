@@ -27,7 +27,7 @@ class ChooseService extends React.Component {
 
         // Fetch children data
         axios
-            .get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentID}`)
+            .get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentID}`)
             .then((response) => {
                 this.setState({ childerParent: response.data });
             })
@@ -37,7 +37,7 @@ class ChooseService extends React.Component {
 
         // Fetch services data
         axios
-            .get("http://localhost:5124/api/Service/GetAllServices")
+            .get(`${process.env.REACT_APP_API_URL}/api/Service/GetAllServices`)
             .then((response) => {
                 this.setState({ services: response.data });
             })
@@ -93,7 +93,7 @@ class ChooseService extends React.Component {
             };
 
             axios
-                .post("http://localhost:5124/api/Service/AddChildService", body)
+                .post(`${process.env.REACT_APP_API_URL}/api/Service/AddChildService`, body)
                 .then((response) => {
                     console.log("Service added successfully:", response.data);
                     alert(`Service with ID ${serviceId} added successfully for student ${studentId}.`);

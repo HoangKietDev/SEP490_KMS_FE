@@ -41,12 +41,12 @@ class Albumlist extends React.Component {
 
     try {
       // Gọi API lấy album
-      const albumResponse = await axios.get("http://localhost:5124/api/Album/GetAllAlbums");
+      const albumResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Album/GetAllAlbums`);
       const albumData = albumResponse.data;
 
       if (roleId === 5) {
         // Gọi API lấy lớp học theo teacherId
-        const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByTeacherId/${userData?.userId}`);
+        const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${userData?.userId}`);
         const teacherClassId = classResponse.data[0]?.classId;
 
         // Lọc danh sách album theo classId của giáo viên
@@ -62,7 +62,7 @@ class Albumlist extends React.Component {
       } else if (roleId === 2) {
 
         // Gọi API lấy danh sách children
-        const childrenResponse = await axios.get("http://localhost:5124/api/Children/GetAllChildren");
+        const childrenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
         const allChildren = childrenResponse.data;
         console.log(allChildren);
 
@@ -73,7 +73,7 @@ class Albumlist extends React.Component {
         const classIds = await Promise.all(
           filteredChildren.map(async (child) => {
             // Gọi API lấy class theo children id
-            const classchildrenResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${child.studentId}`);
+            const classchildrenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${child.studentId}`);
             const classChildren = classchildrenResponse?.data;
             return classChildren[0]?.classId; // Trả về classId từ API
           })
@@ -101,8 +101,8 @@ class Albumlist extends React.Component {
 
       // Gọi API lấy danh sách giáo viên và lớp học
       const [teacherResponse, classResponse] = await Promise.all([
-        axios.get(`http://localhost:5124/api/Teacher/GetAllTeachers`),
-        axios.get(`http://localhost:5124/api/Class/GetAllClass`)
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetAllTeachers`),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
       ]);
 
       this.setState({
@@ -150,11 +150,11 @@ class Albumlist extends React.Component {
 
     if (selectedStudentId) {
       // Gọi API lấy class theo  children id
-      const classchildrenResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${selectedStudentId}`);
+      const classchildrenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${selectedStudentId}`);
       const classChildren = classchildrenResponse?.data;
       const classId = classChildren[0]?.classId;
 
-      const childrenResponse = await axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${selectedStudentId}`);
+      const childrenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetChildrenByChildrenId/${selectedStudentId}`);
 
       // Lọc Album theo classId Student đã chọn
       if (classId) {
@@ -260,7 +260,7 @@ class Albumlist extends React.Component {
     try {
       console.log(albumId, newStatus, reason);
 
-      const response = await axios.put(`http://localhost:5124/api/Album/UpdateStatusAlbum`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Album/UpdateStatusAlbum`, {
         albumId: albumId,
         status: newStatus,
         reason: reason
@@ -285,7 +285,7 @@ class Albumlist extends React.Component {
   handleUpdateStatus = async () => {
     const { currentAlbumId, reason } = this.state;
     try {
-      const response = await axios.put(`http://localhost:5124/api/Album/UpdateStatusAlbum`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Album/UpdateStatusAlbum`, {
         albumId: currentAlbumId,
         status: 2, // Cập nhật status là 2
         reason: reason // Lý do được nhập trong modal

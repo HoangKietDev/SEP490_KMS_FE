@@ -80,16 +80,16 @@ class ScheduleDetailCreate extends React.Component {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5124/api/Class/GetAllClass`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`);
         const data = response.data;
 
         const urlParams = new URLSearchParams(this.props.location.search);
         const defaultClassId = urlParams.get('classId') || '';
 
-        const activityrespone = await axios.get(`http://localhost:5124/api/LocationActivity/GetAllActivities`);
+        const activityrespone = await axios.get(`${process.env.REACT_APP_API_URL}/api/LocationActivity/GetAllActivities`);
         const activitydata = activityrespone.data;
 
-        const locationrespone = await axios.get(`http://localhost:5124/api/LocationActivity/GetAllLocations`);
+        const locationrespone = await axios.get(`${process.env.REACT_APP_API_URL}/api/LocationActivity/GetAllLocations`);
         const locationdata = locationrespone.data;
 
 
@@ -104,7 +104,7 @@ class ScheduleDetailCreate extends React.Component {
         }, async () => {
           // Fetch schedule data only after state update
           const { selectId } = this.state;
-          const Scheduleresponse = await axios.get(`http://localhost:5124/api/Schedule/GetSchedulesByClassId?classId=${selectId}`);
+          const Scheduleresponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetSchedulesByClassId?classId=${selectId}`);
           const scheduleData = Scheduleresponse.data
           console.log(scheduleData);
 
@@ -131,7 +131,7 @@ class ScheduleDetailCreate extends React.Component {
       });
       try {
         // Khi thay đổi class, lấy lại scheduleId từ API
-        const Scheduleresponse = await axios.get(`http://localhost:5124/api/Schedule/GetSchedulesByClassId?classId=${selectId}`);
+        const Scheduleresponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetSchedulesByClassId?classId=${selectId}`);
         const scheduleData = Scheduleresponse.data;
         scheduleId = scheduleData[0]?.scheduleId || 0;
 
@@ -275,7 +275,7 @@ class ScheduleDetailCreate extends React.Component {
       }));
 
       try {
-        const response = await axios.post('http://localhost:5124/api/ScheduleDetail/AddListScheduleDetails', formattedDetails);
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/ScheduleDetail/AddListScheduleDetails`, formattedDetails);
         console.log(`Schedule for week ${weekString} saved successfully!`, response.data);
 
       } catch (error) {
@@ -305,7 +305,7 @@ class ScheduleDetailCreate extends React.Component {
       return;
     }
 
-    axios.post("http://localhost:5124/api/LocationActivity/AddLocation", {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/LocationActivity/AddLocation`, {
       locationName: newLocationName,
     })
       .then((response) => {
@@ -315,7 +315,7 @@ class ScheduleDetailCreate extends React.Component {
           showNotification: true
         });
         // Gọi lại API để lấy danh sách mới nhất
-        axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/LocationActivity/GetAllLocations`)
           .then((response) => {
             this.setState({
               locations: response.data, // Cập nhật lại LocationListData từ API
@@ -361,7 +361,7 @@ class ScheduleDetailCreate extends React.Component {
       return;
     }
 
-    axios.post("http://localhost:5124/api/LocationActivity/AddActivity", {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/LocationActivity/AddActivity`, {
       activityName: newActivityName,
     })
       .then((response) => {
@@ -371,7 +371,7 @@ class ScheduleDetailCreate extends React.Component {
           showNotification: true
         });
         // Gọi lại API để lấy danh sách mới nhất
-        axios.get("http://localhost:5124/api/LocationActivity/GetAllActivities")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/LocationActivity/GetAllActivities`)
           .then((response) => {
             this.setState({
               activities: response.data, // Cập nhật lại LocationListData từ API

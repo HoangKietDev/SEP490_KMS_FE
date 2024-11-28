@@ -31,7 +31,7 @@ class TeacherDetail extends React.Component {
     // Gọi API
     const fetchData = async () => {
       try {
-        const TeacherResponse = await axios.get(`http://localhost:5124/api/Teacher/GetTeacherById/${teacherId}`);
+        const TeacherResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetTeacherById/${teacherId}`);
         const Teacherdata = TeacherResponse.data;
         this.setState({ Teacherdata });
         console.log(Teacherdata);

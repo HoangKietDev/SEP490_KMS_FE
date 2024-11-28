@@ -39,7 +39,6 @@ import Checkin from "./screens/Attendance/Checkin";
 import ListClassCheckin from "./screens/Attendance/ListClassCheckin";
 import UpdateMenu from "./screens/Menu/UpdateMenu";
 import profilev1page from "./screens/Pages/ProfileV1";
-import Test from "./screens/Attendance/test";
 import ListMenu from "./screens/Menu/ListMenu"
 import ViewChildrenbyClassID from "./screens/Children/ViewChildrenbyClassID";
 import ViewMenuByTeacherAndParent from "./screens/Menu/ViewMenuByTeacherAndParent";
@@ -468,11 +467,7 @@ class App extends React.Component {
                   path={`${process.env.PUBLIC_URL}/chooseservice`}
                   component={ChooseService}
                   allowedRoles={[2]}
-                />
-                <Route
-                  path={`${process.env.PUBLIC_URL}/test`}
-                  component={Test}
-                />
+                /> 
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/dashboardprin`}

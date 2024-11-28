@@ -49,7 +49,7 @@ class ViewAttendByParent extends React.Component {
     });
 
     axios
-      .get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentID}`)
+      .get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentID}`)
       .then((response) => {
         if (isMounted) {
           this.setState({ childerParent: response.data });
@@ -70,7 +70,7 @@ class ViewAttendByParent extends React.Component {
     try {
       // Lấy dữ liệu điểm danh của tuần (Attend)
       const attendanceResponse = await axios.get(
-        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        `${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
             studentId,
@@ -82,7 +82,7 @@ class ViewAttendByParent extends React.Component {
 
       // Lấy dữ liệu Checkin
       const checkinResponse = await axios.get(
-        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        `${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
             studentId,
@@ -94,7 +94,7 @@ class ViewAttendByParent extends React.Component {
 
       // Lấy dữ liệu Checkout
       const checkoutResponse = await axios.get(
-        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        `${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
             studentId,
@@ -207,7 +207,7 @@ class ViewAttendByParent extends React.Component {
     try {
       // Lấy dữ liệu Attend
       const attendanceResponse = await axios.get(
-        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        `${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
             studentId,
@@ -219,7 +219,7 @@ class ViewAttendByParent extends React.Component {
 
       // Lấy dữ liệu Checkin
       const checkinResponse = await axios.get(
-        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        `${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
             studentId,
@@ -231,7 +231,7 @@ class ViewAttendByParent extends React.Component {
 
       // Lấy dữ liệu Checkout
       const checkoutResponse = await axios.get(
-        `http://localhost:5124/api/Attendance/GetAttendanceByStudentId`,
+        `${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByStudentId`,
         {
           params: {
             studentId,

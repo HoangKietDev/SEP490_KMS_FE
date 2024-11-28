@@ -39,7 +39,7 @@ class ProfileV1Page extends React.Component {
       const storedUser = JSON.parse(sessionStorage.getItem("user"));
       const userId = storedUser.user.userId;
 
-      const response = await fetch(`http://localhost:5124/api/User/ProfileById/${userId}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${userId}`);
       const data = await response.json();
 
       this.setState({
@@ -111,7 +111,7 @@ class ProfileV1Page extends React.Component {
     }
 
     try {
-      const response = await fetch("http://localhost:5124/api/User/UpdateProfile", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/User/UpdateProfile`, {
         method: "PUT",
         body: formData,
       });
@@ -179,7 +179,7 @@ class ProfileV1Page extends React.Component {
     const userId = storedUser.user.userId;
 
     try {
-      const response = await fetch(`http://localhost:5124/api/User/ChangePassWord/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/User/ChangePassWord/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

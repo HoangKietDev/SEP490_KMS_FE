@@ -32,9 +32,9 @@ class CreateClass extends React.Component {
 
   fetchData = () => {
     Promise.all([
-      fetch("http://localhost:5124/api/Semester/GetAllSemester").then((res) => res.json()),
-      fetch("http://localhost:5124/api/Grade").then((res) => res.json()),
-      fetch("http://localhost:5124/api/Teacher/GetAllTeachers").then((res) => res.json()),
+      fetch(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`).then((res) => res.json()),
+      fetch(`${process.env.REACT_APP_API_URL}/api/Grade`).then((res) => res.json()),
+      fetch(`${process.env.REACT_APP_API_URL}/api/Teacher/GetAllTeachers`).then((res) => res.json()),
     ])
       .then(([semesters, grades, teachers]) => {
         const activeSemesters = semesters.filter((semester) => semester.status === 0);
@@ -88,7 +88,7 @@ class CreateClass extends React.Component {
   //     status: 0,
   //   };
 
-  //   fetch("http://localhost:5124/api/Class/AddClass", {
+  //   fetch("${process.env.REACT_APP_API_URL}/api/Class/AddClass", {
   //     method: "POST",
   //     headers: {
   //       "Content-Type": "application/json",
@@ -105,7 +105,7 @@ class CreateClass extends React.Component {
   //         showNotification: true
   //       });
   //       selectedTeachers.forEach((teacherId) => {
-  //         fetch(`http://localhost:5124/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
+  //         fetch(`${process.env.REACT_APP_API_URL}/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
   //           method: "POST",
   //           headers: {
   //             "Content-Type": "application/json",
@@ -145,7 +145,7 @@ class CreateClass extends React.Component {
       status: 0,
     };
 
-    fetch("http://localhost:5124/api/Class/AddClass", {
+    fetch(`${process.env.REACT_APP_API_URL}/api/Class/AddClass`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -165,7 +165,7 @@ class CreateClass extends React.Component {
 
         // Thêm giáo viên vào lớp
         selectedTeachers.forEach((teacherId) => {
-          fetch(`http://localhost:5124/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
+          fetch(`${process.env.REACT_APP_API_URL}/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -235,69 +235,83 @@ class CreateClass extends React.Component {
                 onClose={() => this.setState({ showNotification: false })}
               />
             )}
-            <form onSubmit={this.handleSubmit}>
-              {/* Class Name */}
-              <div className="form-group">
-                <label>Class Name</label>
-                <input
-                  className={`form-control ${errors.className && submeet ? "is-invalid" : ""}`}
-                  value={className}
-                  onChange={(e) => this.setState({ className: e.target.value })}
-                />
-                {errors.className && submeet && <div className="invalid-feedback">{errors.className}</div>}
+           
+            <div className="card shadow-lg">
+              <div className="card-header text-white" style={{ backgroundColor: "#48C3B4" }}>
+                <h4 className="mb-0">Create Class</h4>
               </div>
+              <div className="card-body">
+                <form onSubmit={this.handleSubmit}>
 
-              {/* Number of Students */}
-              <div className="form-group">
-                <label>Number of Students</label>
-                <input
-                  type="number"
-                  className={`form-control ${errors.number && submeet ? "is-invalid" : ""}`}
-                  value={number}
-                  onChange={(e) => this.setState({ number: parseInt(e.target.value) || 0 })}
-                />
-                {errors.number && submeet && <div className="invalid-feedback">{errors.number}</div>}
-              </div>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Class Name</label>
+                        <input
+                          className={`form-control ${errors.className && submeet ? "is-invalid" : ""}`}
+                          value={className}
+                          onChange={(e) => this.setState({ className: e.target.value })}
+                        />
+                        {errors.className && submeet && <div className="invalid-feedback">{errors.className}</div>}
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Number of Students</label>
+                        <input
+                          type="number"
+                          className={`form-control ${errors.number && submeet ? "is-invalid" : ""}`}
+                          value={number}
+                          onChange={(e) => this.setState({ number: parseInt(e.target.value) || 0 })}
+                        />
+                        {errors.number && submeet && <div className="invalid-feedback">{errors.number}</div>}
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Semester */}
-              <div className="form-group">
-                <label>Semester</label>
-                <select
-                  className={`form-control ${errors.semesterId && submeet ? "is-invalid" : ""}`}
-                  value={semesterId}
-                  onChange={(e) => this.setState({ semesterId: parseInt(e.target.value) })}
-                >
-                  <option value={0}>Select Semester</option>
-                  {semesters.map((semester) => (
-                    <option key={semester.semesterId} value={semester.semesterId}>
-                      {semester.name} ({semester.startDate.split("T")[0]} - {semester.endDate.split("T")[0]})
-                    </option>
-                  ))}
-                </select>
-                {errors.semesterId && submeet && <div className="invalid-feedback">{errors.semesterId}</div>}
-              </div>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Grade</label>
+                        <select
+                          className={`form-control ${errors.gradeId && submeet ? "is-invalid" : ""}`}
+                          value={gradeId}
+                          onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
+                        >
+                          <option value={0}>Select Grade</option>
+                          {grades.map((grade) => (
+                            <option key={grade.gradeId} value={grade.gradeId}>
+                              {grade.name}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.gradeId && submeet && <div className="invalid-feedback">{errors.gradeId}</div>}
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Semester</label>
+                        <select
+                          className={`form-control ${errors.semesterId && submeet ? "is-invalid" : ""}`}
+                          value={semesterId}
+                          onChange={(e) => this.setState({ semesterId: parseInt(e.target.value) })}
+                        >
+                          <option value={0}>Select Semester</option>
+                          {semesters.map((semester) => (
+                            <option key={semester.semesterId} value={semester.semesterId}>
+                              {semester.name} ({semester.startDate.split("T")[0]} - {semester.endDate.split("T")[0]})
+                            </option>
+                          ))}
+                        </select>
+                        {errors.semesterId && submeet && <div className="invalid-feedback">{errors.semesterId}</div>}
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Grade */}
-              <div className="form-group">
-                <label>Grade</label>
-                <select
-                  className={`form-control ${errors.gradeId && submeet ? "is-invalid" : ""}`}
-                  value={gradeId}
-                  onChange={(e) => this.setState({ gradeId: parseInt(e.target.value) })}
-                >
-                  <option value={0}>Select Grade</option>
-                  {grades.map((grade) => (
-                    <option key={grade.gradeId} value={grade.gradeId}>
-                      {grade.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.gradeId && submeet && <div className="invalid-feedback">{errors.gradeId}</div>}
-              </div>
-
-              {/* Teachers */}
-              <div className="form-group">
-                <label>Select Teacher</label>
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                      <label>Select Teacher</label>
                 <select
                   className={`form-control ${errors.selectedTeachers && submeet ? "is-invalid" : ""}`}
                   value={selectedTeachers[0] || ""}
@@ -311,13 +325,17 @@ class CreateClass extends React.Component {
                   ))}
                 </select>
                 {errors.selectedTeachers && submeet && <div className="invalid-feedback">{errors.selectedTeachers}</div>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <button type="submit" className="btn btn-primary">
+                      Add Class
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <br />
-              <button type="submit" className="btn btn-primary">
-                Add Class
-              </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>

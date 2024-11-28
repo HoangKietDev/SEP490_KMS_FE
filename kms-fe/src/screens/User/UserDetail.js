@@ -15,7 +15,7 @@
 //         this.setState({ semesterId: parseInt(semesterId) }); // Cập nhật classId vào state
 //         const fetchData = async () => {
 //             try {
-//                 const response = await axios.get(`http://localhost:5124/api/Grade/GetGradeById/${semesterId}`);
+//                 const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Grade/GetGradeById/${semesterId}`);
 //                 const data = response.data;
 //                 this.setState({ GradesDetail: data });
 //                 console.log(data);

@@ -148,7 +148,7 @@ class Attend extends React.Component {
         formData.append("attendanceDetailID", currentAttendanceDetailID);
         formData.append("images", file);
 
-        fetch("http://localhost:5124/api/Attendance/UploadAttendanceImages", {
+        fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/UploadAttendanceImages`, {
             method: "PUT", // Kiểm tra nếu API yêu cầu POST hoặc PUT
             body: formData,
         })
@@ -205,7 +205,7 @@ class Attend extends React.Component {
         const { classId, selectedDate } = this.state;
         const formattedDate = this.formatDate(selectedDate);
 
-        fetch("http://localhost:5124/api/Attendance/CreateDailyAttendance", {
+        fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyAttendance`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -238,7 +238,7 @@ class Attend extends React.Component {
 
     fetchParentData = (parentIds) => {
         const parentPromises = parentIds.map((parentId) =>
-            axios.get(`http://localhost:5124/api/User/ProfileById/${parentId}`)
+            axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${parentId}`)
         );
 
         Promise.all(parentPromises)
@@ -265,7 +265,7 @@ class Attend extends React.Component {
 
     fetchServiceData = () => {
         axios
-            .get("http://localhost:5124/api/Service/GetAllServices")
+            .get(`${process.env.REACT_APP_API_URL}/api/Service/GetAllServices`)
             .then((response) => {
                 this.setState({ serviceData: response.data });
                 const serviceData = response.data
@@ -296,7 +296,7 @@ class Attend extends React.Component {
             body: messageBody,
         };
 
-        axios.post("http://localhost:5124/api/Sms/SendSms", body)
+        axios.post(`${process.env.REACT_APP_API_URL}/api/Sms/SendSms`, body)
             .then((response) => {
                 console.log("SMS sent successfully:", response.data);
                 // alert("Tin nhắn đã được gửi thành công!");
@@ -319,7 +319,7 @@ class Attend extends React.Component {
     };
 
     fetchCheckedServices = (studentId, date) => {
-        return axios.get(`http://localhost:5124/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`)
+        return axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`)
             .then((response) => {
                 // Lọc chỉ những dịch vụ có status là 1
                 const checkedServices = response.data
@@ -340,7 +340,7 @@ class Attend extends React.Component {
         }
 
         const studentPromises = studentIds.map(studentId =>
-            axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${studentId}`)
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetChildrenByChildrenId/${studentId}`)
         );
 
         Promise.all(studentPromises)
@@ -379,7 +379,7 @@ class Attend extends React.Component {
     //     const formattedDate = this.formatDate(selectedDate);
 
     //     axios
-    //         .get(`http://localhost:5124/api/Attendance/GetAttendanceByDate?classId=${classId}&type=Attend&date=${formattedDate}`)
+    //         .get(`${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByDate?classId=${classId}&type=Attend&date=${formattedDate}`)
     //         .then((response) => {
     //             const attendanceData = response.data;
     //             if (attendanceData.length > 0) {
@@ -442,8 +442,8 @@ class Attend extends React.Component {
 
         // Gọi đồng thời cả hai API
         Promise.all([
-            axios.get(`http://localhost:5124/api/Attendance/GetAttendanceByDate?classId=${classId}&type=Attend&date=${formattedDate}`),
-            axios.get(`http://localhost:5124/api/Children/GetAllChildren`)
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Attendance/GetAttendanceByDate?classId=${classId}&type=Attend&date=${formattedDate}`),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`)
         ])
             .then(([attendanceResponse, childrenResponse]) => {
                 const attendanceData = attendanceResponse.data;
@@ -582,7 +582,7 @@ class Attend extends React.Component {
             const studentId = student.studentId;
 
             // Gọi API để lấy các dịch vụ đã có trong DB cho học sinh và ngày hiện tại
-            axios.get(`http://localhost:5124/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${formattedDate}`)
+            axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${formattedDate}`)
                 .then((response) => {
                     const existingServices = response.data.map(service => ({
                         serviceId: service.serviceId,
@@ -618,7 +618,7 @@ class Attend extends React.Component {
 
                             console.log('Updating service status to 1:', body);
 
-                            axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
+                            axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateCheckService`, body)
                                 .then((response) => {
                                     console.log(`Service ${serviceId} status updated to 1 for student ${studentId}:`, response.data);
                                     this.setState({
@@ -648,7 +648,7 @@ class Attend extends React.Component {
 
                             console.log('Adding service:', body);
 
-                            axios.post("http://localhost:5124/api/Service/AddCheckService", body)
+                            axios.post(`${process.env.REACT_APP_API_URL}/api/Service/AddCheckService`, body)
                                 .then((response) => {
                                     console.log(`Service ${serviceId} added for student ${studentId}:`, response.data);
                                     this.setState({
@@ -683,7 +683,7 @@ class Attend extends React.Component {
 
                             console.log('Updating service status to 0:', body);
 
-                            axios.put("http://localhost:5124/api/Service/UpdateCheckService", body)
+                            axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateCheckService`, body)
                                 .then((response) => {
                                     console.log(`Service ${serviceId} status updated to 0 for student ${studentId}:`, response.data);
                                     this.setState({
@@ -770,7 +770,7 @@ class Attend extends React.Component {
         console.log(data);
 
         fetch(
-            `http://localhost:5124/api/Attendance/UpdateAttendance?classId=${classId}&type=Attend`,
+            `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendance?classId=${classId}&type=Attend`,
             {
                 method: "PUT",
                 headers: {
@@ -816,7 +816,7 @@ class Attend extends React.Component {
             body: messageBody,
         };
 
-        axios.post("http://localhost:5124/api/Sms/SendSms", body)
+        axios.post(`${process.env.REACT_APP_API_URL}/api/Sms/SendSms`, body)
             .then((response) => {
                 console.log(`SMS sent for student ${studentId}:`, response.data);
                 // alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);

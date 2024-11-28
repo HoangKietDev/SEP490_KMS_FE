@@ -23,14 +23,14 @@ class TeacherList extends React.Component {
     // Gọi API và cập nhật state
     const fetchData = async () => {
       try {
-        const TeacherResponse = await axios.get('http://localhost:5124/api/Teacher/GetAllTeachers');
+        const TeacherResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetAllTeachers`);
         const Teacherdata = TeacherResponse.data;
         this.setState({ TeacherListData: Teacherdata, filteredTeacherListData: Teacherdata })
 
         // // Fetch student by ParentID
         // const user = localStorage.getItem("user")
         // const parentId = JSON.parse(user).user.userId
-        // const studentResponse = await axios.get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentId}`);
+        // const studentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentId}`);
         // const studentData = studentResponse.data;
 
 
