@@ -5,6 +5,7 @@ import axios from 'axios';
 import { withRouter } from 'react-router-dom';
 import { getSession } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
+import Notification from "../../components/Notification";
 
 class UserList extends React.Component {
   state = {
@@ -22,6 +23,10 @@ class UserList extends React.Component {
 
     currentPage: 1,
     itemsPerPage: 10,
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
   componentDidMount() {
     window.scrollTo(0, 0);
@@ -65,6 +70,45 @@ class UserList extends React.Component {
   handlePageChange = (pageNumber) => {
     this.setState({ currentPage: pageNumber });
   };
+
+  handleStatusChange = async (userId) => {
+    try {
+      // API call to update the status of the user
+      const response = await axios.put('http://localhost:5124/api/User/UpdateUserStatus', {
+        userId,
+      });
+
+      if (response.status === 200) {
+        // Successfully updated status, update local state
+        this.setState((prevState) => {
+          const updatedUsers = prevState.users.map((user) =>
+            user.userId === userId ? { ...user, status: user.status === 1 ? 0 : 1 } : user // Toggle the status between 0 and 1
+          );
+          return { users: updatedUsers };
+        });
+        this.setState({
+          notificationText: "User status updated successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
+      } else {
+        this.setState({
+          notificationText: "Failed to update user status!",
+          notificationType: "error",
+          showNotification: true
+        });
+      }
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      this.setState({
+        notificationText: "Failed to update user status 111!",
+        notificationType: "error",
+        showNotification: true
+      });
+    }
+  };
+
+
 
   render() {
 
@@ -126,7 +170,7 @@ class UserList extends React.Component {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Search by Semester Name"
+                        placeholder="Search by Email"
                         value={searchText}
                         onChange={this.handleSearchChange}
                       />

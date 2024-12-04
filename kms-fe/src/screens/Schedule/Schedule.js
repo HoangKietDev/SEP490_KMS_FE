@@ -182,7 +182,9 @@ class Schedule extends React.Component {
   };
 
   handleSlotClick = (slotDetail) => {
-    if (slotDetail) {
+    const userData = getSession("user").user;
+    const roleId = userData.roleId;
+    if (slotDetail && roleId === 3) {
       this.setState({
         showModal: true,
         selectedSlot: {
@@ -218,7 +220,11 @@ class Schedule extends React.Component {
 
     // Guard clause to check if both activity and location are selected
     if (!activity || !location) {
-      alert("Please select a valid activity and location.");
+      this.setState({
+        notificationText: "Please select a valid activity and location.",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -310,7 +316,6 @@ class Schedule extends React.Component {
     const classId = urlParams.get('classId'); // Assumes classId is in query string
 
     if (!file) {
-      alert("Please select a file to import!"); // Kiểm tra nếu không có file được chọn
       this.setState({
         notificationText: "Please select a file to import!",
         notificationType: "info",

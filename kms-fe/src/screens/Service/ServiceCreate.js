@@ -44,8 +44,15 @@ class ServiceCreate extends React.Component {
             schoolId: 1,
             status: 0,
         };
-
         console.log(newService);
+        if (this.state.servicePrice <= 0) {
+            this.setState({
+                notificationText: "Number of Service Price must grater than 0",
+                notificationType: "error",
+                showNotification: true,
+            });
+            return;
+        }
         try {
             const response = await axios.post(
                 "http://localhost:5124/api/Service/AddService", newService

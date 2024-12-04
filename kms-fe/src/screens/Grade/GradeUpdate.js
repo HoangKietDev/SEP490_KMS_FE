@@ -72,8 +72,10 @@ class CategoryUpdate extends React.Component {
                 }
             }, 1000);
         } catch (error) {
+            const errormess = error?.response?.data?.errors?.BaseTuitionFee
+            console.log(errormess);
             this.setState({
-                notificationText: "Error updating grade",
+                notificationText: errormess[0] || "Grade Update Error",
                 notificationType: "error",
                 showNotification: true,
             });

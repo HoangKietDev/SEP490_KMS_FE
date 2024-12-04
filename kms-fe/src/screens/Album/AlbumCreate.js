@@ -60,7 +60,6 @@ class AlbumCreate extends React.Component {
 
         let userId = getSession('user')?.user?.userId
         console.log(userId);
-
         const newRequest = {
             classId,
             createBy: userId,
@@ -152,6 +151,7 @@ class AlbumCreate extends React.Component {
                                                         value={title}
                                                         name="title"
                                                         onChange={(e) => this.setState({ title: e.target.value })}
+                                                        required
                                                     />
                                                 </div>
                                             </div>
@@ -166,6 +166,7 @@ class AlbumCreate extends React.Component {
                                                     value={description}
                                                     name="description"
                                                     onChange={(e) => this.setState({ description: e.target.value })}
+                                                    required
                                                 />
                                             </div>
                                         </div>

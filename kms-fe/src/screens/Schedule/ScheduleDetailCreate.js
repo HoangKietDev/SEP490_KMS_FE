@@ -241,7 +241,11 @@ class ScheduleDetailCreate extends React.Component {
 
     // Kiểm tra nếu `endWeek` nhỏ hơn `startWeek`
     if (parseInt(startYear) > parseInt(endYear) || (startYear === endYear && parseInt(startWeekNumber) > parseInt(endWeekNumber))) {
-      alert('Invalid week range! End week should be after or equal to the start week.');
+      this.setState({
+        notificationText: "Invalid week range! End week should be after or equal to the start week!",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -252,7 +256,11 @@ class ScheduleDetailCreate extends React.Component {
 
     // Check if the input weeks are valid
     if (startWeekInt > endWeekInt) {
-      alert('Invalid week range! Start week should be before end week.');
+      this.setState({
+        notificationText: "Invalid week range! Start week should be before end week.",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -296,7 +304,7 @@ class ScheduleDetailCreate extends React.Component {
 
   handleCreateLocation = () => {
     const { newLocationName } = this.state;
-    if (!newLocationName.trim()) {
+    if (!newLocationName?.trim()) {
       this.setState({
         notificationText: "Please enter a location name.",
         notificationType: "info",
@@ -352,7 +360,7 @@ class ScheduleDetailCreate extends React.Component {
 
   handleCreateActivity = () => {
     const { newActivityName } = this.state;
-    if (!newActivityName.trim()) {
+    if (!newActivityName?.trim()) {
       this.setState({
         notificationText: "Please enter a Activity name!",
         notificationType: "info",

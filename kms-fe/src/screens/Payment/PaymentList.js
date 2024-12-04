@@ -412,8 +412,7 @@ class PaymentList extends React.Component {
                                           onChange={(e) => this.handleCheckboxChange("tuition", e.target.checked)} />
                                       </td>
                                       <td>{tuition?.paymentName}</td>
-                                      {/* <td className="text-truncate" style={{ maxWidth: "150px" }}>{request?.description}</td> */}
-                                      <td>
+                                      {/* <td>
                                         <select
                                           style={{ width: '70%' }}
                                           className="form-control"
@@ -426,7 +425,8 @@ class PaymentList extends React.Component {
                                             </option>
                                           ))}
                                         </select>
-                                      </td>
+                                      </td> */}
+                                      <td>1 Month</td>
                                       {/* Hiển thị phần trăm discount */}
                                       <td>{this.state.selectedDiscount ? `${this.state.selectedDiscount.discount1} %` : '0%'}</td>
                                       <td>{tuition?.price?.toLocaleString('vi-VN')}</td>

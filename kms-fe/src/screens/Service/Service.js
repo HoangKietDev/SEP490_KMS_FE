@@ -20,7 +20,7 @@ class Service extends React.Component {
     notificationType: "success", // Loại thông báo (success/error)
 
     currentPage: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 5,
   };
   componentDidMount() {
     window.scrollTo(0, 0);

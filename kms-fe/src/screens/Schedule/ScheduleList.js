@@ -182,8 +182,8 @@ class ScheduleList extends React.Component {
 
 
     const statusOptions = [
-      { value: 1, label: "Active", className: "badge-success" },
-      { value: 2, label: "Inactive", className: "badge-danger" },
+      { value: 1, label: "Aprroved", className: "badge-success" },
+      { value: 2, label: "Rejected", className: "badge-danger" },
       { value: 0, label: "Pending", className: "badge-default" },
     ];
 

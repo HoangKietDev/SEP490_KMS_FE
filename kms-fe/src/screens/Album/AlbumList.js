@@ -7,7 +7,7 @@ import { modifyAlpha } from "echarts-gl";
 import { getSession } from "../../components/Auth/Auth";
 import Pagination from "../../components/Common/Pagination";
 import { Modal, Button } from "react-bootstrap"; // Thêm modal từ react-bootstrap
-
+import Notification from "../../components/Notification";
 
 class Albumlist extends React.Component {
   state = {
@@ -30,7 +30,12 @@ class Albumlist extends React.Component {
 
     showModal: false, // State để kiểm soát hiển thị modal
     reason: "", // State để lưu lý do
-    currentAlbumId: null // Lưu albumId của album đang cập nhật
+    currentAlbumId: null, // Lưu albumId của album đang cập nhật
+
+
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   async componentDidMount() {
@@ -266,7 +271,11 @@ class Albumlist extends React.Component {
         reason: reason
       });
       console.log("Status updated successfully:", response.data);
-      alert("Status updated successfully!");
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true
+    });
 
       // Cập nhật trạng thái trong state
       this.setState((prevState) => {
@@ -277,7 +286,12 @@ class Albumlist extends React.Component {
       });
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Error updating status!");
+      this.setState({
+        notificationText: "Error updating status!",
+        notificationType: "error",
+        showNotification: true
+    });
+
     }
   };
 
@@ -291,7 +305,11 @@ class Albumlist extends React.Component {
         reason: reason // Lý do được nhập trong modal
       });
       console.log("Status updated successfully:", response.data);
-      alert("Status updated successfully!");
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true
+    });
 
       // Cập nhật trạng thái trong state
       this.setState((prevState) => {
@@ -304,7 +322,11 @@ class Albumlist extends React.Component {
       this.closeModal(); // Đóng modal sau khi cập nhật
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("Error updating status!");
+      this.setState({
+        notificationText: "Error updating status!",
+        notificationType: "success",
+        showNotification: true
+    });
     }
   };
 
@@ -318,6 +340,8 @@ class Albumlist extends React.Component {
 
   render() {
     const { AlbumListData, selectedChildren, classListData, teacherListData, selectedClassId, filteredAlbumListData, filteredChildrenData, showModal, reason } = this.state;
+    const { showNotification, notificationText, notificationType } = this.state;
+
     const statusOptions = [
       { value: 1, label: "Aprroved", className: "badge-success" },
       { value: 2, label: "Reject", className: "badge-danger" },
@@ -343,6 +367,15 @@ class Albumlist extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader

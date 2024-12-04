@@ -146,8 +146,8 @@ class SemesterCreate extends React.Component {
                                                 </div>
                                             </div>
                                             <br />
-                                            <button type="submit" className="btn btn-primary mr-4">Create Semester</button>
                                             <a href="semester" className="btn btn-success text-center">Back to Semester List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Create Semester</button>
                                         </form>
                                     </div>
                                 </div>

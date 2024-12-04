@@ -68,6 +68,15 @@ class ServiceUpdate extends React.Component {
             }
         };
 
+        if (this.state.servicePrice <= 0) {
+            this.setState({
+                notificationText: "Number of Service Price must grater than 0",
+                notificationType: "error",
+                showNotification: true,
+            });
+            return;
+        }
+
         try {
             await axios.put(`http://localhost:5124/api/Service/UpdateService`, updatedService, {
                 headers: {

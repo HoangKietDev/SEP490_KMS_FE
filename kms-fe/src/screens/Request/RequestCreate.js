@@ -193,6 +193,7 @@ class RequestCreate extends React.Component {
                                                     value={title}
                                                     name="title"
                                                     onChange={(e) => this.setState({ title: e.target.value })}
+                                                    required
                                                 />
                                             </div>
                                             <div className="form-group col-md-12 d-flex flex-column">
@@ -203,6 +204,8 @@ class RequestCreate extends React.Component {
                                                     value={description}
                                                     name="description"
                                                     onChange={(e) => this.setState({ description: e.target.value })}
+                                                    required
+
                                                 />
                                             </div>
                                         </div>

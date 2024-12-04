@@ -43,8 +43,10 @@ class GradeCreate extends React.Component {
                 }
             }, 1000);
         } catch (error) {
+            const errormess = error?.response?.data?.errors?.BaseTuitionFee
+            console.log(errormess);
             this.setState({
-                notificationText: "Grade create Error!",
+                notificationText: errormess[0] || "Grade Create Error",
                 notificationType: "error",
                 showNotification: true,
             });
@@ -90,7 +92,7 @@ class GradeCreate extends React.Component {
                                         <form onSubmit={this.handleCreatGrade}>
                                             <div className="row">
                                                 <div className="form-group col-md-12 d-flex flex-column">
-                                                    <label>Name</label>
+                                                    <label>Grade Name</label>
                                                     <input
                                                         type="text"
                                                         className="form-control"
@@ -102,7 +104,7 @@ class GradeCreate extends React.Component {
                                             </div>
                                             <div className="row">
                                                 <div className="form-group col-md-12 d-flex flex-column">
-                                                    <label>Description</label>
+                                                    <label>Grade Description</label>
                                                     <input
                                                         type="text"
                                                         className="form-control"

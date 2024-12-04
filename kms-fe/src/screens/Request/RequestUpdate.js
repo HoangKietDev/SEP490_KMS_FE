@@ -208,6 +208,8 @@ class RequestUpdate extends React.Component {
                         <label>Title Request</label>
                         <input className="form-control" value={title} name="title"
                           readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                          onChange={(e) => this.setState({ title: e.target.value })}
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6">
@@ -238,6 +240,8 @@ class RequestUpdate extends React.Component {
                         <label>Request Description</label>
                         <textarea className="form" rows="6" value={description} name="description"
                           readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                          onChange={(e) => this.setState({ description: e.target.value })}
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6 d-flex flex-column">
