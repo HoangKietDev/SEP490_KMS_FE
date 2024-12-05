@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Logo from "../assets/images/logo-white.svg";
+import Logo from "../assets/images/logo-white.png";
 import { updateEmail, updatePassword, onLoggedin } from "../actions";
 import { Button } from "react-bootstrap";
 import axios from 'axios';
-import { setSession } from "../components/Auth/Auth";
+import { setCookie } from "../components/Auth/Auth";
 import Notification from "../components/Notification";
 
 class Login extends React.Component {
@@ -43,36 +43,39 @@ class Login extends React.Component {
         email: this.props.email,
         password: this.props.password,
       });
-  
+
       if (loginResponse.status !== 200) {
         throw new Error("Failed to log in");
       }
-  
+
       const loginData = loginResponse.data; // Dữ liệu từ API /api/Account/login
       console.log(loginData, "Login response");
-  
+
       const userId = loginData.user.userId;
-  
+
       // Gọi API để lấy thông tin chi tiết người dùng (bao gồm avatar)
       const profileResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${userId}`);
-  
+
       if (profileResponse.status !== 200) {
         throw new Error("Failed to fetch user profile");
       }
-  
+
       const profileData = profileResponse.data; // Dữ liệu từ API /api/User/ProfileById
       console.log(profileData, "Profile response");
-  
+
       // Thêm avatar vào dữ liệu user mà không thay đổi cấu trúc ban đầu
       const userWithAvatar = {
         ...loginData.user, // Dữ liệu ban đầu
         avatar: profileData.avatar, // Thêm trường avatar
       };
-  
+
       // Lưu lại vào localStorage và sessionStorage
       localStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
       sessionStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
-  
+
+      // Lưu vào cookie
+      setCookie("user", { ...loginData, user: userWithAvatar }); // Lưu vào cookie
+
       // Chuyển hướng dựa trên roleId
       switch (userWithAvatar.roleId) {
         case 1:
@@ -108,7 +111,7 @@ class Login extends React.Component {
       });
     }
   };
-  
+
 
   togglePasswordVisibility = () => {
     this.setState(prevState => ({ showPassword: !prevState.showPassword }));
@@ -133,7 +136,7 @@ class Login extends React.Component {
         )}
         <div className="page-loader-wrapper" style={{ display: this.state.isLoad ? 'block' : 'none' }}>
           <div className="loader">
-            <div className="m-t-30"><img src={require('../assets/images/logo-icon.svg')} width="48" height="48" alt="Lucid" /></div>
+            <div className="m-t-30"><img src={require('../assets/images/logo-icon.svg')} width="48" height="48" alt="EduNest" /></div>
             <p>Please wait...</p>
           </div>
         </div>
@@ -142,7 +145,7 @@ class Login extends React.Component {
             <div className="vertical-align-middle auth-main">
               <div className="auth-box">
                 <div className="top">
-                  <img src={Logo} alt="Lucid" style={{ height: "40px", margin: "10px" }} />
+                  <img src={Logo} alt="EduNest" style={{ width: "50%", margin: "10px" }} />
                 </div>
                 <div className="card">
                   <div className="header">

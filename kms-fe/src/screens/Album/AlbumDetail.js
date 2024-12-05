@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { Modal, Button, Form } from "react-bootstrap";
 import Notification from "../../components/Notification";
 import Resizer from 'react-image-file-resizer'; // Import thư viện nén ảnh
@@ -302,7 +302,7 @@ class AlbumDetail extends React.Component {
     const { title, description, imageData, timePost, teacherListData, createBy, showModal, caption, showImageModal, selectedImage } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
     const groupedImages = this.groupImagesByPostedAt(imageData);
     const timeKeys = Object.keys(groupedImages);

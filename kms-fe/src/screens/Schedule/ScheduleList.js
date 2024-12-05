@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Login from "../Login";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { addNotificationByRoleId, addNotificationByUserId } from "../../components/Common/Notification";
 import Notification from "../../components/Notification";
 import Pagination from "../../components/Common/Pagination";
@@ -30,7 +30,7 @@ class ScheduleList extends React.Component {
   };
 
   componentDidMount() {
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData.roleId
     if (!userData) {
       this.props.history.push("/login");  // Nếu cookie không tồn tại hoặc không hợp lệ, chuyển hướng về login
@@ -187,7 +187,7 @@ class ScheduleList extends React.Component {
       { value: 0, label: "Pending", className: "badge-default" },
     ];
 
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId
 
 

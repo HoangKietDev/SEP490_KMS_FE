@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { getSession } from '../../components/Auth/Auth';
+import { getCookie } from '../../components/Auth/Auth';
 import Notification from "../../components/Notification";
 import Pagination from "../../components/Common/Pagination";
 
@@ -12,7 +12,6 @@ import Pagination from "../../components/Common/Pagination";
 class Grade extends React.Component {
   state = {
     grades: [],
-    isProcessing: false, // Để hiển thị trạng thái đang xử lý
 
     showNotification: false, // Để hiển thị thông báo
     notificationText: "", // Nội dung thông báo
@@ -50,47 +49,19 @@ class Grade extends React.Component {
     // Chuyển hướng đến cap nhat category
     this.props.history.push(`/grade-update/${gradeId}`);
   };
-  handlePayment = async () => {
-    try {
-      // Hiển thị trạng thái đang tải (nếu cần)
-      this.setState({ isProcessing: true });
+ 
 
-      // Gửi yêu cầu POST để tạo học phí
-      const response = await axios.post(
-        "http://localhost:5124/api/Tuition/generate-tuition"
-      );
 
-      // Xử lý thành công
-      this.setState({
-        notificationText: "Tuition generated successfully!",
-        notificationType: "success",
-        showNotification: true,
-      });
-    } catch (error) {
-      // Xử lý lỗi
-      const errorMessage = error.response?.data?.message || "Failed to generate tuition!";
-      this.setState({
-        notificationText: errorMessage,
-        notificationType: "error",
-        showNotification: true,
-      });
-    } finally {
-      // Tắt trạng thái đang tải
-      this.setState({ isProcessing: false });
-    }
-  };
-
-  
   handlePageChange = (pageNumber) => {
     this.setState({ currentPage: pageNumber });
-};
+  };
 
 
   render() {
     const { showNotification, notificationText, notificationType } = this.state;
 
     const { grades } = this.state;
-    const userData = getSession('user').user;
+    const userData = getCookie('user')?.user;
     const roleId = userData.roleId
 
     // phan trang
@@ -131,22 +102,8 @@ class Grade extends React.Component {
 
                     {roleId === 4 ? (
                       <div>
-                        <a
-                          href="#!"
-                          onClick={(e) => {
-                            e.preventDefault(); // Ngăn hành vi mặc định của thẻ <a>
-                            if (!this.state.isProcessing) {
-                              this.handlePayment(); // Chỉ gọi khi không đang xử lý
-                            }
-                          }}
-                          className={`btn btn-primary text-white mr-4 ${this.state.isProcessing ? "disabled" : ""}`}
-                        >
-                          {this.state.isProcessing ? "Processing..." : "Generate Payment"}
-                        </a>
-
                         <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Grade</a>
                       </div>
-
                     ) : null}
                   </div>
                 </div>
@@ -182,7 +139,7 @@ class Grade extends React.Component {
                               </td>
 
                               <td>
-                                {item?.baseTuitionFee}
+                                {item?.baseTuitionFee?.toLocaleString('vi-VN')}
                               </td>
 
                               {/* <td>

@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 import Pagination from "../../components/Common/Pagination";
@@ -116,98 +116,6 @@ class PaymentHistory extends React.Component {
     itemsPerPage: 10,
   };
 
-  // async componentDidMount() {
-  //   window.scrollTo(0, 0);
-  //   this.loadData();
-  // }
-
-  // componentDidUpdate(prevProps) {
-  //   // Kiểm tra nếu URL thay đổi
-  //   if (this.props.location.search !== prevProps.location.search) {
-  //     const queryParams = new URLSearchParams(this.props.location.search);
-  //     const paymentSuccess = queryParams.get('paymentSuccess');
-
-  //     if (paymentSuccess) {
-  //       // Nếu thanh toán thành công, hiển thị thông báo thành công
-  //       this.setState({
-  //         notificationText: "Payment successfully!",
-  //         notificationType: "success",
-  //         showNotification: true,
-  //       });
-
-  //       // Xóa query parameter paymentSuccess khỏi URL để tránh hiển thị thông báo lại khi refresh
-  //       const cleanUrl = window.location.pathname;
-  //       window.history.replaceState({}, '', cleanUrl); // Xóa query parameter paymentSuccess
-  //     }
-
-  //     this.loadData(); // Tải lại dữ liệu khi URL thay đổi
-  //   }
-  // }
-
-
-  // loadData = async () => {
-  //   const userData = getSession('user')?.user;
-  //   const parentId = userData?.userId; // Giá trị thực tế của parentId
-
-  //   if (!parentId) {
-  //     console.error("Parent ID is missing");
-  //     return;
-  //   }
-
-  //   // Lấy tất cả các tham số từ URL
-  //   const queryParams = new URLSearchParams(window.location.search);
-  //   const mydata = {};
-  //   queryParams.forEach((value, key) => {
-  //     mydata[key] = value;
-  //   });
-
-  //   console.log("All query parameters:", mydata);
-
-  //   // Kiểm tra nếu có redirect từ VNPAY
-  //   if (mydata.vnp_TxnRef && mydata.vnp_ResponseCode && mydata.vnp_SecureHash) {
-  //     try {
-  //       const response = await axios.post("http://localhost:5124/api/Payment/payment-callback", {
-  //         data: mydata,
-  //       });
-
-  //       console.log("Payment Callback Response:", response.data);
-
-  //       this.setState({
-  //         notificationText: "Payment successfully!!",
-  //         notificationType: "success",
-  //         showNotification: true,
-  //       });
-
-  //       // Reload trang với URL sạch
-  //       window.location.href = "/payment-history"; // Điều hướng về URL sạch
-
-  //     } catch (error) {
-  //       console.error("Error in Payment Callback:", error);
-
-  //       this.setState({
-  //         notificationText: "Payment Cancel!",
-  //         notificationType: "error",
-  //         showNotification: true,
-  //       });
-  //     }
-  //   }
-
-  //   // Tải PaymentHistory
-  //   try {
-  //     await this.getPaymentHistory(parentId);
-  //   } catch (error) {
-  //     console.error("Error fetching payment history:", error);
-  //   }
-
-  //   // Tải danh sách Children
-  //   try {
-  //     const response = await axios.get("http://localhost:5124/api/Children/GetAllChildren");
-  //     const myChildren = response.data.filter((i) => i.parentId === parentId);
-  //     this.setState({ myChildren });
-  //   } catch (error) {
-  //     console.error("Error fetching children data:", error);
-  //   }
-  // };
 
   async componentDidMount() {
     window.scrollTo(0, 0);
@@ -230,7 +138,7 @@ class PaymentHistory extends React.Component {
   }
 
   loadData = async () => {
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
     if (!parentId) {
@@ -328,7 +236,7 @@ class PaymentHistory extends React.Component {
 
   // Generate PDF using react-pdf
   generatePDF = (item) => {
-    const user = getSession('user')?.user
+    const user = getCookie('user')?.user
     const fullName = user?.firstname + user?.lastName
     return (
       <Document>
@@ -369,14 +277,17 @@ class PaymentHistory extends React.Component {
                 <Text style={[styles.tableCell, styles.bold]}>Discount</Text>
                 <Text style={[styles.tableCell, styles.bold]}>Total</Text>
               </View>
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCell}>1</Text>
-                <Text style={styles.tableCell}>{item.paymentName}</Text>
-                <Text style={styles.tableCell}>{item.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN')}</Text>
-                <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.number} Months</Text>
-                <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.discount1} %</Text>
-                <Text style={styles.tableCell}>{(item.tuitionDetails?.discountDetails?.number * item?.tuitionDetails?.tuitionFee)?.toLocaleString('vi-VN')}</Text>
-              </View>
+
+              {item?.tuitionDetails &&
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCell}>1</Text>
+                  <Text style={styles.tableCell}>{item.paymentName}</Text>
+                  <Text style={styles.tableCell}>{item.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN')}</Text>
+                  <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.number} Months</Text>
+                  <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.discount1} %</Text>
+                  <Text style={styles.tableCell}>{(item.tuitionDetails?.discountDetails?.number * item?.tuitionDetails?.tuitionFee)?.toLocaleString('vi-VN')}</Text>
+                </View>
+              }
 
               {item?.services?.map((item1, index) => (
                 <View style={styles.tableRow} key={index}>
@@ -401,7 +312,7 @@ class PaymentHistory extends React.Component {
           <View style={styles.signatureSection}>
             <Text style={styles.signatureTitle}>Principal's Signature</Text>
             <View style={styles.signatureLine}></View>
-            <Text style={styles.signatureName}>Nguyen Van A</Text>
+            <Text style={styles.signatureName}>Hieu Truong</Text>
           </View>
 
           {/* Ghi chú */}
@@ -509,7 +420,7 @@ class PaymentHistory extends React.Component {
                               <td>{index + 1}</td>
                               <td>{item?.childName}</td>
                               <td>{item?.paymentDate}</td>
-                              <td>{item?.totalAmount} VND</td>
+                              <td>{item?.totalAmount?.toLocaleString('vi-VN')} VND</td>
                               <td>{item?.paymentName}</td>
                               <td>
                                 {/* Download button */}

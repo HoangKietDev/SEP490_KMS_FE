@@ -16,10 +16,10 @@ import {
   onPressSideMenuTab,
   tostMessageLoad,
 } from "../actions";
-import Logo from "../assets/images/logo.svg";
-import LogoWhite from "../assets/images/logo-white.svg";
+import Logo from "../assets/images/logo.png";
+import LogoWhite from "../assets/images/logo-white.png";
 import UserImage from "../assets/images/user.png";
-import { clearSession, getSession } from "./Auth/Auth";
+import { clearCookie, getCookie } from "./Auth/Auth";
 import axios from "axios";
 
 
@@ -37,9 +37,7 @@ class NavbarMenu extends React.Component {
     res = res.length > 4 ? res[4] : "/";
     const { activeKey } = this.props;
     this.activeMenutabwhenNavigate("/" + activeKey);
-    console.log(getSession('user')?.user.avatar, "test avt");
-
-    const user = getSession('user')?.user
+    const user = getCookie('user')?.user;
     this.getNotifications(user?.userId);
     this.fetchPaymentData(user?.userId)
   }
@@ -287,14 +285,14 @@ class NavbarMenu extends React.Component {
   handleLogOut = async (evt) => {
     evt.preventDefault();
     localStorage.removeItem('user')
-    clearSession('user')
+    clearCookie('user');
     window.location.href = "/";
   };
 
 
 
   render() {
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId
     const username = userData?.firstname + " " + userData?.lastName || "User"; // Thay "User" bằng tên mặc định nếu không có
 
@@ -334,17 +332,18 @@ class NavbarMenu extends React.Component {
             </div>
 
             <div className="navbar-brand">
-              {/* <a href=""> */}
+              <a href="">
               <img
                 src={
                   document.body.classList.contains("full-dark")
                     ? LogoWhite
                     : Logo
                 }
-                alt="Lucid Logo"
+                alt="EduNest Logo"
                 className="img-responsive logo"
+                style={{width: "100px"}}
               />
-              {/* </a> */}
+              </a>
             </div>
 
             <div className="navbar-right">
@@ -365,14 +364,16 @@ class NavbarMenu extends React.Component {
 
               <div id="navbar-menu">
                 <ul className="nav navbar-nav">
-                  <li>
-                    <a
-                      href="listschedule"
-                      className="icon-menu d-none d-sm-block d-md-none d-lg-block"
-                    >
-                      <i className="icon-calendar"></i>
-                    </a>
-                  </li>
+                  {roleId !== 1 ? (
+                    <li>
+                      <a
+                        href="listschedule"
+                        className="icon-menu d-none d-sm-block d-md-none d-lg-block"
+                      >
+                        <i className="icon-calendar"></i>
+                      </a>
+                    </li>
+                  ) : null}
                   {/* Notification */}
                   <li
                     className={
@@ -451,7 +452,7 @@ class NavbarMenu extends React.Component {
           <div className="sidebar-scroll">
             <div className="user-account">
               <img
-                src={getSession('user')?.user.avatar || UserImage}
+                src={userData?.avatar || UserImage}
                 className="rounded-circle user-photo"
                 alt="User Profile Picture"
                 style={{

@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { getSession } from '../../components/Auth/Auth';
+import { getCookie } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 
 class PaymentAllStaff extends React.Component {
@@ -76,7 +76,7 @@ class PaymentAllStaff extends React.Component {
 
         const { paymentAll, searchText, startDate, endDate, classList } = this.state;
 
-        const userData = getSession('user').user;
+        const userData = getCookie('user')?.user;
         const roleId = userData.roleId
 
         // Lọc theo tên

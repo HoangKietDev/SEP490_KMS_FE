@@ -6,7 +6,7 @@ import axios from "axios";
 import Pagination from "../../components/Common/Pagination";
 import { Modal, Button, Form } from "react-bootstrap"; // Thêm modal từ react-bootstrap
 import Notification from "../../components/Notification";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 
 
 class LocationActivityList extends React.Component {
@@ -40,26 +40,34 @@ class LocationActivityList extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    // Gọi API và cập nhật state bằng axios
+
+    // Gọi hai hàm API riêng biệt
+    this.fetchLocationData();
+    this.fetchActivityData();
+  }
+
+  // Hàm fetch location data
+  fetchLocationData = () => {
     axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
       .then((response) => {
         this.setState({ LocationListData: response.data });
         this.setState({ FilterLocationListData: response.data });
       })
       .catch((error) => {
-        console.error("Error fetching data: ", error);
+        console.error("Error fetching location data: ", error);
       });
+  }
 
+  // Hàm fetch activity data
+  fetchActivityData = () => {
     axios.get("http://localhost:5124/api/LocationActivity/GetAllActivities")
       .then((response) => {
         this.setState({ ActivityListData: response.data });
         this.setState({ FilterActivityListData: response.data });
-
       })
       .catch((error) => {
-        console.error("Error fetching data: ", error);
+        console.error("Error fetching activity data: ", error);
       });
-
   }
 
   handleCreateLocation = () => {
@@ -83,22 +91,13 @@ class LocationActivityList extends React.Component {
           notificationType: "success",
           showNotification: true,
         });
-        // Gọi lại API để lấy danh sách mới nhất
-        axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
-          .then((response) => {
-            this.setState({
-              LocationListData: response.data, // Cập nhật lại LocationListData từ API
-              newLocationName: "", // Reset lại tên địa điểm
-              showModalLocation: false, // Đóng modal sau khi thêm thành công
-            });
-          })
-          .catch((error) => {
-            console.error("Error fetching updated locations: ", error);
-          });
+        this.handleCloseModalLocation()
+        this.fetchLocationData();
       })
       .catch((error) => {
+        const errorMessage = error?.response?.data?.message
         this.setState({
-          notificationText: "Failed to add location!",
+          notificationText: errorMessage|| "Failed to add location!",
           notificationType: "error",
           showNotification: true,
         });
@@ -121,7 +120,11 @@ class LocationActivityList extends React.Component {
   handleCreateActivity = () => {
     const { newActivityName } = this.state;
     if (!newActivityName.trim()) {
-      alert("Please enter a location name.");
+      this.setState({
+        notificationText: "Please enter an Activity name!",
+        notificationType: "error",
+        showNotification: true,
+      });
       return;
     }
 
@@ -130,23 +133,22 @@ class LocationActivityList extends React.Component {
       status: 0
     })
       .then((response) => {
-        alert("Activity added successfully!");
+        this.setState({
+          notificationText: "Activity added successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
         // Gọi lại API để lấy danh sách mới nhất
-        axios.get("http://localhost:5124/api/LocationActivity/GetAllActivities")
-          .then((response) => {
-            this.setState({
-              ActivityListData: response.data, // Cập nhật lại LocationListData từ API
-              newActivityName: "", // Reset lại tên địa điểm
-              showModalActivity: false, // Đóng modal sau khi thêm thành công
-            });
-          })
-          .catch((error) => {
-            console.error("Error fetching updated locations: ", error);
-          });
+        this.handleCloseModalActivity()
+        this.fetchActivityData();
       })
       .catch((error) => {
-        console.error("Error adding activity: ", error);
-        alert("Failed to add activity. Please try again.");
+        const errorMessage = error?.response?.data?.message
+        this.setState({
+          notificationText: errorMessage || "Failed to add activity!",
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
 
@@ -161,19 +163,6 @@ class LocationActivityList extends React.Component {
   handleInputChangeActivity = (event) => {
     this.setState({ newActivityName: event.target.value });
   };
-  // handleEdit = (requestId) => {
-  //   this.props.history.push(`/request-update/${requestId}`);
-  // };
-
-  // handleDetail = (requestId) => {
-  //   this.props.history.push(`/request-detail/${requestId}`);
-  // };
-
-  // handleCreateRequest = () => {
-  //   // Chuyển hướng đến trang add teacher
-  //   this.props.history.push(`/create-request`);
-  // };
-
   handlePageChangeActivity = (pageNumber) => {
     this.setState({ currentPageActivity: pageNumber });
   };
@@ -283,7 +272,7 @@ class LocationActivityList extends React.Component {
     const currentItemsLocation = FilterLocationListData.slice(indexOfFirstItemLocation, indexOfLastItemLocation);
 
     // Get user data from cookie
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
 
     return (
@@ -315,9 +304,6 @@ class LocationActivityList extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Location and Activity Manager</h2>
-                    {/* {roleId === 2 ? (
-                      <a onClick={() => this.handleCreateRequest()} class="btn btn-success text-white">Create New Request</a>
-                    ) : null} */}
                   </div>
                 </div>
               </div>

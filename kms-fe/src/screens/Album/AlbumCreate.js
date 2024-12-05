@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 class AlbumCreate extends React.Component {
@@ -27,7 +27,7 @@ class AlbumCreate extends React.Component {
 
     componentDidMount() {
         window.scrollTo(0, 0);
-        const userData = getSession('user')?.user;
+        const userData = getCookie('user')?.user;
         const roleId = userData?.roleId;
 
         const fetchData = async () => {
@@ -58,7 +58,7 @@ class AlbumCreate extends React.Component {
         e.preventDefault(); // Prevent default form submission
         const { classId, description, createBy, title, reason } = this.state;
 
-        let userId = getSession('user')?.user?.userId
+        let userId = getCookie('user')?.user?.userId
         console.log(userId);
         const newRequest = {
             classId,

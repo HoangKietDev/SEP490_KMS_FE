@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { Modal, Button } from "react-bootstrap";
 import Notification from "../../components/Notification";
 
@@ -25,8 +25,8 @@ class ViewClassByTeacher extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const user = getSession('user')
-    const teacherId = user ? user?.user?.userId : null;
+    const user = getCookie('user')?.user
+    const teacherId = user ? user?.userId : null;
 
     if (teacherId) {
       // Gọi API lấy danh sách class theo teacherId

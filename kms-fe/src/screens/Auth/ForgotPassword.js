@@ -83,7 +83,7 @@ class ForgotPassword extends React.Component {
             <div className="vertical-align-middle auth-main">
               <div className="auth-box">
                 <div className="top">
-                  <img src={Logo} alt="Lucid" style={{ height: "40px", margin: "10px" }} />
+                  <img src={Logo} alt="EduNest" style={{ height: "40px", margin: "10px" }} />
                 </div>
                 <div className="card">
                   <div className="header">

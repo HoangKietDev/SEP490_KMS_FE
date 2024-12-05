@@ -9,7 +9,7 @@ class FeedCards extends React.Component {
     return (
       <div className="card">
         <div className="header">
-          <h2>Lucid Feeds</h2>
+          <h2>EduNest Feeds</h2>
         </div>
         <div className="body">
           <ul className="list-unstyled feeds_widget">

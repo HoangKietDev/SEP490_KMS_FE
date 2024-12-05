@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import { modifyAlpha } from "echarts-gl";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import Pagination from "../../components/Common/Pagination";
 import { Modal, Button } from "react-bootstrap"; // Thêm modal từ react-bootstrap
 import Notification from "../../components/Notification";
@@ -41,7 +41,7 @@ class Albumlist extends React.Component {
   async componentDidMount() {
     window.scrollTo(0, 0);
 
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
 
     try {
@@ -356,7 +356,7 @@ class Albumlist extends React.Component {
     console.log(filteredAlbumListData);
 
     // Get user data from cookie
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
 
     return (

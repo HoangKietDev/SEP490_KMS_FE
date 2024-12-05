@@ -12,7 +12,7 @@ class Page404 extends React.Component {
             <div className="vertical-align-middle auth-main">
               <div className="auth-box">
                 <div className="top">
-                  <img src={Logo} alt="Lucid" style={{ height: "40px", margin: "10px" }} />
+                  <img src={Logo} alt="EduNest" style={{ height: "40px", margin: "10px" }} />
                 </div>
                 <div className="card">
                   <div className="header">
@@ -27,7 +27,7 @@ class Page404 extends React.Component {
                   <div className="body">
                     <div className="margin-top-30">
                       <a className="btn btn-default" onClick={() => this.props.history.goBack()}><i className="fa fa-arrow-left"></i>&nbsp;<span >Go Back</span></a>&nbsp;
-                      <a className="btn btn-primary" href="dashboard"><i className="fa fa-home"></i>&nbsp;<span >Home</span></a>
+                      <a className="btn btn-primary" href="/"><i className="fa fa-home"></i>&nbsp;<span >Home</span></a>
                     </div>
                   </div>
                 </div>

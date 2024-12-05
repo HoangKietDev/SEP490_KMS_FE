@@ -7,7 +7,7 @@ const DashboardAdmin = () => {
   const [data, setData] = useState(null);
   const [accountStats, setAccountStats] = useState(null);
   const [selectedYear, setSelectedYear] = useState(2024); // State lưu năm đã chọn
-  const [yearsList, setYearsList] = useState([2024, 2023, 2022]); // Danh sách năm cho phép chọn (có thể lấy từ API)
+  const [yearsList, setYearsList] = useState([]); // Danh sách năm cho phép chọn (có thể lấy từ API)
 
   // Fetch data from system status API
   useEffect(() => {
@@ -22,22 +22,33 @@ const DashboardAdmin = () => {
 
   // Fetch account statistics from API
   useEffect(() => {
-    axios.get(`http://localhost:5124/api/Dashboard/GetAccountmentStatistics?year=${selectedYear}`)
+    axios.get(`http://localhost:5124/api/Dashboard/GetAccountmentStatistics`)
       .then(response => {
-        const fullYearData = response.data.monthlyAccountments;
+        
+        const allYears = response.data.map(item => item.year); // Lấy danh sách năm từ dữ liệu trả về
+        setYearsList(allYears); // Cập nhật yearsList
 
-        // Chắc chắn dữ liệu cho tất cả 12 tháng đều có
-        const completeData = Array.from({ length: 12 }, (_, index) => {
-          const monthData = fullYearData.find(item => item.month === index + 1);
-          return monthData ? monthData : { month: index + 1, newAccount: 0 }; // Nếu không có dữ liệu cho tháng này, gán newAccount = 0
-        });
+        // Tìm dữ liệu của năm đã chọn
+        const selectedYearData = response.data.find(item => item.year === parseInt(selectedYear));
 
-        setAccountStats({ ...response.data, monthlyAccountments: completeData });
+        if (selectedYearData) {
+          const fullYearData = selectedYearData.monthlyAccountments;
+
+          // Chắc chắn dữ liệu cho tất cả 12 tháng đều có
+          const completeData = Array.from({ length: 12 }, (_, index) => {
+            const monthData = fullYearData.find(item => item.month === index + 1);
+            return monthData ? monthData : { month: index + 1, newAccount: 0 }; // Nếu không có dữ liệu cho tháng này, gán newAccount = 0
+          });
+
+          setAccountStats({ ...selectedYearData, monthlyAccountments: completeData });
+        }
       })
       .catch(error => {
         console.error("Error fetching account statistics:", error);
       });
-  }, [selectedYear]);
+  }, [selectedYear]); // Chỉ fetch lại khi selectedYear thay đổi
+
+
 
   // Format data to use in charts
   const cpuUsage = parseFloat(data?.cpuUsage) || 0;
@@ -121,32 +132,46 @@ const DashboardAdmin = () => {
   };
 
   // Options for Account Creation Statistics Chart
-  const accountStatsOption = {
-    title: {
-      text: `New Account Statistics (${selectedYear})`,
-      left: "center",
-      textStyle: {
-        color: "#4c4c4c",
+const accountStatsOption = {
+  title: {
+    text: `New Account Statistics (${selectedYear})`,
+    left: "center",
+    textStyle: {
+      color: "#4c4c4c",
+    },
+  },
+  xAxis: {
+    type: "category",
+    data: accountStats?.monthlyAccountments?.map(item => `Month ${item.month}`), // Lấy tên tháng
+  },
+  yAxis: {
+    type: "value",
+  },
+  tooltip: {
+    trigger: 'axis', // Kích hoạt tooltip khi hover vào một cột
+    axisPointer: {
+      type: 'shadow', // Hiển thị shadow cho dễ nhìn
+    },
+    formatter: (params) => {
+      // params là các thông tin chi tiết của các điểm dữ liệu
+      const month = params[0].name; // Tên tháng
+      const newAccounts = params[0].value; // Số tài khoản mới
+      return `<b>${month}</b><br/>New Accounts: ${newAccounts}`;
+    }
+  },
+  series: [
+    {
+      name: "New Accounts",
+      type: "bar", // Dùng biểu đồ cột
+      data: accountStats?.monthlyAccountments?.map(item => item.newAccount), // Lấy số tài khoản mới
+      itemStyle: {
+        color: "#3eaf7c",
       },
     },
-    xAxis: {
-      type: "category",
-      data: accountStats?.monthlyAccountments?.map(item => `Month ${item.month}`), // Lấy tên tháng
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        name: "New Accounts",
-        type: "bar", // Dùng biểu đồ cột
-        data: accountStats?.monthlyAccountments?.map(item => item.newAccount), // Lấy số tài khoản mới
-        itemStyle: {
-          color: "#3eaf7c",
-        },
-      },
-    ],
-  };
+  ],
+};
+
+
 
   return (
     <div
@@ -221,6 +246,7 @@ const DashboardAdmin = () => {
                     <div className="m-4">Loading Account Statistics...</div>
                   )}
                 </div>
+
               </div>
             </div>
           </div>

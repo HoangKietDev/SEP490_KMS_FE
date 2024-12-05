@@ -5,7 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import * as XLSX from 'xlsx';
 import Notification from "../../components/Notification";
 import { ProgressBar } from "react-loader-spinner"; // Import spinner
@@ -134,7 +134,7 @@ class Schedule extends React.Component {
         `http://localhost:5124/api/Schedule/GetSchedulesByClassId?classId=${selectId}`
       );
       const scheduleData = response.data;
-      const userData = getSession("user").user;
+      const userData = getCookie("user")?.user;
       const roleId = userData.roleId;
 
       console.log(scheduleData);
@@ -182,7 +182,7 @@ class Schedule extends React.Component {
   };
 
   handleSlotClick = (slotDetail) => {
-    const userData = getSession("user").user;
+    const userData = getCookie("user")?.user;
     const roleId = userData.roleId;
     if (slotDetail && roleId === 3) {
       this.setState({
@@ -456,7 +456,7 @@ class Schedule extends React.Component {
     const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek, showConfirmModal, loading } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = (getSession("user")).user;
+    const userData = (getCookie("user")?.user);
     const roleId = userData.roleId;
 
     console.log(scheduleDetails);
