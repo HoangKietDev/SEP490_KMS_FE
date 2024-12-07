@@ -44,8 +44,8 @@ class TeacherList extends React.Component {
   filterTeacherList = () => {
     const { TeacherListData, filterPhone, filterCode, filterStatus } = this.state;
     const filteredData = TeacherListData.filter((teacher) => {
-      const matchesPhone = filterPhone === "" || teacher.phoneNumber.includes(filterPhone);
-      const matchesCode = filterCode === "" || teacher.code.includes(filterCode.toLocaleUpperCase());
+      const matchesPhone = filterPhone === "" || teacher.phoneNumber?.includes(filterPhone);
+      const matchesCode = filterCode === "" || teacher.code?.includes(filterCode.toLocaleUpperCase());
       const matchesStatus = filterStatus === "" || teacher.status === parseInt(filterStatus);
       return matchesPhone && matchesCode && matchesStatus;
     });
@@ -155,6 +155,7 @@ class TeacherList extends React.Component {
                             <th>Gender</th>
                             <th>Code</th>
                             <th>Status</th>
+                            <th>Assign Teacher</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -186,7 +187,18 @@ class TeacherList extends React.Component {
                                     <span className="badge badge-default">InActive</span>
                                   ) : null}
                                 </td>
-
+                                <td>
+                                  <div className="fancy-checkbox d-inline-block ">
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                    
+                                       
+                                      />
+                                      <span></span>
+                                    </label>
+                                  </div>
+                                </td>
 
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"

@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import "react-calendar/dist/Calendar.css";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-import { Modal, Button, Form } from "react-bootstrap"; // Import Modal and other components from React Bootstrap
+import { Modal, Button, Form } from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class UpdateMenu extends React.Component {
@@ -12,20 +12,23 @@ class UpdateMenu extends React.Component {
             startOfWeek: new Date(),
             endOfWeek: new Date(),
         },
-        menuData: {
-            "0-3": [],
-        },
+        menuData: {},
         daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         showModal: false,
         structuredMenuData: null,
         selectedMenuItem: null,
+        gradeId: null,
     };
 
     componentDidMount() {
         const { gradeId, startDate, endDate } = this.props.location.state;
         const { startOfWeek, endOfWeek } = this.getWeekRange(new Date());
-
-        this.setState({ selectedWeek: { startOfWeek, endOfWeek } }, () => {
+        console.log(startOfWeek,"start week");
+        console.log(endOfWeek,"end week");
+        this.setState({
+            selectedWeek: { startOfWeek, endOfWeek },
+            gradeId: gradeId
+        }, () => {
             this.fetchMenuData(startDate, endDate, gradeId);
         });
     }
@@ -42,24 +45,63 @@ class UpdateMenu extends React.Component {
         return { startOfWeek, endOfWeek };
     };
 
+    // fetchMenuData = async (startOfWeek, endOfWeek, gradeId) => {
+    //     try {
+    //         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate`, {
+    //             params: { startDate: startOfWeek, endDate: endOfWeek, gradeId },
+    //         });
+
+    //         const menuData = response.data[0];
+    //         if (menuData) {
+    //             const structuredMenuData = this.structureMenuData(menuData);
+    //             this.setState({
+    //                 structuredMenuData,
+    //                 menuData: { [gradeId]: structuredMenuData.menuDetails },
+    //             });
+    //         } else {
+    //             // Nếu không có menu cho grade này, vẫn gán mảng rỗng
+    //             this.setState({
+    //                 structuredMenuData: null,
+    //                 menuData: { [gradeId]: [] },
+    //             });
+    //         }
+    //     } catch (error) {
+    //         console.error("Error fetching menu data:", error);
+    //     }
+    // };
     fetchMenuData = async (startOfWeek, endOfWeek, gradeId) => {
+        // Nếu startOfWeek và endOfWeek đang là chuỗi, parse chúng sang Date
+        const start = typeof startOfWeek === 'string' ? new Date(startOfWeek) : startOfWeek;
+        const end = typeof endOfWeek === 'string' ? new Date(endOfWeek) : endOfWeek;
+
+        const startDate = this.formatDate(start);
+        const endDate = this.formatDate(end);
+
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate`, {
-                params: { startDate: startOfWeek, endDate: endOfWeek, gradeId },
+                params: { startDate, endDate },
             });
 
-            const menuData = response.data[0];
-            if (menuData) {
-                const structuredMenuData = this.structureMenuData(menuData);
+            const data = response.data;
+            const menuForGrade = data.find(m => m.gradeIDs.includes(gradeId));
+
+            if (menuForGrade) {
+                const structuredMenuData = this.structureMenuData(menuForGrade);
                 this.setState({
                     structuredMenuData,
-                    menuData: { "0-3": structuredMenuData.menuDetails },
+                    menuData: { [gradeId]: structuredMenuData.menuDetails },
+                });
+            } else {
+                this.setState({
+                    structuredMenuData: null,
+                    menuData: { [gradeId]: [] },
                 });
             }
         } catch (error) {
             console.error("Error fetching menu data:", error);
         }
     };
+
 
     structureMenuData = (menuData) => {
         const { menuID, startDate, endDate, gradeID, status, menuDetails } = menuData;
@@ -86,29 +128,35 @@ class UpdateMenu extends React.Component {
     };
 
     formatDate = (date) => {
-        return date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+        const d = new Date(date);  // Tạo đối tượng Date từ tham số đầu vào
+        return d.toISOString().split('T')[0];  // Trả về định dạng yyyy-mm-dd
     };
+    
+    
 
     handleSave = async () => {
-        const { selectedMenuItem, selectedWeek, structuredMenuData } = this.state;
+        const { selectedMenuItem, selectedWeek, structuredMenuData, gradeId } = this.state;
         const requestBody = this.createRequestBody(selectedMenuItem, selectedWeek, structuredMenuData);
-
+        console.log(requestBody,"sdsdsdsd");
+        
         try {
             await axios.put(`${process.env.REACT_APP_API_URL}/api/Menu/UpdateMenu`, requestBody);
             this.setState({ showModal: false });
-            this.fetchMenuData(selectedWeek.startOfWeek, selectedWeek.endOfWeek, this.props.location.state.gradeId);
+            this.fetchMenuData(this.formatDate(selectedWeek.startOfWeek), this.formatDate(selectedWeek.endOfWeek), gradeId);
         } catch (error) {
             console.error("Error updating menu item:", error);
         }
     };
 
-    createRequestBody = (selectedMenuItem, selectedWeek, structuredMenuData) => {
+    createRequestBody = (selectedMenuItem, selectedWeek, structuredMenuData, gradeId) => {
+        console.log(this.formatDate(selectedWeek.startOfWeek),"okeokeokeo");
+        
         return {
-            menuID: structuredMenuData.menuID,
+            menuID: structuredMenuData?.menuID || 0,
             startDate: this.formatDate(selectedWeek.startOfWeek),
             endDate: this.formatDate(selectedWeek.endOfWeek),
-            gradeID: this.props.location.state.gradeId,
-            status: structuredMenuData.status || 0,
+            gradeID: gradeId,
+            status: structuredMenuData?.status || 0,
             menuDetails: [
                 {
                     menuDetailId: selectedMenuItem.menuDetailId,
@@ -120,7 +168,7 @@ class UpdateMenu extends React.Component {
         };
     };
 
-    renderTable = (ageGroup) => {
+    renderTable = (gradeId) => {
         const { menuData, daysOfWeek } = this.state;
 
         return (
@@ -138,7 +186,7 @@ class UpdateMenu extends React.Component {
                         {["BS", "BT", "BC"].map(mealCode => (
                             <tr key={mealCode}>
                                 <td className="sticky-col text-bold"><strong>{this.getMealLabel(mealCode)}</strong></td>
-                                {this.renderMeals(ageGroup, mealCode)}
+                                {this.renderMeals(gradeId, mealCode)}
                             </tr>
                         ))}
                     </tbody>
@@ -147,11 +195,13 @@ class UpdateMenu extends React.Component {
         );
     };
 
-    renderMeals = (ageGroup, mealCode) => {
+    renderMeals = (gradeId, mealCode) => {
         const { menuData, daysOfWeek } = this.state;
 
+        const gradeMenuData = menuData[gradeId] || [];
+
         return daysOfWeek.map((day, index) => {
-            const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === mealCode && this.mapDayToEnglish(menu.dayOfWeek) === day);
+            const menuItems = gradeMenuData.filter(menu => menu.mealCode === mealCode && this.mapDayToEnglish(menu.dayOfWeek) === day);
             return (
                 <td key={index} className="text-center">
                     {menuItems.length > 0 ? (
@@ -161,7 +211,7 @@ class UpdateMenu extends React.Component {
                                     <span
                                         className="menu-item text-info"
                                         onClick={() => this.toggleModal(menuItem)}
-                                        style={{ cursor: 'pointer', }}
+                                        style={{ cursor: 'pointer' }}
                                     >
                                         {menuItem.foodName}
                                     </span>
@@ -199,13 +249,13 @@ class UpdateMenu extends React.Component {
     };
 
     render() {
-        const { selectedWeek, showModal, selectedMenuItem } = this.state;
+        const { selectedWeek, showModal, selectedMenuItem, gradeId } = this.state;
 
         return (
             <div className="container-fluid">
                 <PageHeader
                     HeaderText="Food Management"
-                    Breadcrumb={[{ name: "Food Management", navigate: "" }, { name: "View Menu", navigate: "" }]}
+                    Breadcrumb={[{ name: "Food Management", navigate: "/viewmenu" }, { name: "View Menu", navigate: "" }]}
                 />
                 <div className="row">
                     <div className="col-lg-12 col-md-12">
@@ -213,8 +263,13 @@ class UpdateMenu extends React.Component {
                         <div className="week-selector">
                             Selected Week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
                         </div>
-                        <h4 className="menu-title">All: 0-3</h4>
-                        <div className="table-container">{this.renderTable("0-3")}</div>
+                        {/* Đổi All: 0-3 thành Grade: {gradeId}, và render với gradeId */}
+                        {gradeId && (
+                            <>
+                                <h4 className="menu-title">Grade: {gradeId}</h4>
+                                <div className="table-container">{this.renderTable(gradeId)}</div>
+                            </>
+                        )}
 
                         {/* Modal for editing menu item */}
                         <Modal show={showModal} onHide={this.toggleModal} centered>

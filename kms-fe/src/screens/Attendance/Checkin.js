@@ -113,127 +113,7 @@ class Checkin extends React.Component {
     return new File([u8arr], filename, { type: mime });
   };
 
-  // uploadFile = (file) => {
-  //   let currentAttendanceDetailID;
-  //   if (!file) {
-  //     alert("No file selected. Please select an image before uploading.");
-  //     return;
-  //   }
-
-  //   // Kiểm tra định dạng file
-  //   const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-  //   if (!validTypes.includes(file.type)) {
-  //     alert("Invalid file type. Please select a JPEG or PNG image.");
-  //     return;
-  //   }
-
-  //   // Kiểm tra kích thước file (giới hạn 5MB)
-  //   if (file.size > 5 * 1024 * 1024) {
-  //     alert("File too large. Please select a file smaller than 5MB.");
-  //     return;
-  //   }
-
-
-
-  //   // Hiển thị trạng thái đang upload
-  //   this.setState({ isUploading: true });
-
-  //   const formDataForRecognition = new FormData();
-  //   formDataForRecognition.append("photo", file); // Gửi file để nhận diện
-
-  //   // Gọi API nhận diện học sinh
-  //   fetch("${process.env.REACT_APP_API_URL}/api/Luxand/RecognizePerson?collections=student", {
-  //     method: "POST",
-  //     body: formDataForRecognition,
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error(`Failed to recognize person: ${response.statusText}`);
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((recognitionData) => {
-  //       console.log("Recognition API response:", recognitionData);
-
-  //       if (recognitionData && recognitionData.length > 0) {
-  //         const recognizedName = recognitionData[0].name;
-
-  //         // Đối chiếu với studentDataCheckin
-  //         const matchedStudent = this.state.studentDataCheckin.find(
-  //           (student) => String(student.studentId) === recognizedName
-  //         );
-
-  //         if (matchedStudent) {
-  //           // alert(`Học sinh ${matchedStudent.fullName} được nhận diện thành công.`);
-  //           // console.log(recognizedName, "sdsdsds");
-  //           this.setState({
-  //             notificationText: `Học sinh ${matchedStudent.fullName} được nhận diện thành công.`,
-  //             notificationType: "success",
-  //             showNotification: true
-  //           });
-  //           // Chuẩn bị dữ liệu upload ảnh sau khi nhận diện thành công
-  //           currentAttendanceDetailID = this.getAttendanceDetailIDByStudentID(recognizedName)
-  //           console.log(currentAttendanceDetailID, "test curent");
-
-  //           const formDataForUpload = new FormData();
-  //           formDataForUpload.append("attendanceDetailID", currentAttendanceDetailID);
-  //           formDataForUpload.append("images", file);
-
-  //           // Gọi API upload ảnh
-  //           return fetch("${process.env.REACT_APP_API_URL}/api/Attendance/UploadAttendanceImages", {
-  //             method: "PUT", // Hoặc POST nếu API yêu cầu
-  //             body: formDataForUpload,
-  //           }).then((uploadResponse) => {
-  //             if (!uploadResponse.ok) {
-  //               throw new Error(
-  //                 `Failed to upload image: ${uploadResponse.status} ${uploadResponse.statusText}`
-  //               );
-  //             }
-  //             return uploadResponse.json();
-  //           });
-  //         } else {
-  //           this.setState({
-  //             notificationText: `Không tìm thấy học sinh phù hợp.`,
-  //             notificationType: "error",
-  //             showNotification: true
-  //           });
-  //           throw new Error("Không tìm thấy học sinh phù hợp.");
-
-  //         }
-  //       } else {
-  //         this.setState({
-  //           notificationText: `Không tìm thấy dữ liệu phù hợp trong ảnh.`,
-  //           notificationType: "error",
-  //           showNotification: true
-  //         });
-  //         throw new Error("Không tìm thấy dữ liệu phù hợp trong ảnh.");
-  //       }
-  //     })
-  //     .then((uploadData) => {
-  //       console.log("Upload response:", uploadData);
-  //       this.setState({
-  //         notificationText: `Image uploaded successfully!`,
-  //         notificationType: "success",
-  //         showNotification: true
-  //       });
-  //       // Cập nhật trạng thái điểm danh
-  //       const studentId = this.getStudentIdByAttendanceDetailID(currentAttendanceDetailID);
-  //       if (studentId) {
-  //         this.handleAttendance(studentId, "Có");
-  //       }
-
-  //       // Đóng modal
-  //       this.closeImageModal();
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //       alert(`Có lỗi xảy ra: ${error.message}`);
-  //     })
-  //     .finally(() => {
-  //       // Ẩn trạng thái đang upload
-  //       this.setState({ isUploading: false });
-  //     });
-  // };
+  
   uploadFile = (file) => {
     let currentAttendanceDetailID;
     if (!file) {
@@ -317,19 +197,19 @@ class Checkin extends React.Component {
             });
           } else {
             this.setState({
-              notificationText: "Không tìm thấy học sinh phù hợp.",
+              notificationText: "No suitable students found.",
               notificationType: "error",
               showNotification: true,
             });
-            throw new Error("Không tìm thấy học sinh phù hợp.");
+            throw new Error("No suitable students found.");
           }
         } else {
           this.setState({
-            notificationText: "Không tìm thấy dữ liệu phù hợp trong ảnh.",
+            notificationText: "No matching data found in image.",
             notificationType: "error",
             showNotification: true,
           });
-          throw new Error("Không tìm thấy dữ liệu phù hợp trong ảnh.");
+          throw new Error("No matching data found in image.");
         }
       })
       .then((uploadData) => {
@@ -379,7 +259,7 @@ class Checkin extends React.Component {
         console.error("Error fetching pickup person info:", error);
         // alert("Không thể tải thông tin người đón.");
         this.setState({
-          notificationText: "Không thể tải thông tin người đón.",
+          notificationText: "Unable to load pick up information.",
           notificationType: "error",
           showNotification: true,
         });
@@ -1387,6 +1267,7 @@ class Checkin extends React.Component {
                       capture="environment"
                       style={{ display: "none" }}
                       onChange={this.handleFileChange} // Không truyền `studentId` trực tiếp
+                      disabled={!isToday}
                     />
                   </label>
                   <table className="table table-hover mt-3">
@@ -1505,6 +1386,7 @@ class Checkin extends React.Component {
                       capture="environment"
                       style={{ display: "none" }}
                       onChange={this.handleFileChange} // Không truyền `studentId` trực tiếp
+                      disabled={!isToday}
                     />
                   </label>
                   <table className="table table-hover mt-3">

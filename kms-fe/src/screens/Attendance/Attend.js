@@ -1014,7 +1014,7 @@ class Attend extends React.Component {
                                             <tr>
                                                 <th>Student Name</th>
                                                 {serviceData.map((service) => (
-                                                    <th key={service.serviceId}>{service.serviceName}</th>
+                                                    <th key={service.serviceId}>{service.serviceName} ({service.servicePrice}) </th>
                                                 ))}
                                             </tr>
                                         </thead>

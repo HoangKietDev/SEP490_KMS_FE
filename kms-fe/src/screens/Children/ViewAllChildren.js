@@ -43,7 +43,12 @@ class ViewAllChildren extends React.Component {
     // Chuyển hướng đến trang cập nhật thông tin học sinh
     this.props.history.push(`/viewstudentbyId/${studentId}`);
   };
-
+  handleDownload = () => {
+    const link = document.createElement('a'); // Tạo thẻ a
+    link.href = '/assets/excel/Sample_Import_Student.xlsx';  // Đường dẫn đến file Excel
+    link.download = 'Sample_Import_Student.xlsx';             // Tên file khi tải về
+    link.click();                             // Kích hoạt sự kiện click để tải file
+  };
   // Xử lý khi người dùng chọn file
   handleFileChange = (e) => {
     this.setState({ file: e.target.files[0], error: "" });
@@ -128,6 +133,14 @@ class ViewAllChildren extends React.Component {
                 onClose={() => this.setState({ showNotification: false })}
               />
             )}
+            <a
+              onClick={() => {
+                this.handleDownload()
+              }}
+              className="btn btn-success text-white mr-4"
+            >
+              <i className="icon-arrow-down mr-2"></i>Dowload Template
+            </a>
             <form onSubmit={this.handleSubmit}>
               <div className="form-group">
                 <label>Choose Excel File</label>
@@ -138,6 +151,7 @@ class ViewAllChildren extends React.Component {
                   onChange={this.handleFileChange}
                 />
                 {error && <p className="text-danger">{error}</p>}
+
               </div>
               <button type="submit" className="btn btn-primary">
                 Upload Excel File
