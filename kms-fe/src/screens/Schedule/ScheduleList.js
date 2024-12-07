@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Login from "../Login";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { addNotificationByRoleId, addNotificationByUserId } from "../../components/Common/Notification";
 import Notification from "../../components/Notification";
 import Pagination from "../../components/Common/Pagination";
@@ -30,7 +30,7 @@ class ScheduleList extends React.Component {
   };
 
   componentDidMount() {
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData.roleId
     if (!userData) {
       this.props.history.push("/login");  // Nếu cookie không tồn tại hoặc không hợp lệ, chuyển hướng về login
@@ -121,10 +121,6 @@ class ScheduleList extends React.Component {
       }
       await axios.put(`${process.env.REACT_APP_API_URL}/api/Schedule/UpdateSchedule`, formdata);
 
-      // tao thong bao moi
-      addNotificationByUserId('UserId', 'content', 21);
-      // addNotificationByRoleId('RoleId', 'content', 3);
-
       // Update the state locally after a successful API call
       this.setState((prevState) => ({
         ScheduleListData: prevState.ScheduleListData.map(schedule =>
@@ -186,12 +182,12 @@ class ScheduleList extends React.Component {
 
 
     const statusOptions = [
-      { value: 1, label: "Active", className: "badge-success" },
-      { value: 2, label: "Inactive", className: "badge-danger" },
+      { value: 1, label: "Aprroved", className: "badge-success" },
+      { value: 2, label: "Rejected", className: "badge-danger" },
       { value: 0, label: "Pending", className: "badge-default" },
     ];
 
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId
 
 

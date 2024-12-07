@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import Pagination from "../../components/Common/Pagination";
 
 class RequestList extends React.Component {
@@ -26,7 +26,7 @@ class RequestList extends React.Component {
       .get(`${process.env.REACT_APP_API_URL}/api/Request/GetAllRequests`)
       .then((response) => {
         const { data } = response;
-        const userData = getSession("user")?.user;
+        const userData = getCookie("user")?.user;
         const roleId = userData?.roleId;
 
         const reversedData = data.reverse(); // Đảo ngược thứ tự dữ liệu
@@ -107,7 +107,7 @@ class RequestList extends React.Component {
 
   render() {
     const { NewRequestListData, UserListData } = this.state;
-    const userData = getSession("user")?.user;
+    const userData = getCookie("user")?.user;
     const roleId = userData?.roleId;
 
     const statusDescriptions = {

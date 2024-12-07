@@ -131,10 +131,10 @@ class UpdateChildren extends React.Component {
             />
             <div className="row clearfix">
               <div className="col-md-12">
-                <div className="card">
-                  <div className="header text-center">
-                    <h4>Teacher Update</h4>
-                  </div>
+              <div className="card shadow-lg">
+                <div className="card-header text-white theme-colorbg">
+                  <h4 className="mb-0">Update Teacher</h4>
+                </div>
                   <div className="body">
                     <form onSubmit={this.handleSubmit} className="update-teacher-form">
                       <div className="row">

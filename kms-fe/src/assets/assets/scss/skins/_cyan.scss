@@ -16,6 +16,9 @@ $cyan-600: #00acc1 !default;
     .theme-color {
         color: $cyan-500;
     }
+    .theme-colorbg {
+        background-color: $cyan-500;
+    }
 
     ::selection {
         color: $white;

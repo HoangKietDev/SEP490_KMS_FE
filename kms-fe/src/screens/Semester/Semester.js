@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { getSession } from '../../components/Auth/Auth';
+import { getCookie } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 
 class Semester extends React.Component {
@@ -78,7 +78,7 @@ class Semester extends React.Component {
 
     const { semesters, searchText, sortDirection, filterStatus } = this.state;
     
-    const userData = getSession('user').user;
+    const userData = getCookie('user')?.user;
     const roleId = userData.roleId
 
 
@@ -117,7 +117,7 @@ class Semester extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Semester Manager</h2>
-                    {roleId === 3 ? (
+                    {roleId === 4 ? (
                       <div>
                         <a onClick={() => this.handleCreateSemester()} class="btn btn-success text-white">Create New Semester</a>
                       </div>
@@ -162,8 +162,8 @@ class Semester extends React.Component {
                         <tr className="theme-color">
                           <th>#</th>
                           <th>Semester Name</th>
-                          <th>startDate</th>
-                          <th>endDate</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
                           <th>Status</th>
                           <th>Action</th>
                         </tr>
@@ -193,9 +193,9 @@ class Semester extends React.Component {
                                 ) : null}
                               </td>
                               <td className="project-actions">
-                                {/* <a onClick={() => this.handleViewDetail(item.semesterId)} className="btn btn-outline-secondary mr-1">
+                                <a onClick={() => this.handleViewDetail(item.semesterId)} className="btn btn-outline-secondary mr-1">
                                   <i className="icon-eye"></i>
-                                </a> */}
+                                </a>
                                 <a onClick={() => this.handleEdit(item.semesterId)} className="btn btn-outline-secondary">
                                   <i className="icon-pencil"></i>
                                 </a>

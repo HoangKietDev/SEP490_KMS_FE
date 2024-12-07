@@ -68,6 +68,15 @@ class ServiceUpdate extends React.Component {
             }
         };
 
+        if (this.state.servicePrice <= 0) {
+            this.setState({
+                notificationText: "Number of Service Price must grater than 0",
+                notificationType: "error",
+                showNotification: true,
+            });
+            return;
+        }
+
         try {
             await axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateService`, updatedService, {
                 headers: {
@@ -119,7 +128,10 @@ class ServiceUpdate extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Update Service</h4>
+                                    </div>
                                     <div className="body">
                                         <form onSubmit={this.handleSubmit}>
                                             <div className="row">
@@ -190,9 +202,8 @@ class ServiceUpdate extends React.Component {
                                             </div>
 
                                             <br />
-                                            <div className="text-center">
-                                                <button type="submit" className="btn btn-primary my-4">Update Service</button>
-                                            </div>
+                                            <a href="/service" className="btn btn-success text-center">Back to Service List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Update Service</button>
                                         </form>
                                     </div>
                                 </div>

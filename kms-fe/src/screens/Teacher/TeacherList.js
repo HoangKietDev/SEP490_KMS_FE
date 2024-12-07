@@ -27,12 +27,6 @@ class TeacherList extends React.Component {
         const Teacherdata = TeacherResponse.data;
         this.setState({ TeacherListData: Teacherdata, filteredTeacherListData: Teacherdata })
 
-        // // Fetch student by ParentID
-        // const user = localStorage.getItem("user")
-        // const parentId = JSON.parse(user).user.userId
-        // const studentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentId}`);
-        // const studentData = studentResponse.data;
-
 
       } catch (error) {
         console.error('Error fetching category details:', error);
@@ -43,7 +37,7 @@ class TeacherList extends React.Component {
 
   filterTeacherList = () => {
     const { TeacherListData, filterPhone, filterCode, filterStatus } = this.state;
-    const filteredData = TeacherListData.filter((teacher) => {
+    const filteredData = TeacherListData?.filter((teacher) => {
       const matchesPhone = filterPhone === "" || teacher.phoneNumber?.includes(filterPhone);
       const matchesCode = filterCode === "" || teacher.code?.includes(filterCode.toLocaleUpperCase());
       const matchesStatus = filterStatus === "" || teacher.status === parseInt(filterStatus);

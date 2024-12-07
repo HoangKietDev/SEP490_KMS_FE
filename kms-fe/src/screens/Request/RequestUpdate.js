@@ -5,7 +5,7 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Notification from "../../components/Notification";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { addNotificationByUserId } from "../../components/Common/Notification";
 
 class RequestUpdate extends React.Component {
@@ -39,7 +39,7 @@ class RequestUpdate extends React.Component {
     window.scrollTo(0, 0);
     const { requestId } = this.props.match.params;
     this.setState({ requestId: parseInt(requestId) });
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
 
     const dataRole = this.getFilteredStatusDescriptions(roleId); // Call filtering here
@@ -114,8 +114,8 @@ class RequestUpdate extends React.Component {
         notificationType: "success",
         showNotification: true,
       });
-      console.log(typeof(status));
-     
+      console.log(typeof (status));
+
 
       if (status == 3) {
         addNotificationByUserId("Request Handle", "Request has been approved", createBy)
@@ -179,7 +179,7 @@ class RequestUpdate extends React.Component {
   render() {
     const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject, filteredStatuses, statusDescriptions } = this.state;
 
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
 
     return (
@@ -197,9 +197,9 @@ class RequestUpdate extends React.Component {
           />
           <div className="row clearfix">
             <div className="col-md-12">
-              <div className="card">
-                <div className="header text-center">
-                  <h4>Request Update</h4>
+              <div className="card shadow-lg">
+                <div className="card-header text-white theme-colorbg">
+                  <h4 className="mb-0">Update Request</h4>
                 </div>
                 <div className="body">
                   <form className="update-teacher-form" onSubmit={this.handleSubmit}>
@@ -208,6 +208,8 @@ class RequestUpdate extends React.Component {
                         <label>Title Request</label>
                         <input className="form-control" value={title} name="title"
                           readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                          onChange={(e) => this.setState({ title: e.target.value })}
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6">
@@ -238,6 +240,8 @@ class RequestUpdate extends React.Component {
                         <label>Request Description</label>
                         <textarea className="form" rows="6" value={description} name="description"
                           readOnly={roleId !== 2} // Không readonly nếu roleId = 2 
+                          onChange={(e) => this.setState({ description: e.target.value })}
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6 d-flex flex-column">

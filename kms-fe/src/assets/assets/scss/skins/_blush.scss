@@ -16,6 +16,9 @@ $blush-600: #e25985 !default;
     .theme-color {
         color: $blush-500;
     }
+    .theme-colorbg {
+        background-color: $blush-500;
+    }
     ::selection {
         color: $white;
         background: $blush-500;

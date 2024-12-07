@@ -3,12 +3,14 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
+
 import Pagination from "../../components/Common/Pagination";
+import sign from "../../assets/images/signature.png"
 
 // Import PDF generation utilities
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image } from '@react-pdf/renderer';
 
 
 const styles = StyleSheet.create({
@@ -77,6 +79,33 @@ const styles = StyleSheet.create({
   notes: {
     marginTop: 30,
   },
+
+  signatureSection: {
+    marginTop: 50,
+    alignItems: "flex-end",
+    marginRight: 50,
+  },
+  signatureTitle: {
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "right",
+    marginBottom: 10,
+  },
+  signatureLine: {
+    width: 150,
+    height: 1,
+    backgroundColor: "#000",
+    marginBottom: 5,
+  },
+  signatureName: {
+    fontSize: 12,
+    textAlign: "right",
+  },
+  signatureImage: {
+    width: 100, // Điều chỉnh kích thước hình ảnh chữ ký
+    height: 50, // Điều chỉnh chiều cao hình ảnh
+    objectFit: 'contain' // Đảm bảo hình ảnh được hiển thị đúng tỉ lệ
+  }
 });
 
 class PaymentHistory extends React.Component {
@@ -92,20 +121,29 @@ class PaymentHistory extends React.Component {
     itemsPerPage: 10,
   };
 
+
   async componentDidMount() {
     window.scrollTo(0, 0);
-    this.loadData();
-  }
 
-  componentDidUpdate(prevProps) {
-    // Kiểm tra nếu URL thay đổi
-    if (this.props.location.search !== prevProps.location.search) {
-      this.loadData(); // Tải lại dữ liệu khi URL thay đổi
+    // Kiểm tra và hiển thị thông báo từ sessionStorage nếu có
+    const savedNotification = sessionStorage.getItem('paymentNotification');
+    if (savedNotification) {
+      const notification = JSON.parse(savedNotification);
+      this.setState({
+        notificationText: notification.text,
+        notificationType: notification.type,
+        showNotification: true,
+      });
+
+      // Xóa thông báo đã lưu trong sessionStorage sau khi hiển thị
+      sessionStorage.removeItem('paymentNotification');
     }
+
+    this.loadData(); // Tải lại dữ liệu
   }
 
   loadData = async () => {
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
     if (!parentId) {
@@ -131,19 +169,25 @@ class PaymentHistory extends React.Component {
 
         console.log("Payment Callback Response:", response.data);
 
-        this.setState({
-          notificationText: "Payment successfully!",
-          notificationType: "success",
-          showNotification: true,
-        });
+        // Lưu thông báo thành công vào sessionStorage
+        sessionStorage.setItem('paymentNotification', JSON.stringify({
+          text: "Payment successfully!",
+          type: "success",
+        }));
+
+        // Reload trang với URL sạch
+        window.location.href = "/payment-history"; // Điều hướng về URL sạch
       } catch (error) {
         console.error("Error in Payment Callback:", error);
 
-        this.setState({
-          notificationText: "Payment Cancel!",
-          notificationType: "error",
-          showNotification: true,
-        });
+        // Lưu thông báo thất bại vào sessionStorage
+        sessionStorage.setItem('paymentNotification', JSON.stringify({
+          text: "Payment failed. Please try again.",
+          type: "error",
+        }));
+
+        // Reload trang với URL sạch
+        window.location.href = "/payment-history"; // Điều hướng về URL sạch
       }
     }
 
@@ -163,7 +207,6 @@ class PaymentHistory extends React.Component {
       console.error("Error fetching children data:", error);
     }
   };
-
 
   getPaymentHistory = async (parentId) => {
     if (!parentId) {
@@ -190,12 +233,15 @@ class PaymentHistory extends React.Component {
   };
 
   removeDiacritics = (str) => {
+    if (typeof str !== "string") {
+      return ""; // Trả về chuỗi rỗng nếu đầu vào không phải là chuỗi
+    }
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
 
   // Generate PDF using react-pdf
   generatePDF = (item) => {
-    const user = getSession('user')?.user
+    const user = getCookie('user')?.user
     const fullName = user?.firstname + user?.lastName
     return (
       <Document>
@@ -236,14 +282,17 @@ class PaymentHistory extends React.Component {
                 <Text style={[styles.tableCell, styles.bold]}>Discount</Text>
                 <Text style={[styles.tableCell, styles.bold]}>Total</Text>
               </View>
-              <View style={styles.tableRow}>
-                <Text style={styles.tableCell}>1</Text>
-                <Text style={styles.tableCell}>{item.paymentName}</Text>
-                <Text style={styles.tableCell}>{item.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN')}</Text>
-                <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.number} Months</Text>
-                <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.discount1} %</Text>
-                <Text style={styles.tableCell}>{(item.tuitionDetails?.discountDetails?.number * item?.tuitionDetails?.tuitionFee)?.toLocaleString('vi-VN')}</Text>
-              </View>
+
+              {item?.tuitionDetails &&
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCell}>1</Text>
+                  <Text style={styles.tableCell}>{item.paymentName}</Text>
+                  <Text style={styles.tableCell}>{item.tuitionDetails?.tuitionFee?.toLocaleString('vi-VN')}</Text>
+                  <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.number} Months</Text>
+                  <Text style={styles.tableCell}>{item.tuitionDetails?.discountDetails?.discount1} %</Text>
+                  <Text style={styles.tableCell}>{(item.tuitionDetails?.discountDetails?.number * item?.tuitionDetails?.tuitionFee)?.toLocaleString('vi-VN')}</Text>
+                </View>
+              }
 
               {item?.services?.map((item1, index) => (
                 <View style={styles.tableRow} key={index}>
@@ -262,6 +311,16 @@ class PaymentHistory extends React.Component {
           {/* Tổng cộng */}
           <View style={styles.total}>
             <Text style={styles.totalText}>Grand Total: {item?.totalAmount?.toLocaleString('vi-VN')} VND</Text>
+          </View>
+
+          {/* Chữ ký hiệu trưởng */}
+          <View style={styles.signatureSection}>
+            <Text style={styles.signatureTitle}>Principal's Signature</Text>
+            <View style={styles.signatureLine}></View>
+            <Image
+              src={sign} // Thay đổi đường dẫn tới file hình ảnh chữ ký của hiệu trưởng
+              style={styles.signatureImage} // Tùy chỉnh kích thước hình ảnh nếu cần
+            />
           </View>
 
           {/* Ghi chú */}
@@ -369,7 +428,7 @@ class PaymentHistory extends React.Component {
                               <td>{index + 1}</td>
                               <td>{item?.childName}</td>
                               <td>{item?.paymentDate}</td>
-                              <td>{item?.totalAmount} VND</td>
+                              <td>{item?.totalAmount?.toLocaleString('vi-VN')} VND</td>
                               <td>{item?.paymentName}</td>
                               <td>
                                 {/* Download button */}

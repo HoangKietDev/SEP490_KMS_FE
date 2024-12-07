@@ -26,7 +26,7 @@ class SemesterCreate extends React.Component {
         event.preventDefault(); // Ngăn hành vi mặc định của form
         const values = {
             name: this.state.name,
-            status: this.state.status,
+            status: 1,
             startDate: this.state.startDate,
             endDate: this.state.endDate,
         };
@@ -93,7 +93,10 @@ class SemesterCreate extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Create Semester</h4>
+                                    </div>
                                     <div className="body">
                                         <form onSubmit={this.handleCreatSemester}>
                                             <div className="form-group">
@@ -142,38 +145,9 @@ class SemesterCreate extends React.Component {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="form-group">
-                                                <label>Status</label>
-                                                <br />
-                                                <label className="fancy-radio">
-                                                    <input
-                                                        name="status"
-                                                        type="radio"
-                                                        value={1}
-                                                        checked={status === 1}
-                                                        onChange={() => this.setState({ status: 1 })}
-                                                    />
-                                                    <span>
-                                                        <i></i>Enable
-                                                    </span>
-                                                </label>
-                                                <label className="fancy-radio">
-                                                    <input
-                                                        name="status"
-                                                        type="radio"
-                                                        value={0}
-                                                        checked={status === 0}
-                                                        onChange={() => this.setState({ status: 0 })}
-                                                    />
-                                                    <span>
-                                                        <i></i>Disable
-                                                    </span>
-                                                </label>
-                                            </div>
                                             <br />
-                                            <br />
-                                            <button type="submit" className="btn btn-primary mr-4">Create Semester</button>
                                             <a href="semester" className="btn btn-success text-center">Back to Semester List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Create Semester</button>
                                         </form>
                                     </div>
                                 </div>

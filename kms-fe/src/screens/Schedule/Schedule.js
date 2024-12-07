@@ -5,11 +5,10 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import * as XLSX from 'xlsx';
 import Notification from "../../components/Notification";
-
-
+import { ProgressBar } from "react-loader-spinner"; // Import spinner
 
 class Schedule extends React.Component {
 
@@ -90,6 +89,8 @@ class Schedule extends React.Component {
     notificationText: "", // Text for the notification
     notificationType: "success", // Type of notification (success or error)
 
+    loading: false,  // Thêm trạng thái loading
+
   };
 
 
@@ -133,7 +134,7 @@ class Schedule extends React.Component {
         `${process.env.REACT_APP_API_URL}/api/Schedule/GetSchedulesByClassId?classId=${selectId}`
       );
       const scheduleData = response.data;
-      const userData = getSession("user").user;
+      const userData = getCookie("user")?.user;
       const roleId = userData.roleId;
 
       console.log(scheduleData);
@@ -181,7 +182,9 @@ class Schedule extends React.Component {
   };
 
   handleSlotClick = (slotDetail) => {
-    if (slotDetail) {
+    const userData = getCookie("user")?.user;
+    const roleId = userData.roleId;
+    if (slotDetail && roleId === 3) {
       this.setState({
         showModal: true,
         selectedSlot: {
@@ -217,7 +220,11 @@ class Schedule extends React.Component {
 
     // Guard clause to check if both activity and location are selected
     if (!activity || !location) {
-      alert("Please select a valid activity and location.");
+      this.setState({
+        notificationText: "Please select a valid activity and location.",
+        notificationType: "info",
+        showNotification: true
+      });
       return;
     }
 
@@ -309,7 +316,6 @@ class Schedule extends React.Component {
     const classId = urlParams.get('classId'); // Assumes classId is in query string
 
     if (!file) {
-      alert("Please select a file to import!"); // Kiểm tra nếu không có file được chọn
       this.setState({
         notificationText: "Please select a file to import!",
         notificationType: "info",
@@ -393,13 +399,64 @@ class Schedule extends React.Component {
     link.click();                             // Kích hoạt sự kiện click để tải file
   };
 
+  getGradeName = (gradeId) => {
+    const { GradesData } = this.state;
+    const grade = GradesData.find((g) => g.gradeId === gradeId);
+    return grade ? grade.name : 'N/A';
+  };
+
+  // Hàm xử lý khi nhấn "Send Mail Notification"
+  handleSendMailNotification = () => {
+    this.setState({ showConfirmModal: true });
+  };
+
+  handleConfirmSendMail = async () => {
+    this.setState({ showConfirmModal: false, loading: true }); // Bật loading
+
+    // Lấy classId từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const classId = urlParams.get('classId'); // Assumes classId is in query string
+
+    try {
+      // API call sử dụng fetch
+      const response = await fetch(`http://localhost:5124/api/Class/SendMailToParentsByClassId/${classId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        this.setState({
+          notificationText: "Mail sent successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
+      }
+    } catch (error) {
+      this.setState({
+        notificationText: "Mail sent Error!",
+        notificationType: "error",
+        showNotification: true
+      });
+    } finally {
+      this.setState({ loading: false }); // Kết thúc loading
+    }
+  };
+
+
+  // Hàm đóng popup confirm
+  handleCloseConfirmModal = () => {
+    this.setState({ showConfirmModal: false });
+  };
+
 
 
   renderTable = () => {
-    const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek } = this.state;
+    const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek, showConfirmModal, loading } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = (getSession("user")).user;
+    const userData = (getCookie("user")?.user);
     const roleId = userData.roleId;
 
     console.log(scheduleDetails);
@@ -459,6 +516,46 @@ class Schedule extends React.Component {
                           </select>
                         </div>
                       </div>
+
+                      {/* Button để gửi email */}
+                      {roleId === 5 ? (
+                        <>
+                          <button
+                            className="btn btn-primary ml-3"
+                            onClick={this.handleSendMailNotification}
+                            disabled={loading} // Nút bị vô hiệu hóa nếu loading = true
+                          >
+                            {loading ? "Sending..." : "Send Mail Notification"}
+                          </button>
+
+                          {/* Nếu loading, hiển thị spinner */}
+                          {loading && (
+                            <div className="loading-container">
+                              <ProgressBar color="#00BFFF" height={40} width={100} />
+                            </div>
+                          )}
+                        </>
+                      ) : null}
+
+
+
+                      {/* Modal confirm */}
+                      <Modal show={showConfirmModal} onHide={this.handleCloseConfirmModal}>
+                        <Modal.Header closeButton>
+                          <Modal.Title>Confirm Mail Notification</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          Are you sure you want to send mail notifications with the current filters?
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={this.handleCloseConfirmModal}>
+                            Cancel
+                          </Button>
+                          <Button variant="primary" onClick={this.handleConfirmSendMail}>
+                            Confirm
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
 
                       {/* Export and Import buttons */}
                       <div className="d-flex flex-column flex-sm-row align-items-center">
@@ -547,7 +644,9 @@ class Schedule extends React.Component {
                                   <td key={dayIndex} onClick={() => this.handleSlotClick(result)}>
                                     {result ? (
                                       <div>
-                                        <strong>{result?.activityName || 'No activity'}</strong>
+                                        {result?.activityName !== 'Trống' && (
+                                          <strong>{result?.activityName}</strong>
+                                        )}
                                         <div className="d-flex flex-column">
                                           {result?.locationName !== 'Trống' && (
                                             <span style={{ fontSize: 'smaller' }} className="pt-2">

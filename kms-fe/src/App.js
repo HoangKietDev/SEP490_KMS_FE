@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Route, Switch, withRouter } from "react-router-dom";
+import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import Login from "./screens/Login";
-import dashboard from "./screens/Dashbord/Dashbord";
+import DashboardAdmin from "./screens/Dashbord/Dashbord";
 import demographic from "./screens/Dashbord/Demographic";
 import ioT from "./screens/Dashbord/IoT";
 import NavbarMenu from "./components/NavbarMenu";
@@ -71,6 +71,10 @@ import SemesterCreate from "./screens/Semester/SemesterCreate";
 import UserList from "./screens/User/UserList";
 import UserCreate from "./screens/User/UserCreate";
 import ListPickupPerson from "./screens/Pickup_Person/ListPickupPerson";
+import PaymentAllStaff from "./screens/Payment/PaymentAllStaff";
+import PaymentTuition from "./screens/Payment/PaymentTuition";
+import SemesterDetail from "./screens/Semester/SemesterDetail";
+import { getCookie } from "./components/Auth/Auth";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -78,9 +82,40 @@ class App extends React.Component {
     super(props);
     this.state = {
       isLoad: true,
+      isAuthenticated: false, // Giả sử có một state để quản lý đăng nhập
+      roleId: null, // Lưu roleId của người dùng
     };
   }
+
+  componentDidMount() {
+    // Kiểm tra trạng thái đăng nhập từ localStorage hoặc bất kỳ nơi nào bạn lưu trữ thông tin đăng nhập
+    const user = getCookie("user");
+    const isAuthenticated = user !== null; // Kiểm tra nếu người dùng đã đăng nhập
+    const roleId = isAuthenticated ? user.user.roleId : null;
+    this.setState({ isAuthenticated, roleId })
+  }
+
+  // Hàm này trả về trang chủ tương ứng với roleId của người dùng
+  getHomePageByRole(roleId) {
+    switch (roleId) {
+      case 1:
+        return `${process.env.PUBLIC_URL}/dashboard`;
+      case 2:
+        return `${process.env.PUBLIC_URL}/viewattendparent`;
+      case 3:
+        return `${process.env.PUBLIC_URL}/viewclass`;
+      case 4:
+        return `${process.env.PUBLIC_URL}/dashboardprin`;
+      case 5:
+        return `${process.env.PUBLIC_URL}/viewclass3`;
+      default:
+        return `${process.env.PUBLIC_URL}/`;
+    }
+  }
+
+
   render() {
+    const { isAuthenticated, roleId, } = this.state;
 
     var res = window.location.pathname;
     var baseUrl = process.env.PUBLIC_URL;
@@ -88,7 +123,34 @@ class App extends React.Component {
     res = res.split("/");
     res = res.length > 0 ? res[baseUrl.length] : "/";
     res = res ? res : "/";
+    console.log(res);
+
     const activeKey1 = res;
+
+
+    const allowedUrls = [
+      "dashboard", "dashboardprin", "test",
+      "category", "create-category", "category-detail", "category-update",
+      "service", "create-service", "service-detail", "service-update",
+      "teacher", "teacher-detail", "teacher-update",
+      "request", "create-request", "request-detail", "request-update",
+      "grade", "create-grade", "grade-detail", "grade-update",
+      "semester", "create-semester", "semester-detail", "semester-update",
+      "user", "create-user", "locationActivity",
+      "viewallstudent", "createstudent", " viewstudentbyID",
+      "viewclass", "viewclass2", "viewclass3", "createclass", "updateclass", "updateclass2", "viewchildrenbyclassid",
+      "listmenu", "viewmenu", "viewmenu2", "updatemenu",
+      "listschedule", "schedule", "create-schedule", "create-scheduledetail",
+      "album", "create-album", "album-detail",
+      "payment", "payment-history", "paymentAll", "tuition",
+      "profilev1page",
+      "checkin", "listclasscheckin", "listclassattendance", "attend", "viewattendparent",
+      "chooseservice", "addpickupperson"
+    ];
+
+    // Kiểm tra xem URL có hợp lệ không, nếu không thì trả về trang page404
+    const isValidUrl = allowedUrls.includes(activeKey1);
+
 
     return (
       <div id="wrapper">
@@ -97,17 +159,26 @@ class App extends React.Component {
           activeKey1 === "login" ||
           activeKey1 === "forgotpassword" ||
           activeKey1 === "resetpassword" ||
-          activeKey1 === "page404" ||
-          activeKey1 === "maintanance" ? (
+          activeKey1 === "page404" ? (
           <Switch>
-            <Route exact path={`${process.env.PUBLIC_URL}/`} component={Login} />
+            <Route
+              exact
+              path={`${process.env.PUBLIC_URL}/`}
+              render={() =>
+                isAuthenticated ? (
+                  // Điều hướng đến trang home theo role của người dùng
+                  <Redirect to={this.getHomePageByRole(roleId)} />
+                ) : (
+                  <Login />
+                )
+              }
+            />
             <Route exact path={`${process.env.PUBLIC_URL}/login`} component={Login} />
             <Route exact path={`${process.env.PUBLIC_URL}/forgotpassword`} component={forgotpassword} />
             <Route exact path={`${process.env.PUBLIC_URL}/resetpassword`} component={resetpassword} />
             <Route exact path={`${process.env.PUBLIC_URL}/page404`} component={page404} />
-            <Route exact path={`${process.env.PUBLIC_URL}/maintanance`} component={maintanance} />
           </Switch>
-        ) : (
+        ) : isValidUrl ? (
           <>
             <NavbarMenu history={this.props.history} activeKey={activeKey1} />
             <div id="main-content">
@@ -115,8 +186,8 @@ class App extends React.Component {
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/dashboard`}
-                  component={dashboard}
-                  allowedRoles={[1, 3]}
+                  component={DashboardAdmin}
+                  allowedRoles={[1]}
                 />
                 <ProtectedRoute
                   exact
@@ -242,19 +313,25 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/semester`}
                   component={Semester}
-                  allowedRoles={[3]}
+                  allowedRoles={[4]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/semester-detail/:semesterId`}
+                  component={SemesterDetail}
+                  allowedRoles={[4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/semester-update/:semesterId`}
                   component={SemesterUpdate}
-                  allowedRoles={[3]}
+                  allowedRoles={[4]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/create-semester`}
                   component={SemesterCreate}
-                  allowedRoles={[3]}
+                  allowedRoles={[4]}
                 />
 
                 <ProtectedRoute
@@ -395,13 +472,6 @@ class App extends React.Component {
                   component={AlbumDetail}
                   allowedRoles={[2, 3, 4, 5]}
                 />
-                {/* <ProtectedRoute
-                  exact
-                  path={`${process.env.PUBLIC_URL}/service-update/:serviceId`}
-                  component={ServiceUpdate}
-                  allowedRoles={[3, 4]}
-                /> */}
-
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/listmenu`}
@@ -464,6 +534,18 @@ class App extends React.Component {
                 />
                 <ProtectedRoute
                   exact
+                  path={`${process.env.PUBLIC_URL}/paymentAll`}
+                  component={PaymentAllStaff}
+                  allowedRoles={[3]}
+                />
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/tuition`}
+                  component={PaymentTuition}
+                  allowedRoles={[3, 4]}
+                />
+                <ProtectedRoute
+                  exact
                   path={`${process.env.PUBLIC_URL}/chooseservice`}
                   component={ChooseService}
                   allowedRoles={[2]}
@@ -487,9 +569,12 @@ class App extends React.Component {
                   component={ListPickupPerson}
                   allowedRoles={[2]}
                 />
+                <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
               </Switch>
             </div>
           </>
+        ) : (
+          <Route exact path={`${process.env.PUBLIC_URL}/*`} component={page404} />
         )}
       </div>
     );

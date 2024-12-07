@@ -3,8 +3,9 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { Modal, Button, Alert } from "react-bootstrap"; // Thêm modal từ react-bootstrap
+import Notification from "../../components/Notification";
 
 class PaymentList extends React.Component {
   state = {
@@ -21,9 +22,9 @@ class PaymentList extends React.Component {
 
     Dicounts: [],
 
-    quantityOptions: [
-      1, 3, 6
-    ],
+    // quantityOptions: [
+    //   1, 3, 6
+    // ],
 
     selectedTuition: false, // Thêm trạng thái cho tuition checkbox
     selectedServices: [], // Lưu trữ các dịch vụ được chọn
@@ -32,12 +33,15 @@ class PaymentList extends React.Component {
 
     showModal: false, // State để kiểm soát hiển thị modal
 
+    showNotification: false,
+    notificationText: "",
+    notificationType: "success",
   };
 
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
     // Lấy năm và tháng hiện tại
@@ -243,7 +247,7 @@ class PaymentList extends React.Component {
       paymentName: (selectedTuition && selectedServices && selectedServices.length > 0)
         ? `Tuiton and services ${month < 10 ? `0${month}` : month}/${year}` // Nếu cả 2 được chọn
         : selectedTuition
-          ? `Tuition fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedTuition
+          ? `Tuition fee ${month < 9 ? `0${month + 1}` : month + 1}/${year}` // Nếu chỉ có selectedTuition
           : (selectedServices && selectedServices.length > 0)
             ? `Service fee ${month < 10 ? `0${month}` : month}/${year}` // Nếu chỉ có selectedServices
             : `Tuiton and services ${month < 10 ? `0${month}` : month}/${year}`, // Nếu không có gì
@@ -255,7 +259,11 @@ class PaymentList extends React.Component {
 
     console.log(paymentData);
     if (totalPayment === 0) {
-      alert("You need to choose Payment");
+      this.setState({
+        notificationText: "You need to choose Payment!",
+        notificationType: "info",
+        showNotification: true,
+      });
     }
     else {
       // Gọi API thanh toán
@@ -266,22 +274,37 @@ class PaymentList extends React.Component {
             window.location.href = response.data.url;
 
           } else {
-            alert("Failed to get payment URL. Please try again.");
+            this.setState({
+              notificationText: "Failed to get payment URL!",
+              notificationType: "error",
+              showNotification: true,
+            });
           }
           // Cập nhật lại UI nếu cần
         })
         .catch(error => {
           console.error("Payment failed", error);
-          alert("Payment failed. Please try again.");
+          this.setState({
+            notificationText: "Payment failed. Please try again.",
+            notificationType: "error",
+            showNotification: true,
+          });
         });
     }
 
   };
 
+  formatDate = (dateString) => {
+    const [year, month] = dateString.split("-");
+    return `${month}/${year}`;
+  };
+
 
   render() {
     const { ServiceListData, UserListData, tuition, showServices, Children, Class, selectedChild, Payment, ChildrenPayment } = this.state;
-    const userData = getSession('user').user
+    const { showNotification, notificationText, notificationType } = this.state;
+
+    const userData = getCookie('user')?.user
 
     const roleId = userData.roleId
     const parentId = userData?.userId;
@@ -292,11 +315,6 @@ class PaymentList extends React.Component {
       return total + (item.quantity * item.price);
     }, 0);
 
-    // Lấy năm và tháng hiện tại
-    const currentDate = new Date();
-    const year = currentDate.getFullYear(); // Lấy năm hiện tại
-    const month = currentDate.getMonth() + 1; // Lấy tháng hiện tại (tháng trả về từ 0 -> 11, cộng 1 để có tháng đúng)
-
 
     return (
       <div
@@ -305,6 +323,15 @@ class PaymentList extends React.Component {
           document.body.classList.remove("offcanvas-active");
         }}
       >
+        {showNotification && (
+          <Notification
+            type={notificationType}
+            position="top-right"
+            dialogText={notificationText}
+            show={showNotification}
+            onClose={() => this.setState({ showNotification: false })}
+          />
+        )}
         <div>
           <div className="container-fluid">
             <PageHeader
@@ -352,7 +379,7 @@ class PaymentList extends React.Component {
                       {selectedChild === null
                         ? <div className="col-md-9 d-flex align-items-center">
                           <div>
-                            <h4>Please select your child who wants to pay tuition for.    {month} / {year}</h4>
+                            <h4>Please select your child who wants to pay tuition for. </h4>
                             <p className="text-danger">Tuition fees will need to be paid between the 1st and 5th of each month.</p>
                           </div>
                         </div>
@@ -383,9 +410,8 @@ class PaymentList extends React.Component {
                                           checked={this.state.selectedTuition}
                                           onChange={(e) => this.handleCheckboxChange("tuition", e.target.checked)} />
                                       </td>
-                                      <td>{tuition?.paymentName}</td>
-                                      {/* <td className="text-truncate" style={{ maxWidth: "150px" }}>{request?.description}</td> */}
-                                      <td>
+                                      <td> {"Tuition fee " + this.formatDate(ChildrenPayment?.tuition[0]?.dueDate)}</td>
+                                      {/* <td>
                                         <select
                                           style={{ width: '70%' }}
                                           className="form-control"
@@ -398,7 +424,8 @@ class PaymentList extends React.Component {
                                             </option>
                                           ))}
                                         </select>
-                                      </td>
+                                      </td> */}
+                                      <td>1 Month</td>
                                       {/* Hiển thị phần trăm discount */}
                                       <td>{this.state.selectedDiscount ? `${this.state.selectedDiscount.discount1} %` : '0%'}</td>
                                       <td>{tuition?.price?.toLocaleString('vi-VN')}</td>

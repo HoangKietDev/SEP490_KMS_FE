@@ -3,11 +3,11 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { Modal, Button, Form } from "react-bootstrap";
 import Notification from "../../components/Notification";
 import Resizer from 'react-image-file-resizer'; // Import thư viện nén ảnh
-import { Bars } from 'react-loader-spinner';
+import { RotatingLines } from 'react-loader-spinner';
 
 
 class AlbumDetail extends React.Component {
@@ -112,75 +112,92 @@ class AlbumDetail extends React.Component {
 
   handleSaveAlbum = async () => {
     const { albumId, newImages, caption } = this.state;
-    this.setState({ isUploading: true });  // Bật loading khi bắt đầu upload
-
     // Mảng chứa các ảnh đã được nén
     const resizedImages = [];
+    if (!caption) {
+      this.setState({
+        notificationText: "Decription is not empty",
+        notificationType: "info",
+        showNotification: true,
+      });
+      return;
+    }
+    if (newImages.length == 0) {
+      this.setState({
+        notificationText: "Images are not empty",
+        notificationType: "info",
+        showNotification: true,
+      });
+      return;
+    }
+    if (caption && newImages) {
+      this.setState({ isUploading: true });  // Bật loading khi bắt đầu upload
+      try {
+        // Nén từng ảnh trước khi upload
+        for (let i = 0; i < newImages.length; i++) {
+          const image = newImages[i];
 
-    try {
-      // Nén từng ảnh trước khi upload
-      for (let i = 0; i < newImages.length; i++) {
-        const image = newImages[i];
+          // Sử dụng thư viện Resizer để nén ảnh
+          const resizedImage = await new Promise((resolve, reject) => {
+            Resizer.imageFileResizer(
+              image,  // File ảnh gốc
+              800,    // Chiều rộng ảnh sau khi nén
+              600,    // Chiều cao ảnh sau khi nén
+              'JPEG', // Định dạng ảnh (có thể là 'JPEG', 'PNG', 'WEBP'...)
+              80,     // Chất lượng ảnh (0-100)
+              0,      // Rotate, nếu cần xoay ảnh (0: không xoay)
+              (uri) => resolve(uri),  // Callback trả về ảnh đã nén
+              'base64', // Loại dữ liệu trả về (base64)
+            );
+          });
 
-        // Sử dụng thư viện Resizer để nén ảnh
-        const resizedImage = await new Promise((resolve, reject) => {
-          Resizer.imageFileResizer(
-            image,  // File ảnh gốc
-            800,    // Chiều rộng ảnh sau khi nén
-            600,    // Chiều cao ảnh sau khi nén
-            'JPEG', // Định dạng ảnh (có thể là 'JPEG', 'PNG', 'WEBP'...)
-            80,     // Chất lượng ảnh (0-100)
-            0,      // Rotate, nếu cần xoay ảnh (0: không xoay)
-            (uri) => resolve(uri),  // Callback trả về ảnh đã nén
-            'base64', // Loại dữ liệu trả về (base64)
-          );
+          // Chuyển base64 về dạng Blob hoặc File nếu cần (ví dụ: base64 -> Blob)
+          const resizedBlob = await fetch(resizedImage).then(res => res.blob());
+          const resizedFile = new File([resizedBlob], image.name, { type: image.type });
+
+          resizedImages.push(resizedFile);  // Thêm ảnh đã nén vào mảng
+        }
+
+        // Chuẩn bị FormData để upload
+        const formData = new FormData();
+        formData.append("albumId", albumId); // Thêm albumId vào FormData
+        formData.append("caption", caption); // Thêm caption vào FormData
+
+        // Thêm tất cả ảnh đã nén vào FormData
+        resizedImages.forEach((image) => {
+          formData.append("images", image); // API nhận `images` là một field với nhiều file
         });
 
-        // Chuyển base64 về dạng Blob hoặc File nếu cần (ví dụ: base64 -> Blob)
-        const resizedBlob = await fetch(resizedImage).then(res => res.blob());
-        const resizedFile = new File([resizedBlob], image.name, { type: image.type });
+        // Gửi request upload ảnh
+        await axios.post("http://localhost:5124/api/Images/CreateImages", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-        resizedImages.push(resizedFile);  // Thêm ảnh đã nén vào mảng
+        this.handleClose(); // Đóng modal sau khi tải lên thành công
+        this.setState({
+          notificationText: "Images Upload Successfully!",
+          notificationType: "success",
+          showNotification: true,
+        });
+
+        setTimeout(async () => {
+          await this.fetchAlbumImages(); // Fetch lại danh sách ảnh sau khi upload
+        }, 2000);
+
+      } catch (error) {
+        console.error("Lỗi khi tải lên ảnh:", error);
+        this.setState({
+          notificationText: "Images Upload Error!",
+          notificationType: "error",
+          showNotification: true,
+        });
+      } finally {
+        this.setState({ isUploading: false });  // Tắt loader sau khi tải lên xong
       }
-
-      // Chuẩn bị FormData để upload
-      const formData = new FormData();
-      formData.append("albumId", albumId); // Thêm albumId vào FormData
-      formData.append("caption", caption); // Thêm caption vào FormData
-
-      // Thêm tất cả ảnh đã nén vào FormData
-      resizedImages.forEach((image) => {
-        formData.append("images", image); // API nhận `images` là một field với nhiều file
-      });
-
-      // Gửi request upload ảnh
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/Images/CreateImages`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      this.handleClose(); // Đóng modal sau khi tải lên thành công
-      this.setState({
-        notificationText: "Images Upload Successfully!",
-        notificationType: "success",
-        showNotification: true,
-      });
-
-      setTimeout(async () => {
-        await this.fetchAlbumImages(); // Fetch lại danh sách ảnh sau khi upload
-      }, 2000);
-
-    } catch (error) {
-      console.error("Lỗi khi tải lên ảnh:", error);
-      this.setState({
-        notificationText: "Images Upload Error!",
-        notificationType: "error",
-        showNotification: true,
-      });
-    } finally {
-      this.setState({ isUploading: false });  // Tắt loader sau khi tải lên xong
     }
+
 
   };
 
@@ -252,7 +269,6 @@ class AlbumDetail extends React.Component {
       const response = await axios.delete(`${process.env.REACT_APP_API_URL}/api/Images/DeleteImage/${imageId}`);
 
       if (response.status === 200) {
-
         // Hiển thị thông báo ngay lập tức
         this.setState({
           notificationText: "Image deleted successfully!",
@@ -269,7 +285,6 @@ class AlbumDetail extends React.Component {
       }
     } catch (error) {
       console.error("Lỗi khi xóa ảnh:", error);
-
       this.setState({
         notificationText: "Failed to delete image!",
         notificationType: "error",
@@ -286,7 +301,7 @@ class AlbumDetail extends React.Component {
     const { title, description, imageData, timePost, teacherListData, createBy, showModal, caption, showImageModal, selectedImage } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = getSession('user')?.user;
+    const userData = getCookie('user')?.user;
     const roleId = userData?.roleId;
     const groupedImages = this.groupImagesByPostedAt(imageData);
     const timeKeys = Object.keys(groupedImages);
@@ -302,12 +317,6 @@ class AlbumDetail extends React.Component {
             onClose={() => this.setState({ showNotification: false })}
           />
         )}
-        {/* Hiển thị loader khi đang tải ảnh */}
-        {this.state.isUploading && (
-          <div className="loading-overlay">
-            <Bars color="#00BFFF" height={100} width={100} />
-          </div>
-        )}
 
         <div className="container-fluid">
           <PageHeader
@@ -319,7 +328,10 @@ class AlbumDetail extends React.Component {
           />
           <div className="row clearfix">
             <div className="col-md-12">
-              <div className="card">
+              <div className="card shadow-lg">
+                <div className="card-header text-white theme-colorbg">
+                  <h4 className="mb-0">Detail Album</h4>
+                </div>
                 <div className="body">
                   <form className="update-teacher-form">
                     <div className="row justify-content-between">
@@ -347,13 +359,14 @@ class AlbumDetail extends React.Component {
                               }}
                               className="btn btn-warning text-white mr-4 "
                             >
-                              Sửa Album
+                              Edit Album
                             </button>
-                            <button onClick={(e) => { e.preventDefault(); this.handleShow(); }} className="btn btn-success text-white">Đăng Album Ảnh</button>
+                            <button onClick={(e) => { e.preventDefault(); this.handleShow(); }} className="btn btn-success text-white">Post Album Image</button>
                           </>
                         )}
                       </div>
                     </div>
+                    <hr></hr>
 
                     {/* List of time links */}
                     <ul className="list-inline">
@@ -372,6 +385,7 @@ class AlbumDetail extends React.Component {
                         </li>
                       ))}
                     </ul>
+                    <hr></hr>
 
                     <div className="container">
                       {(!imageData || imageData.length === 0) ? (
@@ -390,7 +404,12 @@ class AlbumDetail extends React.Component {
                                       src={image.imgUrl}
                                       alt={`Image ${image.caption}`}
                                       className="card-img-top"
-                                      style={{ cursor: 'pointer' }}
+                                      style={{
+                                        cursor: 'pointer',
+                                        width: '100%', // Make the image responsive to container width
+                                        height: '200px', // Fixed height for uniformity
+                                        objectFit: 'cover', // Ensures the image fills the container without distortion
+                                      }}
                                       onClick={() => this.handleImageClick(image.imgUrl)} // On click, open the modal
                                     />
 
@@ -436,7 +455,7 @@ class AlbumDetail extends React.Component {
           {showImageModal && (
             <Modal show={showImageModal} onHide={this.handleImageModalClose} size="lg">
               <Modal.Header closeButton>
-                <Modal.Title>Enlarged Image</Modal.Title>
+                <Modal.Title>View Image</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <img src={selectedImage} alt="Enlarged" style={{ width: '100%', height: 'auto' }} />
@@ -452,34 +471,42 @@ class AlbumDetail extends React.Component {
           {/* Modal for adding new album */}
           <Modal show={showModal} onHide={this.handleClose}>
             <Modal.Header closeButton>
-              <Modal.Title>Thêm Album Image Mới</Modal.Title>
+              <Modal.Title>Add New Album Image</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form>
                 <Form.Group controlId="formTitle">
-                  <Form.Label>Mô tả</Form.Label>
+                  <Form.Label>Description</Form.Label>
                   <Form.Control
                     type="text"
                     value={caption}
                     onChange={(e) => this.setState({ caption: e.target.value })}
+                    required
                   />
                 </Form.Group>
                 <Form.Group controlId="formImages">
-                  <Form.Label>Hình ảnh</Form.Label>
+                  <Form.Label>Image</Form.Label>
                   <Form.Control
                     type="file"
                     multiple
                     onChange={this.handleImageChange}
+                    required
                   />
                 </Form.Group>
+                {/* Hiển thị loader khi đang tải ảnh */}
+                {this.state.isUploading && (
+                  <div className="loading-overlay">
+                    <RotatingLines color="#00BFFF" height={100} width={100} />
+                  </div>
+                )}
               </Form>
             </Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={this.handleClose}>
-                Hủy
+                Close
               </Button>
-              <Button variant="primary" onClick={this.handleSaveAlbum}>
-                Lưu Album Image
+              <Button variant="primary" onClick={this.handleSaveAlbum} disabled={this.state.isUploading}>
+                Save Album Image
               </Button>
             </Modal.Footer>
           </Modal>

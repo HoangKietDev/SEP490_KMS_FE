@@ -18,6 +18,9 @@ $green-600: #43a047 !default;
     .theme-color {
         color: $green-500;
     }
+    .theme-colorbg {
+        background-color: $green-500;
+    }
 
     ::selection {
         color: $white;

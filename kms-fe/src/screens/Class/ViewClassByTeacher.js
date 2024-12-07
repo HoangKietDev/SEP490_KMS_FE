@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import { Modal, Button } from "react-bootstrap";
 import Notification from "../../components/Notification";
 
@@ -25,8 +25,8 @@ class ViewClassByTeacher extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const user = JSON.parse(sessionStorage.getItem('user'));
-    const teacherId = user ? user.user.userId : null;
+    const user = getCookie('user')?.user
+    const teacherId = user ? user?.userId : null;
 
     if (teacherId) {
       // Gọi API lấy danh sách class theo teacherId
@@ -133,7 +133,7 @@ class ViewClassByTeacher extends React.Component {
   };
 
   render() {
-    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData, showConfirmModal } = this.state;
+    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
 
@@ -223,32 +223,6 @@ class ViewClassByTeacher extends React.Component {
                           placeholder="Enter class name"
                         />
                       </div>
-
-                      {/* Button để gửi email */}
-                      <button
-                        className="btn btn-primary ml-3"
-                        onClick={this.handleSendMailNotification}
-                      >
-                        Send Mail Notification
-                      </button>
-
-                      {/* Modal confirm */}
-                      <Modal show={showConfirmModal} onHide={this.handleCloseConfirmModal}>
-                        <Modal.Header closeButton>
-                          <Modal.Title>Confirm Mail Notification</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                          Are you sure you want to send mail notifications with the current filters?
-                        </Modal.Body>
-                        <Modal.Footer>
-                          <Button variant="secondary" onClick={this.handleCloseConfirmModal}>
-                            Cancel
-                          </Button>
-                          <Button variant="primary" onClick={this.handleConfirmSendMail}>
-                            Confirm
-                          </Button>
-                        </Modal.Footer>
-                      </Modal>
                     </div>
 
                     <div className="table-responsive">

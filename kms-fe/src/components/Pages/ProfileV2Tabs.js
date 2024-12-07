@@ -1539,7 +1539,7 @@ class ProfileV2Tabs extends React.Component {
                     </div>
                   </div>
                   <div className="col-lg-12 col-md-12">
-                    <h6>Email from Lucid</h6>
+                    <h6>Email from EduNest</h6>
                     <p>I'd like to receive the following emails:</p>
                     <ul className="list-unstyled list-email-received">
                       <li>

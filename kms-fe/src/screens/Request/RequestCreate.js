@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Notification from "../../components/Notification";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 
 class RequestCreate extends React.Component {
     state = {
@@ -28,7 +28,7 @@ class RequestCreate extends React.Component {
         const fetchData = async () => {
             try {
                 // Fetch student by ParentID
-                const userData = getSession('user')?.user;
+                const userData = getCookie('user')?.user;
                 const parentId = userData?.userId;
 
                 const studentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentId}`);
@@ -105,7 +105,7 @@ class RequestCreate extends React.Component {
                     this.props.history.push('/request');
                 }
             }, 1000);
-        } catch (error) { 
+        } catch (error) {
             const errorMessage = error.response?.data?.message || "Failed to create request!";
             this.setState({
                 notificationText: errorMessage,
@@ -148,9 +148,9 @@ class RequestCreate extends React.Component {
                             </div>
                         </div>
                         <div className="col-md-12">
-                            <div className="card">
-                                <div className="header text-center">
-                                    <h4>Create New Request</h4>
+                            <div className="card shadow-lg">
+                                <div className="card-header text-white theme-colorbg">
+                                    <h4 className="mb-0">Create Request</h4>
                                 </div>
                                 <div className="body">
                                     <form onSubmit={this.handleCreateRequest}>
@@ -193,6 +193,7 @@ class RequestCreate extends React.Component {
                                                     value={title}
                                                     name="title"
                                                     onChange={(e) => this.setState({ title: e.target.value })}
+                                                    required
                                                 />
                                             </div>
                                             <div className="form-group col-md-12 d-flex flex-column">
@@ -203,6 +204,8 @@ class RequestCreate extends React.Component {
                                                     value={description}
                                                     name="description"
                                                     onChange={(e) => this.setState({ description: e.target.value })}
+                                                    required
+
                                                 />
                                             </div>
                                         </div>

@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-import { getSession } from "../../components/Auth/Auth";
+import { getCookie } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 class AlbumCreate extends React.Component {
@@ -27,7 +27,7 @@ class AlbumCreate extends React.Component {
 
     componentDidMount() {
         window.scrollTo(0, 0);
-        const userData = getSession('user')?.user;
+        const userData = getCookie('user')?.user;
         const roleId = userData?.roleId;
 
         const fetchData = async () => {
@@ -58,9 +58,8 @@ class AlbumCreate extends React.Component {
         e.preventDefault(); // Prevent default form submission
         const { classId, description, createBy, title, reason } = this.state;
 
-        let userId = getSession('user')?.user?.userId
+        let userId = getCookie('user')?.user?.userId
         console.log(userId);
-
         const newRequest = {
             classId,
             createBy: userId,
@@ -77,7 +76,7 @@ class AlbumCreate extends React.Component {
                 notificationType: "success",
                 showNotification: true
             });
-            
+
             // Set timeout để chuyển hướng sau 2 giây
             setTimeout(() => {
                 this.props.history.push('/album');
@@ -118,9 +117,9 @@ class AlbumCreate extends React.Component {
                     />
                     <div className="row clearfix">
                         <div className="col-md-12">
-                            <div className="card">
-                                <div className="header text-center">
-                                    <h4>Create New Album</h4>
+                            <div className="card shadow-lg">
+                                <div className="card-header text-white theme-colorbg">
+                                    <h4 className="mb-0">Create New Album</h4>
                                 </div>
                                 <div className="body">
                                     <form onSubmit={this.handleCreateRequest}>
@@ -152,6 +151,7 @@ class AlbumCreate extends React.Component {
                                                         value={title}
                                                         name="title"
                                                         onChange={(e) => this.setState({ title: e.target.value })}
+                                                        required
                                                     />
                                                 </div>
                                             </div>
@@ -166,6 +166,7 @@ class AlbumCreate extends React.Component {
                                                     value={description}
                                                     name="description"
                                                     onChange={(e) => this.setState({ description: e.target.value })}
+                                                    required
                                                 />
                                             </div>
                                         </div>

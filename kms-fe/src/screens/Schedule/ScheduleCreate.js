@@ -132,9 +132,9 @@ class ScheduleCreate extends React.Component {
           />
           <div className="row clearfix">
             <div className="col-md-12">
-              <div className="card">
-                <div className="header text-center">
-                  <h4>Create New Schedule</h4>
+              <div className="card shadow-lg">
+                <div className="card-header text-white theme-colorbg">
+                  <h4 className="mb-0">Create New Schedule</h4>
                 </div>
                 <div className="body">
                   <form onSubmit={this.handleCreateSchedule}>

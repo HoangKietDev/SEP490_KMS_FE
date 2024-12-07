@@ -81,9 +81,9 @@ class RequestDetail extends React.Component {
           />
           <div className="row clearfix">
             <div className="col-md-12">
-              <div className="card">
-                <div className="header text-center">
-                  <h4>Request Detail</h4>
+              <div className="card shadow-lg">
+                <div className="card-header text-white theme-colorbg">
+                  <h4 className="mb-0">Detail Request</h4>
                 </div>
                 <div className="body">
                   <form className="update-teacher-form">

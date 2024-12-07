@@ -108,7 +108,10 @@ class SemesterUpdate extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Update Semester</h4>
+                                    </div>
                                     <div className="body">
                                         <form onSubmit={this.handleSubmit}>
                                             <div className="form-group">
@@ -187,8 +190,8 @@ class SemesterUpdate extends React.Component {
                                             </div>
                                             <br />
                                             <br />
-                                            <button type="submit" className="btn btn-primary mr-4">Update Semester</button>
-                                            <a href="semester" className="btn btn-success text-center">Back to Semester List</a>
+                                            <a href="/semester" className="btn btn-success text-center">Back to Semester List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Update Semester</button>
                                         </form>
                                     </div>
                                 </div>

@@ -16,7 +16,7 @@ import Image15 from "../assets/images/image-gallery/15.jpg";
 
 export const fileFolderCardData = [
   {
-    Header: "Lucid Project",
+    Header: "EduNest Project",
   },
   {
     Header: "Themeforest",

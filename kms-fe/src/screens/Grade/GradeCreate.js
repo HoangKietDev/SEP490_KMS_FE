@@ -9,6 +9,7 @@ class GradeCreate extends React.Component {
 
     state = {
         name: '',
+        description: '',
         baseTuitionfee: null,
         grades: [], // Chứa danh sách các grade
 
@@ -24,6 +25,7 @@ class GradeCreate extends React.Component {
         event.preventDefault(); // Ngăn hành vi mặc định của form
         const values = {
             name: this.state.name,
+            description: this.state.description,
             baseTuitionfee: this.state.baseTuitionfee,
         };
         try {
@@ -41,8 +43,10 @@ class GradeCreate extends React.Component {
                 }
             }, 1000);
         } catch (error) {
+            const errormess = error?.response?.data?.errors?.BaseTuitionFee
+            console.log(errormess);
             this.setState({
-                notificationText: "Grade create Error!",
+                notificationText: errormess[0] || "Grade Create Error",
                 notificationType: "error",
                 showNotification: true,
             });
@@ -50,7 +54,7 @@ class GradeCreate extends React.Component {
     };
 
     render() {
-        const { name, baseTuitionfee } = this.state;
+        const { name, description, baseTuitionfee } = this.state;
         const { showNotification, notificationText, notificationType } = this.state;
 
         return (
@@ -80,20 +84,32 @@ class GradeCreate extends React.Component {
                         />
                         <div className="row clearfix">
                             <div className="col-md-12">
-                                <div className="card">
-                                    <div className="header text-center">
-                                        <h4>Create New Grade</h4>
+                                <div className="card shadow-lg">
+                                    <div className="card-header text-white theme-colorbg">
+                                        <h4 className="mb-0">Create Grade</h4>
                                     </div>
                                     <div className="body">
                                         <form onSubmit={this.handleCreatGrade}>
                                             <div className="row">
                                                 <div className="form-group col-md-12 d-flex flex-column">
-                                                    <label>Name</label>
+                                                    <label>Grade Name</label>
                                                     <input
                                                         type="text"
                                                         className="form-control"
                                                         value={name}
                                                         onChange={(e) => this.setState({ name: e.target.value })}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="row">
+                                                <div className="form-group col-md-12 d-flex flex-column">
+                                                    <label>Grade Description</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        value={description}
+                                                        onChange={(e) => this.setState({ description: e.target.value })}
                                                         required
                                                     />
                                                 </div>
@@ -111,11 +127,8 @@ class GradeCreate extends React.Component {
                                                 </div>
                                             </div>
                                             <br />
-                                            <div className="text-center">
-                                                <button type="submit" className="btn btn-success">
-                                                    Create Grade
-                                                </button>
-                                            </div>
+                                            <a href="grade" className="btn btn-success text-center">Back to Grade List</a>
+                                            <button type="submit" className="btn btn-primary ml-4">Create Grade</button>
                                         </form>
                                     </div>
                                 </div>
