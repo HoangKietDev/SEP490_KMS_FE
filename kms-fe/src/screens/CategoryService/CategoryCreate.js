@@ -13,7 +13,7 @@ class CategoryCreate extends React.Component {
 
         try {
             const response = await axios.post(
-                "http://localhost:5124/api/CategoryService/AddCategoryService",values
+                `${process.env.REACT_APP_API_URL}/api/CategoryService/AddCategoryService`,values
             );
             console.log("Tạo danh mục thành công:", response.data);
             alert("Tạo danh mục thành công!"); // User-friendly success message

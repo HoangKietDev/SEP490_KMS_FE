@@ -4,7 +4,7 @@ import axios from 'axios';
 export const addNotificationByRoleId = async (title, message, roleId) => {
     try {
         const response = await axios.post(
-            `http://localhost:5124/api/Notification/AddNotificationByRoleId`,
+            `${process.env.REACT_APP_API_URL}/api/Notification/AddNotificationByRoleId`,
             null, // Dữ liệu body là rỗng
             {
                 params: {
@@ -28,7 +28,7 @@ export const addNotificationByRoleId = async (title, message, roleId) => {
 // Hàm gọi API để thêm thông báo theo UserId
 export const addNotificationByUserId = async (title, message, userId) => {
     try {
-        const response = await axios.post(`http://localhost:5124/api/Notification/AddNotificationByUserId`, null, {
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Notification/AddNotificationByUserId`, null, {
             params: {
                 title: title,
                 message: message,

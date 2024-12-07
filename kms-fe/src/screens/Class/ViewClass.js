@@ -14,7 +14,7 @@ class ViewClass extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    fetch("http://localhost:5124/api/Class/GetAllClass")
+    fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ ProjectsData: data });
@@ -23,7 +23,7 @@ class ViewClass extends React.Component {
         console.error("Error fetching class data: ", error);
       });
 
-    fetch("http://localhost:5124/api/Grade")
+    fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ GradesData: data });
@@ -34,7 +34,7 @@ class ViewClass extends React.Component {
   }
 
   handleEdit = (classId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(sessionStorage.getItem('user'));
     if (user && user.user.roleId === 3) {
       this.props.history.push(`/updateclass/${classId}`);
     } else if (user && user.user.roleId === 4) {

@@ -32,7 +32,7 @@ class UpdateChildren extends React.Component {
     this.setState({ teacherId: parseInt(teacherId) });
 
     // Gọi API để lấy thông tin học sinh
-    axios.get(`http://localhost:5124/api/Teacher/GetTeacherById/${teacherId}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetTeacherById/${teacherId}`)
       .then((response) => {
         const data = response.data;
         // Cập nhật state với dữ liệu học sinh
@@ -75,7 +75,7 @@ class UpdateChildren extends React.Component {
     };
 
     // Gọi API cập nhật học sinh
-    axios.put("http://localhost:5124/api/Teacher/StaffUpdateProfileForTeacher", updatedTeacher, {
+    axios.put(`${process.env.REACT_APP_API_URL}/api/Teacher/StaffUpdateProfileForTeacher`, updatedTeacher, {
       headers: {
         "Content-Type": "application/json",
       },

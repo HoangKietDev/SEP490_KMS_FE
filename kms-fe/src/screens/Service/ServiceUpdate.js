@@ -25,10 +25,10 @@ class ServiceUpdate extends React.Component {
         const { serviceId } = this.props.match.params;
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/Service/GetServiceById/${serviceId}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Service/GetServiceById/${serviceId}`);
                 const data = response.data;
 
-                const CategoryResponse = await axios.get('http://localhost:5124/api/CategoryService/GetAllCategoryService');
+                const CategoryResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/CategoryService/GetAllCategoryService`);
                 const Categorydata = CategoryResponse.data;
                 this.setState({ categories: Categorydata });
 
@@ -78,7 +78,7 @@ class ServiceUpdate extends React.Component {
         }
 
         try {
-            await axios.put(`http://localhost:5124/api/Service/UpdateService`, updatedService, {
+            await axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateService`, updatedService, {
                 headers: {
                     "Content-Type": "application/json",
                 },

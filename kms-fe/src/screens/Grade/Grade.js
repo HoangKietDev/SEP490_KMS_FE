@@ -24,7 +24,7 @@ class Grade extends React.Component {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5124/api/Grade');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Grade`);
         const data = response.data;
         this.setState({ grades: data });
         console.log(data);

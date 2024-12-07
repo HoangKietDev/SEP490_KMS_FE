@@ -31,7 +31,7 @@ class RequestCreate extends React.Component {
                 const userData = getCookie('user')?.user;
                 const parentId = userData?.userId;
 
-                const studentResponse = await axios.get(`http://localhost:5124/api/Request/GetStudentsByParentId/${parentId}`);
+                const studentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentId}`);
                 const studentData = studentResponse.data;
                 this.setState({ createBy: parentId });
                 this.setState({ childerParent: studentData });
@@ -48,7 +48,7 @@ class RequestCreate extends React.Component {
 
         try {
             // Fetch classes for the selected student
-            const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${studentId}`);
+            const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${studentId}`);
 
             // Ensure that classResponse exists and has valid data
             if (classResponse && classResponse.data && Array.isArray(classResponse.data)) {
@@ -94,7 +94,7 @@ class RequestCreate extends React.Component {
         };
         console.log(newRequest);
         try {
-            const response = await axios.post("http://localhost:5124/api/Request/AddRequest", newRequest);
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Request/AddRequest`, newRequest);
             this.setState({
                 notificationText: "Request created successfully!",
                 notificationType: "success",

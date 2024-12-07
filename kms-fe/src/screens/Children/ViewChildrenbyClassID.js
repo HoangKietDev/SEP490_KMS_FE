@@ -18,7 +18,7 @@ class ViewChildrenByClassID extends React.Component {
     const classId = this.props.match.params.classId;
 
     // Gọi API để lấy danh sách học sinh
-    fetch(`http://localhost:5124/api/Class/GetChildrenByClassId/${classId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetChildrenByClassId/${classId}`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ StudentsData: data });
@@ -28,7 +28,7 @@ class ViewChildrenByClassID extends React.Component {
       });
 
     // Gọi API để lấy danh sách grade
-    fetch(`http://localhost:5124/api/Grade`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => response.json())
       .then((data) => {
         this.setState({ GradesData: data });
@@ -69,10 +69,13 @@ class ViewChildrenByClassID extends React.Component {
       student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const getGradeName = (gradeId) => {
-      const grade = GradesData.find((g) => g.gradeId === gradeId);
-      return grade ? grade.name : "Unknown";
-    };
+    const getGradeName = (gradeID) => {
+      
+      const grade = GradesData.find((g) => g.gradeId === gradeID);
+  
+      return grade ? grade.name : "Unknown"; // Sử dụng "name" thay vì "Name"
+  };
+  
 
     return (
       <div
@@ -108,6 +111,7 @@ class ViewChildrenByClassID extends React.Component {
                         <tr>
                           <th>Full Name</th>
                           <th>Nick Name</th>
+                          <th>Code</th>
                           <th>Grade</th>
                           <th>Date of birth</th>
                           <th>Status</th>
@@ -137,7 +141,8 @@ class ViewChildrenByClassID extends React.Component {
                                 </div>
                               </td>
                               <td>{student.nickName}</td>
-                              <td>{getGradeName(student.grade)}</td>
+                              <td>{student.code}</td>
+                              <td>{getGradeName(student.gradeId)}</td>
                               <td>
                                 {new Date(student.dob).toLocaleDateString("vi-VN", {
                                   day: "2-digit",

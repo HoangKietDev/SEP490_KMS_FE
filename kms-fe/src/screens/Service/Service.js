@@ -89,7 +89,7 @@ class Service extends React.Component {
     }
     console.log(data);
     try {
-      const response = await axios.put(`http://localhost:5124/api/Service/UpdateService`, data);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateService`, data);
       console.log("Status updated successfully:", response.data);
       this.setState({
         notificationText: "Status update successfully!",

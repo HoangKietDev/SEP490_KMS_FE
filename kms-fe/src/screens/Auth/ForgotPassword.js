@@ -33,7 +33,7 @@ class ForgotPassword extends React.Component {
     }
 
     try {
-      const response = await axios.post("http://localhost:5124/api/Account/forgot-password", {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Account/forgot-password`, {
         mail: email,  // Send the email in the request body
       });
       if (response.status === 200) {

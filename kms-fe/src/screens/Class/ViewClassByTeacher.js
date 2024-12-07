@@ -30,7 +30,7 @@ class ViewClassByTeacher extends React.Component {
 
     if (teacherId) {
       // Gọi API lấy danh sách class theo teacherId
-      fetch(`http://localhost:5124/api/Class/GetClassesByTeacherId/${teacherId}`)
+      fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${teacherId}`)
         .then((response) => response.json())
         .then((data) => {
           const activeClasses = data.filter(classData => classData.status === 1);
@@ -41,7 +41,7 @@ class ViewClassByTeacher extends React.Component {
         });
 
       // Gọi API lấy danh sách grade
-      fetch("http://localhost:5124/api/Grade")
+      fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
         .then((response) => response.json())
         .then((data) => {
           this.setState({ GradesData: data });
@@ -55,7 +55,7 @@ class ViewClassByTeacher extends React.Component {
   }
 
   handleEdit = (classId) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(sessionStorage.getItem('user'));
     if (user && user.user.roleId === 3) {
       this.props.history.push(`/updateclass/${classId}`);
     } else if (user && user.user.roleId === 4) {
@@ -92,6 +92,45 @@ class ViewClassByTeacher extends React.Component {
     this.setState({ showConfirmModal: true });
   };
 
+  handleConfirmSendMail = async () => {
+    this.setState({ showConfirmModal: false });
+
+    const { ProjectsData } = this.state; // Giả sử 'nameFilter' là classId
+
+    // Lấy classId từ nameFilter hoặc một nguồn khác
+    const classId = ProjectsData[0].classId; // Thay đổi nếu cần thiết
+    console.log(classId);
+
+    try {
+      // API call sử dụng fetch
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Class/SendMailToParentsByClassId/${classId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        this.setState({
+          notificationText: "Mail sent successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
+      }
+    } catch (error) {
+      this.setState({
+        notificationText: "Mail sent Error!",
+        notificationType: "error",
+        showNotification: true
+      });
+    }
+  };
+
+
+  // Hàm đóng popup confirm
+  handleCloseConfirmModal = () => {
+    this.setState({ showConfirmModal: false });
+  };
 
   render() {
     const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData } = this.state;

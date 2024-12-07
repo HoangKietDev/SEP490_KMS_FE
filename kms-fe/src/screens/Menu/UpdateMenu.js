@@ -44,7 +44,7 @@ class UpdateMenu extends React.Component {
 
     fetchMenuData = async (startOfWeek, endOfWeek, gradeId) => {
         try {
-            const response = await axios.get(`http://localhost:5124/api/Menu/GetMenuByDate`, {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate`, {
                 params: { startDate: startOfWeek, endDate: endOfWeek, gradeId },
             });
 
@@ -94,7 +94,7 @@ class UpdateMenu extends React.Component {
         const requestBody = this.createRequestBody(selectedMenuItem, selectedWeek, structuredMenuData);
 
         try {
-            await axios.put(`http://localhost:5124/api/Menu/UpdateMenu`, requestBody);
+            await axios.put(`${process.env.REACT_APP_API_URL}/api/Menu/UpdateMenu`, requestBody);
             this.setState({ showModal: false });
             this.fetchMenuData(selectedWeek.startOfWeek, selectedWeek.endOfWeek, this.props.location.state.gradeId);
         } catch (error) {
@@ -180,7 +180,7 @@ class UpdateMenu extends React.Component {
         const mealLabels = {
             BS: "Breakfast",
             BT: "Lunch",
-            BC: "Dinner",
+            BC: "Snack",
         };
         return mealLabels[mealCode];
     };

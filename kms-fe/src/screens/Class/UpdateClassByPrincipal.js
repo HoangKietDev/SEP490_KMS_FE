@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-
+import Notification from "../../components/Notification";
 class UpdateClassByPrincipal extends React.Component {
   state = {
     classId: 0,
@@ -17,6 +17,9 @@ class UpdateClassByPrincipal extends React.Component {
     semesters: [],  // Lưu danh sách semester
     status: 0,
     submeet: false,
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -25,7 +28,7 @@ class UpdateClassByPrincipal extends React.Component {
     this.setState({ classId: parseInt(classId) });
 
     // Gọi API để lấy thông tin lớp học
-    axios.get(`http://localhost:5124/api/Class/GetClassById/${classId}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassById/${classId}`)
       .then((response) => {
         const data = response.data;
         const formattedExpireDate = data.expireDate ? new Date(data.expireDate).toISOString().slice(0, 16) : "";
@@ -46,7 +49,7 @@ class UpdateClassByPrincipal extends React.Component {
       });
 
     // Gọi API lấy danh sách Grade
-    axios.get("http://localhost:5124/api/Grade")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => {
         this.setState({ grades: response.data });
       })
@@ -55,7 +58,7 @@ class UpdateClassByPrincipal extends React.Component {
       });
 
     // Gọi API lấy danh sách Semester
-    axios.get("http://localhost:5124/api/Semester/GetAllSemester")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`)
       .then((response) => {
         this.setState({ semesters: response.data });
       })
@@ -99,14 +102,18 @@ class UpdateClassByPrincipal extends React.Component {
     };
 
     // Gọi API để cập nhật lớp học
-    axios.put("http://localhost:5124/api/Class/UpdateClass", updatedClass, {
+    axios.put(`${process.env.REACT_APP_API_URL}/api/Class/UpdateClass`, updatedClass, {
       headers: {
         "Content-Type": "application/json",
       },
     })
       .then((response) => {
-        alert("Class has been updated successfully!");
-        this.props.history.push('/viewclass');
+        this.setState({
+          notificationText: "Class has been updated successfully!",
+          notificationType: "success",
+          showNotification: true
+        });    
+            this.props.history.push('/viewclass');
       })
       .catch((error) => {
         console.error("Error updating class:", error);
@@ -115,7 +122,9 @@ class UpdateClassByPrincipal extends React.Component {
   };
 
   render() {
-    const { className, status, expireDate, submeet, grades, semesters, gradeId, semesterId } = this.state;
+    const { className, status, expireDate, submeet, grades, semesters, gradeId, semesterId, showNotification, // State to control notification visibility
+      notificationText, // Text for the notification
+      notificationType } = this.state;
 
     return (
       <div
@@ -131,6 +140,15 @@ class UpdateClassByPrincipal extends React.Component {
                 { name: "Update Class", navigate: "" },
               ]}
             />
+             {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <form onSubmit={this.handleSubmit}>
               <div className="form-group">
                 <label>Class Name</label>

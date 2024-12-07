@@ -45,7 +45,7 @@ class NavbarMenu extends React.Component {
   // GET all noti by userId
   async getNotifications(userId) {
     try {
-      const response = await axios.get(`http://localhost:5124/api/Notification/GetNotificationByUserId`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Notification/GetNotificationByUserId`, {
         params: { userId: userId }
       });
       // Cập nhật state với dữ liệu thông báo nhận được
@@ -65,7 +65,7 @@ class NavbarMenu extends React.Component {
       try {
         const userNotificationId = myNoti[index]?.usernotifications[0]?.userNotificationId;
         if (userNotificationId) {
-          await axios.get(`http://localhost:5124/api/Notification/UpdateNotificationStatus`, {
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/Notification/UpdateNotificationStatus`, {
             params: { UserNotificationID: userNotificationId }
           });
         }
@@ -77,7 +77,7 @@ class NavbarMenu extends React.Component {
 
   async fetchPaymentData(parentId) {
     try {
-      const response = await axios.get(`http://localhost:5124/api/Tuition/parent/${parentId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Tuition/parent/${parentId}`);
 
       // Kiểm tra mảng tuition trong từng sinh viên
       const hasTuition = response.data.some(payment => payment.tuition && payment.tuition.length > 0);
@@ -133,6 +133,11 @@ class NavbarMenu extends React.Component {
       activeKey === "/demographic"
     ) {
       this.activeMenutabContainer("dashboradContainer");
+    }
+    else if (
+      activeKey === "/dashboardprin" 
+    ) {
+      this.activeMenutabContainer("DasboardPrinContainer");
     }
     else if (
       activeKey === "/category" ||
@@ -195,6 +200,12 @@ class NavbarMenu extends React.Component {
       activeKey === "/create-schedule"
     ) {
       this.activeMenutabContainer("scheduleContainer");
+    }
+    // PickupPersonContainer
+    else if (
+      activeKey === "/addpickupperson"
+    ) {
+      this.activeMenutabContainer("PickupPersonContainer");
     }
     else if (
       activeKey === "/listclasscheckin" ||
@@ -534,7 +545,22 @@ class NavbarMenu extends React.Component {
                         </a>
                       </li>
                     ) : null}
-
+                      {/* Dashboard prin */}
+                    {roleId === 4 ? (
+                      <li id="DasboardPrinContainer" className="DasboardPrinContainer">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/dashboardprin");
+                            this.activeMenutabContainer("DasboardPrinContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Dashboard</span>
+                        </a>
+                      </li>
+                    ) : null}
                     {/* UserAccount */}
                     {roleId === 1 ? (
                       <li id="UserContainer" className="">
@@ -823,7 +849,24 @@ class NavbarMenu extends React.Component {
 
                       </li>
                     ) : null}
+                    {/* Teachers */}
+                    {roleId === 2 ? (
 
+                      <li id="PickupPersonContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/addpickupperson");
+                            this.activeMenutabContainer("PickupPersonContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Pickup Person Manager</span>
+                        </a>
+
+                      </li>
+                    ) : null}
                     {/* Requests */}
                     {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
                       <li id="RequestContainer" className="">
@@ -917,7 +960,7 @@ class NavbarMenu extends React.Component {
                             className={activeKey === "listclasscheckin" ? "active" : ""}
                             onClick={() => { }}
                           >
-                            <Link to="/listclasscheckin">Check in/out</Link>
+                            <Link to="/checkin">Check in/out</Link>
                           </li>
                           <li
                             className={activeKey === "listclassattendance" ? "active" : ""}

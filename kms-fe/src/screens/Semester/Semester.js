@@ -21,7 +21,7 @@ class Semester extends React.Component {
     window.scrollTo(0, 0);
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5124/api/Semester/GetAllSemester');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`);
         const data = response.data;
         this.setState({ semesters: data });
         console.log(data);

@@ -14,7 +14,7 @@ class CategoryDetail extends React.Component {
         this.setState({ categoryServiceId: parseInt(categoryServiceId) }); // Cập nhật classId vào state
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/CategoryService/GetCategoryServiceById/${categoryServiceId}`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/CategoryService/GetCategoryServiceById/${categoryServiceId}`);
                 const data = response.data;
                 this.setState({ categoriesDetail: data });
                 console.log(data);

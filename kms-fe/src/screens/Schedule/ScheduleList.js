@@ -45,7 +45,7 @@ class ScheduleList extends React.Component {
         let allowedClassIds = [];
         if (roleId === 5) { // Teacher
           try {
-            const response = await axios.get(`http://localhost:5124/api/Class/GetClassesByTeacherId/${userData.userId}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${userData.userId}`);
             allowedClassIds = response.data?.map((cls) => cls.classId) || [];
           } catch (error) {
             console.error("Error fetching teacher's classes: ", error);
@@ -54,7 +54,7 @@ class ScheduleList extends React.Component {
 
         } else if (roleId === 2) { // Parent
           try {
-            const response = await axios.get(`http://localhost:5124/api/Children/GetAllChildren`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
             // Lấy tất cả classId từ danh sách con
             const myChild = response.data?.filter(child => child.parentId === userData.userId)
             allowedClassIds = myChild.reduce((acc, student) => {
@@ -70,7 +70,7 @@ class ScheduleList extends React.Component {
             console.error("Error fetching parent's children: ", error);
           }
         }
-        axios.get("http://localhost:5124/api/Schedule/GetAllSchedules")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetAllSchedules`)
           .then((response) => {
             const allSchedules = response.data;
             // Lọc dữ liệu nếu là Teacher (roleId = 5) hoặc Parent (roleId = 2)
@@ -83,7 +83,7 @@ class ScheduleList extends React.Component {
             console.error("Error fetching data: ", error);
           });
 
-        axios.get("http://localhost:5124/api/Semester/GetAllSemester")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`)
           .then((response) => {
             this.setState({ semesterListData: response.data });
           })
@@ -91,7 +91,7 @@ class ScheduleList extends React.Component {
             console.error("Error fetching data: ", error);
           });
 
-        axios.get("http://localhost:5124/api/Class/GetAllClass")
+        axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
           .then((response) => {
             this.setState({ classData: response.data });
           })
@@ -119,7 +119,7 @@ class ScheduleList extends React.Component {
         classId: data?.classId,
         teacherName: data?.teacherName
       }
-      await axios.put(`http://localhost:5124/api/Schedule/UpdateSchedule`, formdata);
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/Schedule/UpdateSchedule`, formdata);
 
       // Update the state locally after a successful API call
       this.setState((prevState) => ({

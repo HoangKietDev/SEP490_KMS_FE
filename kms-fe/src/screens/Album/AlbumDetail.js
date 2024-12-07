@@ -44,7 +44,7 @@ class AlbumDetail extends React.Component {
     const { albumId } = this.state;
 
     try {
-      const imageResponse = await axios.get(`http://localhost:5124/api/Images/listAllImageByAlbumId/${albumId}`);
+      const imageResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Images/listAllImageByAlbumId/${albumId}`);
       this.setState({ imageData: imageResponse.data }); // Cập nhật lại danh sách ảnh
     } catch (error) {
       console.error("Lỗi khi tải danh sách ảnh:", error);
@@ -58,7 +58,7 @@ class AlbumDetail extends React.Component {
 
     try {
       // Fetch request details
-      const response = await axios.get(`http://localhost:5124/api/Album/GetAlbumById/${albumId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Album/GetAlbumById/${albumId}`);
       const data = response.data;
 
       // Update state with request details
@@ -75,7 +75,7 @@ class AlbumDetail extends React.Component {
 
       await this.fetchAlbumImages(); // Tải ảnh lúc load trang
 
-      axios.get(`http://localhost:5124/api/Teacher/GetAllTeachers`)
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetAllTeachers`)
         .then((response) => {
           this.setState({ teacherListData: response.data });
         })
@@ -266,8 +266,7 @@ class AlbumDetail extends React.Component {
 
   handleDeleteImage = async (imageId) => {
     try {
-      const response = await axios.delete(`http://localhost:5124/api/Images/DeleteImage/${imageId}`);
-      console.log(response);
+      const response = await axios.delete(`${process.env.REACT_APP_API_URL}/api/Images/DeleteImage/${imageId}`);
 
       if (response.status === 200) {
         // Hiển thị thông báo ngay lập tức

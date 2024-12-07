@@ -81,7 +81,7 @@ class LocationActivityList extends React.Component {
       return;
     }
 
-    axios.post("http://localhost:5124/api/LocationActivity/AddLocation", {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/LocationActivity/AddLocation`, {
       locationName: newLocationName,
       status: 0
     })
@@ -128,7 +128,7 @@ class LocationActivityList extends React.Component {
       return;
     }
 
-    axios.post("http://localhost:5124/api/LocationActivity/AddActivity", {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/LocationActivity/AddActivity`, {
       activityName: newActivityName,
       status: 0
     })
@@ -182,7 +182,7 @@ class LocationActivityList extends React.Component {
 
   handleStatusChangeLocation = async (location, newStatus) => {
     try {
-      const response = await axios.put(`http://localhost:5124/api/LocationActivity/UpdateLocation`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/LocationActivity/UpdateLocation`, {
         locationId: location.locationId,
         locationName: location.locationName,
         status: newStatus
@@ -222,7 +222,7 @@ class LocationActivityList extends React.Component {
 
   handleStatusChangeActivity = async (activity, newStatus) => {
     try {
-      const response = await axios.put(`http://localhost:5124/api/LocationActivity/UpdateActivity`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/LocationActivity/UpdateActivity`, {
         activityId: activity.activityId,
         activityName: activity.activityName,
         status: newStatus

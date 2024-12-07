@@ -32,7 +32,7 @@ class SemesterCreate extends React.Component {
         };
         try {
             const response = await axios.post(
-                "http://localhost:5124/api/Semester/AddSemester", values
+                `${process.env.REACT_APP_API_URL}/api/Semester/AddSemester`, values
             );
             this.setState({
                 notificationText: "Semester Create successfully!",

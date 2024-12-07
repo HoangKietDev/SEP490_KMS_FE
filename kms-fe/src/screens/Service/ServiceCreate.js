@@ -24,7 +24,7 @@ class ServiceCreate extends React.Component {
         window.scrollTo(0, 0);
         const fetchData = async () => {
             try {
-                const CategoryResponse = await axios.get('http://localhost:5124/api/CategoryService/GetAllCategoryService');
+                const CategoryResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/CategoryService/GetAllCategoryService`);
                 const Categorydata = CategoryResponse.data;
                 this.setState({ categories: Categorydata })
             } catch (error) {
@@ -55,7 +55,7 @@ class ServiceCreate extends React.Component {
         }
         try {
             const response = await axios.post(
-                "http://localhost:5124/api/Service/AddService", newService
+                `${process.env.REACT_APP_API_URL}/api/Service/AddService`, newService
             );
             this.setState({
                 notificationText: "Service create successfully!",

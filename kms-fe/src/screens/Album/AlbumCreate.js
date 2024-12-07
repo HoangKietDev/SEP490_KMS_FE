@@ -32,7 +32,7 @@ class AlbumCreate extends React.Component {
 
         const fetchData = async () => {
             try {
-                const classResponse = await axios.get(`http://localhost:5124/api/Class/GetClassesByTeacherId/${userData?.userId}`);
+                const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${userData?.userId}`);
                 const classData = classResponse.data;
 
                 if (classData.length > 0) {
@@ -68,7 +68,7 @@ class AlbumCreate extends React.Component {
         };
         console.log(newRequest);
         try {
-            const response = await axios.post("http://localhost:5124/api/Album/CreateAlbum", newRequest);
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Album/CreateAlbum`, newRequest);
 
             console.log("Album created successfully:", response.data);
             this.setState({

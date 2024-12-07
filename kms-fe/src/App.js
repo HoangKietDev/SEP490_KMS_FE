@@ -39,7 +39,6 @@ import Checkin from "./screens/Attendance/Checkin";
 import ListClassCheckin from "./screens/Attendance/ListClassCheckin";
 import UpdateMenu from "./screens/Menu/UpdateMenu";
 import profilev1page from "./screens/Pages/ProfileV1";
-import Test from "./screens/Attendance/test";
 import ListMenu from "./screens/Menu/ListMenu"
 import ViewChildrenbyClassID from "./screens/Children/ViewChildrenbyClassID";
 import ViewMenuByTeacherAndParent from "./screens/Menu/ViewMenuByTeacherAndParent";
@@ -75,6 +74,7 @@ import PaymentAllStaff from "./screens/Payment/PaymentAllStaff";
 import PaymentTuition from "./screens/Payment/PaymentTuition";
 import SemesterDetail from "./screens/Semester/SemesterDetail";
 import { getCookie } from "./components/Auth/Auth";
+import ListPickupPerson from "./screens/Pickup_Person/ListPickupPerson";
 window.__DEV__ = true;
 
 class App extends React.Component {
@@ -524,13 +524,13 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/payment`}
                   component={PaymentList}
-                  allowedRoles={[2]}
+                  allowedRoles={[2,3,4,5]}
                 />
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/payment-history`}
                   component={PaymentHistory}
-                  allowedRoles={[2]}
+                  allowedRoles={[2,3,4,5]}
                 />
                 <ProtectedRoute
                   exact
@@ -550,10 +550,7 @@ class App extends React.Component {
                   component={ChooseService}
                   allowedRoles={[2]}
                 />
-                <Route
-                  path={`${process.env.PUBLIC_URL}/test`}
-                  component={Test}
-                />
+               
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/dashboardprin`}
@@ -567,6 +564,12 @@ class App extends React.Component {
                   allowedRoles={[2]}
                 />
                 <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
+                <ProtectedRoute
+                  exact
+                  path={`${process.env.PUBLIC_URL}/listpickupperson`}
+                  component={ListPickupPerson}
+                  allowedRoles={[2]}
+                />
               </Switch>
             </div>
           </>

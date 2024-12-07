@@ -60,7 +60,7 @@ class PaymentList extends React.Component {
     });
 
     // Gọi API và cập nhật state bằng axios
-    axios.get(`http://localhost:5124/api/Tuition/parent/${parentId}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Tuition/parent/${parentId}`)
       .then((response) => {
         this.setState({ Payment: response.data });
       })
@@ -68,7 +68,7 @@ class PaymentList extends React.Component {
         console.error("Error fetching data: ", error);
       });
 
-    axios.get(`http://localhost:5124/api/Children/GetAllChildren`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`)
       .then((response) => {
         const data = response.data;
         const myChildren = data?.filter(i => i.parentId === parentId);
@@ -83,7 +83,7 @@ class PaymentList extends React.Component {
         console.error("Error fetching data: ", error);
       });
 
-    axios.get(`http://localhost:5124/api/Payment/getAllDiscount`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Payment/getAllDiscount`)
       .then((response) => {
         this.setState({ Dicounts: response.data });
       })
@@ -93,7 +93,7 @@ class PaymentList extends React.Component {
   }
 
   getClassByStudentId = (studentId, parentId) => {
-    axios.get(`http://localhost:5124/api/Class/GetClassesByStudentId/${studentId}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${studentId}`)
       .then((response) => {
         const data = response.data;
         const updatedChildren = this.state.Children.map(child => {
@@ -267,7 +267,7 @@ class PaymentList extends React.Component {
     }
     else {
       // Gọi API thanh toán
-      axios.post("http://localhost:5124/api/Payment/create-payment-url", paymentData)
+      axios.post(`${process.env.REACT_APP_API_URL}/api/Payment/create-payment-url`, paymentData)
         .then(response => {
           if (response.data.url) {
             // Điều hướng người dùng đến URL của VNPAY sandbox

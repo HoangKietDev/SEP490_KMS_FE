@@ -46,7 +46,7 @@ class RequestUpdate extends React.Component {
     this.setState({ filteredStatuses: dataRole });
     try {
       // Fetch request details
-      const response = await axios.get(`http://localhost:5124/api/Request/GetRequestById/${requestId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetRequestById/${requestId}`);
       const data = response.data;
 
       // Update state with request details
@@ -64,7 +64,7 @@ class RequestUpdate extends React.Component {
       });
 
       // Fetch student information
-      const studentResponse = await axios.get(`http://localhost:5124/api/Children/GetChildrenByChildrenId/${data.studentId}`);
+      const studentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetChildrenByChildrenId/${data.studentId}`);
       const studentData = studentResponse.data;
 
       this.setState(prevState => ({
@@ -75,7 +75,7 @@ class RequestUpdate extends React.Component {
       }));
 
       // Fetch user information
-      const userResponse = await axios.get(`http://localhost:5124/api/User/ProfileById/${data.createBy}`);
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${data.createBy}`);
       const userData = userResponse.data;
 
       this.setState(prevState => ({
@@ -97,7 +97,7 @@ class RequestUpdate extends React.Component {
     const { requestId, title, description, createBy, createAt, classId, studentId, classChangeId, status, ReasonReject } = this.state;
     try {
       // Make a PUT request to update the request
-      await axios.put(`http://localhost:5124/api/Request/UpdateRequest`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/Request/UpdateRequest`, {
         requestId,
         title,
         description,

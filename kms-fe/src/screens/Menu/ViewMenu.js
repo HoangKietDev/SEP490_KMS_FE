@@ -5,7 +5,7 @@ import "react-calendar/dist/Calendar.css";
 import "./ViewMenu.css";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-
+import Notification from "../../components/Notification";
 class ViewMenu extends React.Component {
   state = {
     selectedWeek: {
@@ -19,6 +19,9 @@ class ViewMenu extends React.Component {
     daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
     showCalendar: false,
     selectedFile: null,
+    showNotification: false, // State to control notification visibility
+    notificationText: "", // Text for the notification
+    notificationType: "success" // Type of notification (success or error)
   };
 
   componentDidMount() {
@@ -59,8 +62,8 @@ class ViewMenu extends React.Component {
     const endDate = this.formatDate(endOfWeek);
 
     try {
-      const response1 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
-      const response2 = await fetch(`http://localhost:5124/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
+      const response1 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
+      const response2 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
 
       const menuData1 = await response1.json();
       const menuData2 = await response2.json();
@@ -92,6 +95,12 @@ class ViewMenu extends React.Component {
       },
     });
   };
+  handleDownload = () => {
+    const link = document.createElement('a'); // Tạo thẻ a
+    link.href = '/assets/excel/MenuSample.xlsx';  // Đường dẫn đến file Excel
+    link.download = 'menusample.xlsx';             // Tên file khi tải về
+    link.click();                             // Kích hoạt sự kiện click để tải file
+  };
 
   handleFileChange = (event) => {
     this.setState({ selectedFile: event.target.files[0] });
@@ -100,7 +109,12 @@ class ViewMenu extends React.Component {
   handleUpload = async () => {
     const { selectedFile } = this.state;
     if (!selectedFile) {
-      alert("Please select a file first!");
+      // alert("Please select a file first!");
+      this.setState({
+        notificationText: "Please select a file first!",
+        notificationType: "error",
+        showNotification: true
+      });  
       return;
     }
 
@@ -108,16 +122,26 @@ class ViewMenu extends React.Component {
     formData.append("file", selectedFile);
 
     try {
-      const response = await axios.post("http://localhost:5124/api/Menu/ImportMenuExcel", formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Menu/ImportMenuExcel`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      alert("File uploaded successfully!");
+      // alert("File uploaded successfully!");
+      this.setState({
+        notificationText: "File uploaded successfully!",
+        notificationType: "success",
+        showNotification: true
+      }); 
       this.fetchMenuData(new Date());
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("Error uploading file.");
+      // alert("Error uploading file.");
+      this.setState({
+        notificationText: "Error uploading file.",
+        notificationType: "success",
+        showNotification: true
+      }); 
     }
   };
 
@@ -179,7 +203,7 @@ class ViewMenu extends React.Component {
               })}
             </tr>
             <tr>
-              <td className="sticky-col"><strong>Dinner</strong></td>
+              <td className="sticky-col"><strong>Snack</strong></td>
               {daysOfWeek.map((day, index) => {
                 const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToEnglish(menu.dayOfWeek) === day);
                 return (
@@ -224,7 +248,9 @@ class ViewMenu extends React.Component {
   };
 
   render() {
-    const { selectedWeek, showCalendar } = this.state;
+    const { selectedWeek, showCalendar, showNotification, // State to control notification visibility
+      notificationText, // Text for the notification
+      notificationType } = this.state;
 
     return (
       <div className="container-fluid">
@@ -235,6 +261,15 @@ class ViewMenu extends React.Component {
             { name: "View Menu", navigate: "" },
           ]}
         />
+        {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
         <div className="row">
           <div className="col-lg-12 col-md-12">
             <h2>Menu</h2>
@@ -243,8 +278,19 @@ class ViewMenu extends React.Component {
               <div className="week-selector col-lg-3" onClick={this.toggleCalendar}>
                 Selected week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
               </div>
+              <div>
+
+              </div>
 
               <div className="upload-section d-flex align-items-center">
+                <a
+                  onClick={() => {
+                    this.handleDownload()
+                  }}
+                  className="btn btn-success text-white mr-4"
+                >
+                  <i className="icon-arrow-down mr-2"></i>Dowload Template
+                </a>
                 <input type="file" onChange={this.handleFileChange} className="mr-2" />
                 <button onClick={this.handleUpload}> <i className="wi wi-cloud-up">Upload</i></button>
               </div>
