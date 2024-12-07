@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import Notification from "../../components/Notification";
+import "bootstrap/dist/css/bootstrap.min.css";
+import './CreateClass.css'
 class CreateClass extends React.Component {
   state = {
     classId: 0,
@@ -34,11 +36,11 @@ class CreateClass extends React.Component {
     Promise.all([
       fetch(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`).then((res) => res.json()),
       fetch(`${process.env.REACT_APP_API_URL}/api/Grade`).then((res) => res.json()),
-      fetch(`${process.env.REACT_APP_API_URL}/api/Teacher/GetAllTeachers`).then((res) => res.json()),
+      fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetTeachersWithoutClass`).then((res) => res.json()),
     ])
       .then(([semesters, grades, teachers]) => {
         const activeSemesters = semesters.filter((semester) => semester.status === 0);
-        const validTeachers = teachers.filter((teacher) => teacher.name?.trim());
+        const validTeachers = teachers.filter((teacher) => teacher.teacherName);
         this.setState({
           semesters: activeSemesters,
           grades,
@@ -222,7 +224,7 @@ class CreateClass extends React.Component {
             <PageHeader
               HeaderText="Class Management"
               Breadcrumb={[
-                { name: "Class Management", navigate: "" },
+                { name: "Class Management", navigate: "/viewclass" },
                 { name: "Create Class", navigate: "" },
               ]}
             />
@@ -235,7 +237,7 @@ class CreateClass extends React.Component {
                 onClose={() => this.setState({ showNotification: false })}
               />
             )}
-           
+
             <div className="card shadow-lg">
               <div className="card-header text-white" style={{ backgroundColor: "#48C3B4" }}>
                 <h4 className="mb-0">Create Class</h4>
@@ -308,26 +310,79 @@ class CreateClass extends React.Component {
                     </div>
                   </div>
 
+                  {/* <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Select Teacher</label>
+                        <select
+                          className={`form-control ${errors.selectedTeachers && submeet ? "is-invalid" : ""}`}
+                          value={selectedTeachers[0] || ""}
+                          onChange={(e) => this.setState({ selectedTeachers: [parseInt(e.target.value)] })}
+                        >
+                          <option value="">Select a Teacher</option>
+                          {teachers.map((teacher) => (
+                            <option key={teacher.teacherId} value={teacher.teacherId}>
+                              {teacher.teacherName}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.selectedTeachers && submeet && <div className="invalid-feedback">{errors.selectedTeachers}</div>}
+                      </div>
+                    </div>
+                  </div> */}
                   <div className="row">
                     <div className="col-md-6">
                       <div className="form-group">
-                      <label>Select Teacher</label>
-                <select
-                  className={`form-control ${errors.selectedTeachers && submeet ? "is-invalid" : ""}`}
-                  value={selectedTeachers[0] || ""}
-                  onChange={(e) => this.setState({ selectedTeachers: [parseInt(e.target.value)] })}
-                >
-                  <option value="">Select a Teacher</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher.teacherId} value={teacher.teacherId}>
-                      {teacher.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.selectedTeachers && submeet && <div className="invalid-feedback">{errors.selectedTeachers}</div>}
+                        <label>Select Teachers</label>
+
+                        {/* Hiển thị danh sách các giáo viên đã chọn */}
+                        <div className="mb-3">
+                          {selectedTeachers.map((teacherId) => {
+                            const teacher = teachers.find((t) => t.teacherId === teacherId);
+                            return (
+                              <span key={teacherId} className="badge badge-primary me-2">
+                                {teacher?.teacherName}
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-danger ms-2"
+                                  onClick={() =>
+                                    this.setState({
+                                      selectedTeachers: selectedTeachers.filter((id) => id !== teacherId),
+                                    })
+                                  }
+                                >
+                                  <i className="bi bi-x-circle"></i>
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+
+                        {/* Dropdown cho phép chọn giáo viên */}
+                        <select
+                          className="form-select"
+                          value=""
+                          onChange={(e) => {
+                            const selectedValue = parseInt(e.target.value);
+                            if (selectedValue && !selectedTeachers.includes(selectedValue)) {
+                              this.setState({
+                                selectedTeachers: [...selectedTeachers, selectedValue],
+                              });
+                            }
+                          }}
+                        >
+                          <option value="">Select a Teacher</option>
+                          {teachers.map((teacher) => (
+                            <option key={teacher.teacherId} value={teacher.teacherId}>
+                              {teacher.teacherName}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>
+
+
                   <div className="text-right">
                     <button type="submit" className="btn btn-primary">
                       Add Class

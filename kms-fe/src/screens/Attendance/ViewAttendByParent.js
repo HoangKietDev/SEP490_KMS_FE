@@ -459,7 +459,7 @@ class ViewAttendByParent extends React.Component {
                         <img
                           src={attendance.checkinImageUrl}
                           alt="Checkin"
-                          style={{ width: "100px", height: "auto" }}
+                          style={{ width: "100px", height: "100ppx" }}
                         />
                       ) : (
                         "No Image"
@@ -470,7 +470,7 @@ class ViewAttendByParent extends React.Component {
                         <img
                           src={attendance.checkoutImageUrl}
                           alt="Checkout"
-                          style={{ width: "100px", height: "auto" }}
+                          style={{ width: "100px", height: "100px" }}
                         />
                       ) : (
                         "No Image"

@@ -124,7 +124,7 @@ class ProfileV1Page extends React.Component {
           notificationText: "Cập nhật người dùng thành công!",
           notificationType: "success",
           showNotification: true
-        }); 
+        });
       } else {
         console.error("Failed to update user:", response.statusText);
         // alert("Cập nhật người dùng thất bại.");
@@ -132,8 +132,8 @@ class ProfileV1Page extends React.Component {
           notificationText: "Cập nhật người dùng thất bại.",
           notificationType: "error",
           showNotification: true
-        }); 
-        
+        });
+
       }
     } catch (error) {
       console.error("Error updating user data:", error);
@@ -153,7 +153,14 @@ class ProfileV1Page extends React.Component {
 
   handleChangePassword = async () => {
     const { passwordData } = this.state;
-
+    if (!passwordData.currentPassword) {
+      this.setState({
+        notificationText: "Current Password is required!",
+        notificationType: "error",
+        showNotification: true
+      });
+      return;
+    }
     // Kiểm tra mật khẩu mới và mật khẩu xác nhận
     if (!passwordData.newPassword || !passwordData.confirmNewPassword) {
       // alert("Please fill in all password fields.");
@@ -161,7 +168,7 @@ class ProfileV1Page extends React.Component {
         notificationText: "Please fill in all password fields.",
         notificationType: "error",
         showNotification: true
-      });  
+      });
       return;
     }
 
@@ -171,7 +178,7 @@ class ProfileV1Page extends React.Component {
         notificationText: "New Password and Confirm New Password do not match.",
         notificationType: "error",
         showNotification: true
-      }); 
+      });
       return;
     }
 
@@ -193,7 +200,7 @@ class ProfileV1Page extends React.Component {
           notificationText: "Password updated successfully!",
           notificationType: "success",
           showNotification: true
-        }); 
+        });
         this.setState({
           passwordData: {
             currentPassword: "",
@@ -208,7 +215,7 @@ class ProfileV1Page extends React.Component {
           notificationText: `Failed to update password: ${errorData.message}`,
           notificationType: "success",
           showNotification: true
-        }); 
+        });
       }
     } catch (error) {
       console.error("Error updating password:", error);
@@ -410,6 +417,7 @@ class ProfileV1Page extends React.Component {
                               name="currentPassword"
                               value={passwordData.currentPassword}
                               onChange={this.handlePasswordChange}
+                              required
                             />
                           </div>
                           <div className="form-group">

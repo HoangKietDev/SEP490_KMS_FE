@@ -38,7 +38,7 @@ class UserList extends React.Component {
 
   fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:5124/api/User');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/User`);
       const data = response.data;
       this.setState({ users: data });
     } catch (error) {

@@ -149,6 +149,7 @@ class TeacherList extends React.Component {
                             <th>Gender</th>
                             <th>Code</th>
                             <th>Status</th>
+                            <th>Assign Teacher</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -180,7 +181,18 @@ class TeacherList extends React.Component {
                                     <span className="badge badge-default">InActive</span>
                                   ) : null}
                                 </td>
-
+                                <td>
+                                  <div className="fancy-checkbox d-inline-block ">
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                    
+                                       
+                                      />
+                                      <span></span>
+                                    </label>
+                                  </div>
+                                </td>
 
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"

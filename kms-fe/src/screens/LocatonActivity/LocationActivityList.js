@@ -48,7 +48,7 @@ class LocationActivityList extends React.Component {
 
   // Hàm fetch location data
   fetchLocationData = () => {
-    axios.get("http://localhost:5124/api/LocationActivity/GetAllLocations")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/LocationActivity/GetAllLocations`)
       .then((response) => {
         this.setState({ LocationListData: response.data });
         this.setState({ FilterLocationListData: response.data });
@@ -60,7 +60,7 @@ class LocationActivityList extends React.Component {
 
   // Hàm fetch activity data
   fetchActivityData = () => {
-    axios.get("http://localhost:5124/api/LocationActivity/GetAllActivities")
+    axios.get(`${process.env.REACT_APP_API_URL}/api/LocationActivity/GetAllActivities`)
       .then((response) => {
         this.setState({ ActivityListData: response.data });
         this.setState({ FilterActivityListData: response.data });

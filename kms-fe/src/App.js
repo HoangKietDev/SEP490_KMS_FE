@@ -70,11 +70,11 @@ import SemesterUpdate from "./screens/Semester/SemesterUpdate";
 import SemesterCreate from "./screens/Semester/SemesterCreate";
 import UserList from "./screens/User/UserList";
 import UserCreate from "./screens/User/UserCreate";
+import ListPickupPerson from "./screens/Pickup_Person/ListPickupPerson";
 import PaymentAllStaff from "./screens/Payment/PaymentAllStaff";
 import PaymentTuition from "./screens/Payment/PaymentTuition";
 import SemesterDetail from "./screens/Semester/SemesterDetail";
 import { getCookie } from "./components/Auth/Auth";
-import ListPickupPerson from "./screens/Pickup_Person/ListPickupPerson";
 window.__DEV__ = true;
 
 class App extends React.Component {
