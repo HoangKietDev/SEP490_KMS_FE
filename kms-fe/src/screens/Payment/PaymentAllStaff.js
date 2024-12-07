@@ -13,8 +13,8 @@ class PaymentAllStaff extends React.Component {
         classList: [],
         searchText: "",
 
-        startDate: "", // Lưu trữ ngày bắt đầu
-        endDate: "", // Lưu trữ ngày kết thúc
+        paymentDate: new Date().toISOString().split('T')[0], // Lấy ngày theo định dạng YYYY-MM-DD
+        selectDate: false,
 
         currentPage: 1,
         itemsPerPage: 10,
@@ -52,20 +52,7 @@ class PaymentAllStaff extends React.Component {
         this.setState({ searchText: e.target.value });
     };
 
-    // Lọc danh sách thanh toán theo khoảng thời gian
-    handleDateRangeFilter = () => {
-        const { startDate, endDate, paymentAll } = this.state;
 
-        // Nếu chưa có đủ thông tin về ngày bắt đầu và ngày kết thúc, không lọc
-        if (!startDate || !endDate) return paymentAll;
-
-        return paymentAll.filter(item => {
-            const paymentDate = new Date(item.paymentDate);
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            return paymentDate >= start && paymentDate <= end;
-        });
-    };
 
 
     handlePageChange = (pageNumber) => {
@@ -74,15 +61,23 @@ class PaymentAllStaff extends React.Component {
 
     render() {
 
-        const { paymentAll, searchText, startDate, endDate, classList } = this.state;
+        const { paymentAll, searchText, paymentDate, selectDate } = this.state;
 
         const userData = getCookie('user')?.user;
         const roleId = userData.roleId
 
-        // Lọc theo tên
-        const filteredpaymentAll = this.handleDateRangeFilter().filter((item) =>
+        // Lọc theo tên (searchText)
+        let filteredpaymentAll = paymentAll.filter((item) =>
             item.childName.toLowerCase().includes(searchText.toLowerCase())
         );
+
+        // Lọc theo paymentDate (nếu có)
+        if (selectDate) {
+            filteredpaymentAll = filteredpaymentAll.filter((item) => {
+                const paymentDateItem = item.paymentDate?.split("T")[0]; // Chuyển đổi paymentDate thành định dạng YYYY-MM-DD
+                return paymentDateItem === paymentDate; // So sánh với paymentDate đã chọn
+            });
+        }
 
         // phan trang
         const { currentPage, itemsPerPage } = this.state;
@@ -125,22 +120,12 @@ class PaymentAllStaff extends React.Component {
 
 
                                         <div className="col-md-3 mb-2">
-                                            <label>StartDate</label>
+                                            <label>Payment Date</label>
                                             <input
                                                 type="date"
                                                 className="form-control"
-                                                value={startDate}
-                                                onChange={(e) => this.setState({ startDate: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div className="col-md-3 mb-2">
-                                            <label>EndDate</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                value={endDate}
-                                                onChange={(e) => this.setState({ endDate: e.target.value })}
+                                                value={paymentDate}
+                                                onChange={(e) => this.setState({ paymentDate: e.target.value, selectDate: true })}
                                             />
                                         </div>
 
@@ -183,14 +168,12 @@ class PaymentAllStaff extends React.Component {
                                                                 {item?.paymentDate?.split("T")[0]}
                                                             </td>
                                                             <td>
-                                                                {item?.totalAmount}
+                                                                {item?.totalAmount?.toLocaleString('vi-VN')}
                                                             </td>
                                                             <td>
-                                                                {item?.tuitionDetails?.isPaid === 1 ? (
-                                                                    <span className="badge badge-success">Paid</span>
-                                                                ) : item?.status === 0 ? (
-                                                                    <span className="badge badge-default">Unpaid </span>
-                                                                ) : null}
+
+                                                                <span className="badge badge-success">Paid</span>
+
                                                             </td>
 
                                                         </tr>

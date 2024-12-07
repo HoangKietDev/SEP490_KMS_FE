@@ -7,7 +7,7 @@ import { getCookie } from "../../components/Auth/Auth";
 import { Modal, Button, Form } from "react-bootstrap";
 import Notification from "../../components/Notification";
 import Resizer from 'react-image-file-resizer'; // Import thư viện nén ảnh
-import { Bars } from 'react-loader-spinner';
+import { RotatingLines } from 'react-loader-spinner';
 
 
 class AlbumDetail extends React.Component {
@@ -497,7 +497,7 @@ class AlbumDetail extends React.Component {
                 {/* Hiển thị loader khi đang tải ảnh */}
                 {this.state.isUploading && (
                   <div className="loading-overlay">
-                    <Bars color="#00BFFF" height={100} width={100} />
+                    <RotatingLines color="#00BFFF" height={100} width={100} />
                   </div>
                 )}
               </Form>

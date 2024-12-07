@@ -530,9 +530,9 @@ class Schedule extends React.Component {
 
                           {/* Nếu loading, hiển thị spinner */}
                           {loading && (
-                          <div className="loading-container">
-                            <ProgressBar color="#00BFFF" height={40} width={100} />
-                          </div>
+                            <div className="loading-container">
+                              <ProgressBar color="#00BFFF" height={40} width={100} />
+                            </div>
                           )}
                         </>
                       ) : null}
@@ -644,7 +644,9 @@ class Schedule extends React.Component {
                                   <td key={dayIndex} onClick={() => this.handleSlotClick(result)}>
                                     {result ? (
                                       <div>
-                                        <strong>{result?.activityName || 'No activity'}</strong>
+                                        {result?.activityName !== 'Trống' && (
+                                          <strong>{result?.activityName}</strong>
+                                        )}
                                         <div className="d-flex flex-column">
                                           {result?.locationName !== 'Trống' && (
                                             <span style={{ fontSize: 'smaller' }} className="pt-2">

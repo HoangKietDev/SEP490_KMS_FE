@@ -7,10 +7,10 @@ import { getCookie } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 import Pagination from "../../components/Common/Pagination";
-
+import sign from "../../assets/images/signature.png"
 
 // Import PDF generation utilities
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image } from '@react-pdf/renderer';
 
 
 const styles = StyleSheet.create({
@@ -101,6 +101,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "right",
   },
+  signatureImage: {
+    width: 100, // Điều chỉnh kích thước hình ảnh chữ ký
+    height: 50, // Điều chỉnh chiều cao hình ảnh
+    objectFit: 'contain' // Đảm bảo hình ảnh được hiển thị đúng tỉ lệ
+  }
 });
 
 class PaymentHistory extends React.Component {
@@ -312,7 +317,10 @@ class PaymentHistory extends React.Component {
           <View style={styles.signatureSection}>
             <Text style={styles.signatureTitle}>Principal's Signature</Text>
             <View style={styles.signatureLine}></View>
-            <Text style={styles.signatureName}>Hieu Truong</Text>
+            <Image
+              src={sign} // Thay đổi đường dẫn tới file hình ảnh chữ ký của hiệu trưởng
+              style={styles.signatureImage} // Tùy chỉnh kích thước hình ảnh nếu cần
+            />
           </View>
 
           {/* Ghi chú */}

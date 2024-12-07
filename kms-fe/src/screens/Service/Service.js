@@ -15,6 +15,8 @@ class Service extends React.Component {
     searchText: "", // Dùng để lọc theo serviceName
     filterStatus: "", // Dùng để lọc theo status
 
+    selectedServices: [], // Mảng lưu trữ các dịch vụ đã chọn
+
     showNotification: false, // Để hiển thị thông báo
     notificationText: "", // Nội dung thông báo
     notificationType: "success", // Loại thông báo (success/error)
@@ -24,18 +26,19 @@ class Service extends React.Component {
   };
   componentDidMount() {
     window.scrollTo(0, 0);
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:5124/api/Service/GetAllServices');
-        const data = response.data;
-        this.setState({ services: data, filteredServices: data });
-        console.log(data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
+    this.fetchData();
   }
+
+  fetchData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5124/api/Service/GetAllServices');
+      const data = response.data;
+      this.setState({ services: data, filteredServices: data });
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   handleCreateCategory = () => {
     // Chuyển hướng đến cap nhat category
@@ -63,7 +66,7 @@ class Service extends React.Component {
   filterServices = () => {
     const { services, searchText, filterStatus } = this.state;
     const filtered = services.filter(service => {
-      const matchesName = service.serviceName.toLowerCase().includes(searchText.toLowerCase());
+      const matchesName = service?.serviceName?.toLowerCase()?.includes(searchText?.toLowerCase());
       const matchesStatus = filterStatus === "" || service.status === parseInt(filterStatus);
       return matchesName && matchesStatus;
     });
@@ -110,13 +113,91 @@ class Service extends React.Component {
     }
   };
 
+  handleBulkStatusUpdate = async (newStatus) => {
+    const { selectedServices, filteredServices } = this.state;
+    const servicesToUpdate = filteredServices.filter(service => selectedServices.includes(service.serviceId));
+
+    if (servicesToUpdate.length === 0) {
+      this.setState({
+        notificationText: "No services selected!",
+        notificationType: "error",
+        showNotification: true,
+      });
+      return;
+    }
+
+    try {
+      // Gửi từng yêu cầu cập nhật cho mỗi service
+      for (const service of servicesToUpdate) {
+        const updatedService = {
+          serviceId: service.serviceId,
+          serviceName: service.serviceName,
+          servicePrice: service.servicePrice,
+          serviceDes: service.serviceDes,
+          categoryServiceId: service.categoryServiceId,
+          schoolId: service.schoolId,
+          status: newStatus,
+        };
+
+        // Gửi yêu cầu cập nhật cho từng bản ghi
+        const response = await axios.put(`http://localhost:5124/api/Service/UpdateService`, updatedService);
+
+        // Sau khi mỗi yêu cầu thành công, cập nhật filteredServices
+        this.setState(prevState => {
+          const updatedListData = prevState.filteredServices.map(service =>
+            service.serviceId === updatedService.serviceId ? { ...service, status: newStatus } : service
+          );
+          return { filteredServices: updatedListData };
+        });
+
+
+      }
+      // Thông báo thành công cho mỗi bản ghi
+      this.setState({
+        notificationText: `${servicesToUpdate.length} Service status updated successfully!`,
+        notificationType: "success",
+        showNotification: true,
+      });
+      // Sau khi hoàn thành tất cả, reset selectedServices
+      this.setState({ selectedServices: [] });
+      this.fetchData();
+
+    } catch (error) {
+      this.setState({
+        notificationText: "Error updating status for one or more services!",
+        notificationType: "error",
+        showNotification: true,
+      });
+    }
+  };
+
+
+  handleSelectService = (serviceId) => {
+    this.setState(prevState => {
+      const selectedServices = prevState.selectedServices.includes(serviceId)
+        ? prevState.selectedServices.filter(id => id !== serviceId)
+        : [...prevState.selectedServices, serviceId];
+      return { selectedServices };
+    });
+  };
+
+  handleSelectAll = () => {
+    this.setState(prevState => {
+      if (prevState.selectedServices.length === prevState.filteredServices.length) {
+        return { selectedServices: [] }; // Unselect all
+      }
+      const allServiceIds = prevState.filteredServices.map(service => service.serviceId);
+      return { selectedServices: allServiceIds }; // Select all
+    });
+  };
+
   handlePageChange = (pageNumber) => {
     this.setState({ currentPage: pageNumber });
   };
 
   render() {
 
-    const { filteredServices } = this.state;
+    const { filteredServices, selectedServices, } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
     const userData = getCookie('user')?.user;
@@ -132,6 +213,9 @@ class Service extends React.Component {
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
+
+    // Đếm số bản ghi
+    const totalRecords = filteredServices.length;
 
     return (
       <div
@@ -160,44 +244,87 @@ class Service extends React.Component {
             <div className="row clearfix">
               <div className="col-lg-12 col-md-12">
                 <div className="card planned_task">
-                  <div className="header d-flex justify-content-between">
-                    <h2>Services Manager</h2>
-                    <div className="col-md-3">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search by Service Name"
-                        value={this.state.searchText}
-                        onChange={this.handleSearchChange}
-                      />
+                  <div className='header'>
+                    <div className=" d-flex justify-content-between">
+                      <h2>Services Manager</h2>
+                      <div className="col-md-3">
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Search by Service Name"
+                          value={this.state.searchText}
+                          onChange={this.handleSearchChange}
+                        />
+                      </div>
+                      <div className="col-md-3">
+                        <select
+                          className="form-control"
+                          value={this.state.filterStatus}
+                          onChange={this.handleStatusFilterChange}
+                        >
+                          <option value="">All Status</option>
+                          {statusOptions.map(option => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {roleId === 3 ? (
+                        <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Service</a>
+                      ) : null}
                     </div>
-                    <div className="col-md-3">
-                      <select
-                        className="form-control"
-                        value={this.state.filterStatus}
-                        onChange={this.handleStatusFilterChange}
-                      >
-                        <option value="">All Status</option>
-                        {statusOptions.map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {roleId === 3 ? (
-                      <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Service</a>
+                    {roleId === 4 ? (
+                      <div className="col-md-6 d-flex justify-content-between pt-4">
+                        <div>
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.length === filteredServices.length}
+                            onChange={this.handleSelectAll}
+                            className='mr-2'
+                            style={{ width: '20px', height: '20px' }}
+                          />
+                          <span>Select All</span>
+                        </div>
+                        <button
+                          className="btn btn-success"
+                          onClick={() => this.handleBulkStatusUpdate(1)} // Update status to Active
+                        >
+                          Update Status to Active
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => this.handleBulkStatusUpdate(0)} // Update status to InActive
+                        >
+                          Update Status to InActive
+                        </button>
+
+                      </div>
                     ) : null}
+
                   </div>
                 </div>
               </div>
               <div className="col-lg-12">
                 <div className="card">
-                  <div className="table-responsive">
+                  <div className="header table-responsive">
+                    <div>
+                      <strong>Total Records: </strong>{totalRecords}
+                    </div>
                     <table className="table m-b-0 table-hover">
                       <thead className="">
                         <tr className='theme-color'>
-                          <th>#</th>
+                          <th>
+                            {roleId === 4 ? (
+                              <input
+                                type="checkbox"
+                                checked={selectedServices.length === filteredServices.length}
+                                onChange={this.handleSelectAll}
+                                className='mr-2'
+                              />
+                            ) : null}
+                            <span>#</span>
+                          </th>
                           <th>ServiceName</th>
                           <th>Price</th>
                           <th>Description</th>
@@ -207,18 +334,26 @@ class Service extends React.Component {
                         </tr>
                       </thead>
                       <tbody>
+                        {/* Hiển thị số lượng bản ghi ở đầu bảng */}
                         {currentItems.map((service, i) => {
                           return (
                             <tr key={"dihf" + i}>
-
                               <td className="project-title">
-                                <th scope="row">{i + 1}</th>
+                                {roleId === 4 ? (
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedServices.includes(service.serviceId)}
+                                    onChange={() => this.handleSelectService(service.serviceId)}
+                                    className='mr-2'
+                                  />
+                                ) : null}
+                                <span>{i + 1}</span>
                               </td>
                               <td>
                                 {service?.serviceName}
                               </td>
                               <td>
-                                {service?.servicePrice}
+                                {service?.servicePrice?.toLocaleString('vi-VN')}
                               </td>
                               <td>
                                 {service?.serviceDes}

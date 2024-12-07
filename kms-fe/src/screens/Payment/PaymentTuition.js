@@ -8,7 +8,7 @@ import { getCookie } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 import Notification from "../../components/Notification";
 import { Modal, Button } from 'react-bootstrap';
-import { Bars } from 'react-loader-spinner';
+import { RotatingLines } from 'react-loader-spinner';
 
 class Paymenttuition extends React.Component {
 
@@ -18,6 +18,7 @@ class Paymenttuition extends React.Component {
 
         startDate: "", // Lưu trữ ngày bắt đầu
         endDate: "", // Lưu trữ ngày kết thúc
+        selectDate: false,
         isProcessing: false, // Để hiển thị trạng thái đang xử lý
         showConfirmModal: false, // Điều khiển modal xác nhận
         showConfirmModalStaff: false, // Điều khiển modal xác nhận
@@ -36,12 +37,17 @@ class Paymenttuition extends React.Component {
     // Hàm lấy ngày bắt đầu và ngày kết thúc của tháng hiện tại
     getCurrentMonthDates = () => {
         const now = new Date();
-        const startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Ngày đầu tháng
-        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1); // Ngày cuối tháng
 
+        // Ngày đầu tháng: Sử dụng toLocaleDateString để tính chính xác múi giờ
+        const startDate = new Date(now.getFullYear(), now.getMonth(), 1); // Ngày đầu tháng
+
+        // Ngày cuối tháng: Tạo ngày đầu tháng của tháng sau và trừ đi một ngày
+        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Ngày cuối tháng
+
+        // Chuyển đổi startDate và endDate thành định dạng YYYY-MM-DD
         return {
-            startDate: startDate.toISOString().split('T')[0], // Định dạng thành YYYY-MM-DD
-            endDate: endDate.toISOString().split('T')[0], // Định dạng thành YYYY-MM-DD
+            startDate: startDate.toLocaleDateString('en-CA'), // Định dạng thành YYYY-MM-DD (YYYY/MM/DD)
+            endDate: endDate.toLocaleDateString('en-CA'), // Định dạng thành YYYY-MM-DD (YYYY/MM/DD)
         };
     };
 
@@ -78,12 +84,18 @@ class Paymenttuition extends React.Component {
     };
 
     handleDateRangeFilter = () => {
-        const { startDate, endDate, paymentAll } = this.state;
+        const { startDate, endDate, paymentAll, selectDate } = this.state;
 
         // Nếu chưa có đủ thông tin về ngày bắt đầu và ngày kết thúc, không lọc
+
+        if (!selectDate) {
+            return paymentAll;
+        }
+
         if (!startDate || !endDate) return paymentAll;
 
         const start = new Date(startDate);  // Chuyển startDate thành đối tượng Date
+        start.setHours(0, 0, 0, 0); // Đặt giờ về 00:00:00
         const end = new Date(endDate);      // Chuyển endDate thành đối tượng Date
 
         console.log(start + "-" + end);
@@ -91,10 +103,12 @@ class Paymenttuition extends React.Component {
         return paymentAll.filter(item => {
             const paymentStartDate = new Date(item.startDate);  // Lấy ngày bắt đầu của item
             const paymentEndDate = new Date(item.endDate);      // Lấy ngày kết thúc của item
+            console.log(paymentStartDate, paymentEndDate);
 
             // Kiểm tra nếu ngày bắt đầu của item lớn hơn hoặc bằng startDate và ngày kết thúc của item nhỏ hơn hoặc bằng endDate
             return paymentStartDate >= start && paymentEndDate <= end;
         });
+
     };
 
     generateTuition = async () => {
@@ -254,7 +268,7 @@ class Paymenttuition extends React.Component {
         const roleId = userData.roleId
 
         // Lọc theo tên
-        const filteredpaymentAll = this.handleDateRangeFilter().filter((item) =>
+        const filteredpaymentAll = this?.handleDateRangeFilter().filter((item) =>
             item.studentName.toLowerCase().includes(searchText.toLowerCase())
         );
 
@@ -322,7 +336,7 @@ class Paymenttuition extends React.Component {
                                                         {this.state.isUploading ? 'Sending' : 'Send Mail'}
                                                     </a>
                                                     {this.state.isUploading && (
-                                                        <Bars color="#00BFFF" height={50} width={50} />
+                                                        <RotatingLines color="#00BFFF" height={50} width={50} />
                                                     )}
                                                 </div>
                                             </div>
@@ -341,7 +355,7 @@ class Paymenttuition extends React.Component {
                                                         {this.state.isUploadingStaff ? 'Sending' : 'Send Expired Mail'}
                                                     </a>
                                                     {this.state.isUploadingStaff && (
-                                                        <Bars color="#00BFFF" height={50} width={50} />
+                                                        <RotatingLines color="#00BFFF" height={50} width={50} />
                                                     )}
                                                 </div>
                                             </div>
@@ -367,7 +381,7 @@ class Paymenttuition extends React.Component {
                                                 type="date"
                                                 className="form-control"
                                                 value={startDate}
-                                                onChange={(e) => this.setState({ startDate: e.target.value })}
+                                                onChange={(e) => this.setState({ startDate: e.target.value, selectDate: true })}
                                             />
                                         </div>
 
@@ -377,7 +391,7 @@ class Paymenttuition extends React.Component {
                                                 type="date"
                                                 className="form-control"
                                                 value={endDate}
-                                                onChange={(e) => this.setState({ endDate: e.target.value })}
+                                                onChange={(e) => this.setState({ endDate: e.target.value, selectDate: true })}
                                             />
                                         </div>
 
@@ -398,6 +412,7 @@ class Paymenttuition extends React.Component {
                                                     <th>End Date</th>
                                                     <th>tuitionFee</th>
                                                     <th>Due Date</th>
+                                                    <th>Status</th>
                                                     <th>Action</th>
 
                                                 </tr>
@@ -431,7 +446,13 @@ class Paymenttuition extends React.Component {
                                                             <td>
                                                                 {item?.dueDate?.split("T")[0]}
                                                             </td>
-
+                                                            <td>
+                                                                {item?.isPaid === 1 ? (
+                                                                    <span className="badge badge-success">Paid</span>
+                                                                ) : item?.isPaid === 0 ? (
+                                                                    <span className="badge badge-danger">Not Paid</span>
+                                                                ) : null}
+                                                            </td>
                                                             {roleId === 4 ? (
                                                                 <td>
                                                                     {item?.sendMailByPR === 1 ? (
@@ -443,7 +464,7 @@ class Paymenttuition extends React.Component {
                                                             ) : null}
                                                             {roleId === 3 ? (
                                                                 <td>
-                                                                    {new Date(item?.lastEmailSentDate).toISOString().split('T')[0] === new Date().toISOString().split('T')[0] ? (
+                                                                    {new Date(item?.lastEmailSentDate).toLocaleDateString().split('T')[0] === new Date().toLocaleDateString().split('T')[0] ? (
                                                                         <span className="badge badge-success">Sent Mail</span>
                                                                     ) : (
                                                                         <span className="badge badge-info">Not Send Mail</span>

@@ -37,9 +37,9 @@ class TeacherList extends React.Component {
 
   filterTeacherList = () => {
     const { TeacherListData, filterPhone, filterCode, filterStatus } = this.state;
-    const filteredData = TeacherListData.filter((teacher) => {
-      const matchesPhone = filterPhone === "" || teacher.phoneNumber.includes(filterPhone);
-      const matchesCode = filterCode === "" || teacher.code.includes(filterCode.toLocaleUpperCase());
+    const filteredData = TeacherListData?.filter((teacher) => {
+      const matchesPhone = filterPhone === "" || teacher.phoneNumber?.includes(filterPhone);
+      const matchesCode = filterCode === "" || teacher.code?.includes(filterCode.toLocaleUpperCase());
       const matchesStatus = filterStatus === "" || teacher.status === parseInt(filterStatus);
       return matchesPhone && matchesCode && matchesStatus;
     });

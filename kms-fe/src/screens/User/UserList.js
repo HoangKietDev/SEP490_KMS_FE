@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { getCookie } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 import Notification from "../../components/Notification";
-import { Bars } from 'react-loader-spinner';
+import { RotatingLines } from 'react-loader-spinner';
 
 class UserList extends React.Component {
   state = {
@@ -231,7 +231,7 @@ class UserList extends React.Component {
                           onChange={this.handleImportUser}
                         />
                         {this.state.isUploading && (
-                          <Bars color="#00BFFF" height={50} width={50} />
+                          <RotatingLines color="#00BFFF" height={50} width={50} />
                         )}
                         {/* <a onClick={() => this.fileInput.click()} class="btn btn-info text-white mr-2" style={{ width: "200px", textAlign: 'center' }} disabled={false}>{this.state.isUploading ? 'Importing' : 'Import Excel'}</a> */}
 
