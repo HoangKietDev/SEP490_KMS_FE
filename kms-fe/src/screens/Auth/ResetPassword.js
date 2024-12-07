@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // Don't forget to import axios if you're making API requests
-import Logo from "../../assets/images/logo-white.svg";
+import Logo from "../../assets/images/logo-white.png";
 import Notification from "../../components/Notification";
 
 class ResetPassword extends React.Component {
@@ -116,7 +116,7 @@ class ResetPassword extends React.Component {
             <div className="vertical-align-middle auth-main">
               <div className="auth-box">
                 <div className="top">
-                  <img src={Logo} alt="EduNest" style={{ height: "40px", margin: "10px" }} />
+                  <img src={Logo} alt="EduNest" style={{ width: "50%", margin: "10px" }} />
                 </div>
                 <div className="card">
                   <div className="header">
