@@ -384,6 +384,8 @@ class ViewMenu extends React.Component {
           notificationText: 'Status updated successfully!',
           notificationType: 'success'
         });
+        this.fetchMenuData(data.startDate, data.endDate);
+
       })
       .catch(error => {
         // Handle error response
@@ -404,12 +406,14 @@ class ViewMenu extends React.Component {
     });
   };
 
+
   formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    if (!(date instanceof Date)) {
+      date = new Date(date);
+    }
+    return date.toISOString().split('T')[0];
   };
+
 
   fetchMenuData = async (startOfWeek, endOfWeek) => {
     const startDate = this.formatDate(startOfWeek);
@@ -555,7 +559,15 @@ class ViewMenu extends React.Component {
                 );
               })}
               <td rowSpan={3} className="text-center align-middle">
-                {status === 0 ? 'Draft' : status === 1 ? 'Pending' : status === 2 ? 'Approved' : 'Unknown'}
+                {status === 0 ? (
+                  <span className="badge badge-default">Draft</span> // Thêm màu cho trạng thái Draft
+                ) : status === 1 ? (
+                  <span className="badge badge-warning">Pending</span> // Thêm màu cho trạng thái Pending
+                ) : status === 2 ? (
+                  <span className="badge badge-success">Approved</span> // Thêm màu cho trạng thái Approved
+                ) : (
+                  <span className="badge badge-secondary">Unknown</span> // Thêm màu cho trạng thái Unknown
+                )}
               </td>
 
             </tr>
@@ -687,8 +699,8 @@ class ViewMenu extends React.Component {
                 const gradeId = grade.gradeId;
                 // Tìm tất cả menuDetails từ menus mà có chứa gradeId này
                 const combinedMenuDetails = menus
-                  .filter(m => m.gradeIDs.includes(gradeId))  // Lọc menu có gradeID này
-                  .flatMap(m => m.menuDetails);  // Kết hợp tất cả menuDetails của các menu có gradeId này
+                  ?.filter(m => m.gradeIDs?.includes(gradeId))  // Lọc menu có gradeID này
+                  ?.flatMap(m => m.menuDetails);  // Kết hợp tất cả menuDetails của các menu có gradeId này
 
                 return (
                   <div key={gradeId}>

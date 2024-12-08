@@ -33,7 +33,7 @@ class ViewClassByTeacher extends React.Component {
       fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${teacherId}`)
         .then((response) => response.json())
         .then((data) => {
-          const activeClasses = data.filter(classData => classData.status === 1);
+          const activeClasses = data.filter(classData => classData.status === 2);
           this.setState({ ProjectsData: activeClasses });
         })
         .catch((error) => {
@@ -140,7 +140,7 @@ class ViewClassByTeacher extends React.Component {
     // Lọc dữ liệu theo status, grade, và tên lớp
     const filteredData = ProjectsData.filter(classData => {
       const statusMatch = statusFilter === '' ||
-        (statusFilter === 'active' && classData.status === 1) ||
+        (statusFilter === 'active' && classData.status ===2) ||
         (statusFilter === 'inactive' && classData.status === 0);
 
       const gradeMatch = gradeFilter === '' || classData.gradeId === parseInt(gradeFilter);
@@ -244,7 +244,7 @@ class ViewClassByTeacher extends React.Component {
                                 <td>{classData.number}</td>
                                 <td>{this.getGradeName(classData.gradeId)}</td>
                                 <td>
-                                  {classData.status === 1 ? (
+                                  {classData.status === 2 ? (
                                     <span className="badge badge-success">Active</span>
                                   ) : (
                                     <span className="badge badge-default">Inactive</span>

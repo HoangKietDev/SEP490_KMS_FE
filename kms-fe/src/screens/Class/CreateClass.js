@@ -39,11 +39,13 @@ class CreateClass extends React.Component {
       fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetTeachersWithoutClass`).then((res) => res.json()),
     ])
       .then(([semesters, grades, teachers]) => {
-        const activeSemesters = semesters.filter((semester) => semester.status === 0);
-        const validTeachers = teachers.filter((teacher) => teacher.teacherName);
+        // Kiểm tra dữ liệu trả về có phải mảng không, nếu không thì gán mảng rỗng
+        const activeSemesters = Array.isArray(semesters) ? semesters?.filter((semester) => semester.status === 1) : [];
+        const validTeachers = Array.isArray(teachers) && teachers !== "No teachers found without a class." ? teachers?.filter((teacher) => teacher.teacherName) : [];
+
         this.setState({
           semesters: activeSemesters,
-          grades,
+          grades: Array.isArray(grades) ? grades : [], // Kiểm tra nếu grades là mảng hợp lệ
           teachers: validTeachers,
         });
       })
@@ -52,6 +54,8 @@ class CreateClass extends React.Component {
         alert("Failed to fetch data.");
       });
   };
+
+
 
   validateForm = () => {
     const { className, number, semesterId, gradeId, selectedTeachers } = this.state;
@@ -370,6 +374,7 @@ class CreateClass extends React.Component {
                               });
                             }
                           }}
+                           // Thêm thuộc tính required vào đây
                         >
                           <option value="">Select a Teacher</option>
                           {teachers.map((teacher) => (
@@ -378,9 +383,11 @@ class CreateClass extends React.Component {
                             </option>
                           ))}
                         </select>
+                        <div className="invalid-feedback">Please select at least one teacher.</div> {/* Hiển thị thông báo nếu không chọn */}
                       </div>
                     </div>
                   </div>
+
 
 
                   <div className="text-right">

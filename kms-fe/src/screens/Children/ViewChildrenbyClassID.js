@@ -5,7 +5,7 @@ import { withRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap nếu chưa có
 import Notification from "../../components/Notification";
 import axios from 'axios';
-
+import { getCookie } from "../../components/Auth/Auth";
 class ViewChildrenByClassID extends React.Component {
   state = {
     StudentsData: [],
@@ -297,7 +297,9 @@ class ViewChildrenByClassID extends React.Component {
 
   render() {
     const { StudentsData, GradesData, searchTerm, hoveredImageSrc, hoveredImagePosition, studentsWithoutClass, showAddModal, showNotification, notificationText, notificationType } = this.state;
-
+    const user = getCookie('user');
+    const isRole4 = user && user.user.roleId === 4;
+    const isRole3 = user && user.user.roleId === 3; // Kiểm tra roleId = 3
     const filteredStudents = StudentsData.filter((student) =>
       student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -342,36 +344,38 @@ class ViewChildrenByClassID extends React.Component {
                       />
                     </div>
 
-                    <div className="mb-4 d-flex flex-column flex-sm-row justify-content-between">
-
-                      <div className="btn-group">
-                        <a
-                          onClick={this.handleAddChildren} // On click open the modal
-                          className="btn btn-success text-white d-flex align-items-center mr-2"
-                        >
-                          <i className="icon-plus mr-2"></i>Add Children To Class
-                        </a>
-                        <a
-                          onClick={() => this.handleDownload()}
-                          className="btn btn-success text-white d-flex align-items-center mr-2"
-                        >
-                          <i className="icon-arrow-down mr-2"></i>Export Student
-                        </a>
-                        <a
-                          onClick={() => document.getElementById("fileInput").click()} // Trigger file input click
-                          className="btn btn-primary text-white d-flex align-items-center"
-                        >
-                          <i className="icon-arrow-up mr-2"></i>Import Excel
-                        </a>
-                        <input
-                          id="fileInput"
-                          type="file"
-                          style={{ display: "none" }}
-                          onChange={this.handleFileChange} // Tự động gọi API khi chọn file
-                          accept=".xls,.xlsx,.csv" // Chỉ chấp nhận file Excel
-                        />
+                    {(isRole3 || isRole4) && (
+                      <div className="mb-4 d-flex flex-column flex-sm-row justify-content-between">
+                        <div className="btn-group">
+                          <a
+                            onClick={this.handleAddChildren} // On click open the modal
+                            className="btn btn-success text-white d-flex align-items-center mr-2"
+                          >
+                            <i className="icon-plus mr-2"></i>Add Children To Class
+                          </a>
+                          <a
+                            onClick={() => this.handleDownload()}
+                            className="btn btn-success text-white d-flex align-items-center mr-2"
+                          >
+                            <i className="icon-arrow-down mr-2"></i>Export Student
+                          </a>
+                          <a
+                            onClick={() => document.getElementById("fileInput").click()} // Trigger file input click
+                            className="btn btn-primary text-white d-flex align-items-center"
+                          >
+                            <i className="icon-arrow-up mr-2"></i>Import Excel
+                          </a>
+                          <input
+                            id="fileInput"
+                            type="file"
+                            style={{ display: "none" }}
+                            onChange={this.handleFileChange} // Tự động gọi API khi chọn file
+                            accept=".xls,.xlsx,.csv" // Chỉ chấp nhận file Excel
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
+
                   </div>
 
                   <div className="table-responsive">
@@ -397,7 +401,16 @@ class ViewChildrenByClassID extends React.Component {
                         ) : (
                           filteredStudents.map((student, index) => (
                             <tr key={index}>
-                              <td>{student.fullName}</td>
+                              <td><div className="d-flex align-items-center">
+                                <img
+                                  src={student.avatar || "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"} // Avatar học sinh hoặc avatar mặc định
+                                  alt="Profile"
+                                  className="img-fluid rounded-circle mr-2"
+                                  style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                />
+                                <span>{student.fullName}</span>
+                              </div>
+                              </td>
                               <td>{student.nickName}</td>
                               <td>{student.code}</td>
                               <td>{getGradeName(student.gradeId)}</td>
@@ -422,9 +435,7 @@ class ViewChildrenByClassID extends React.Component {
                                 <a className="btn btn-outline-secondary">
                                   <i className="icon-pencil"></i>
                                 </a>
-                                <a className="btn btn-outline-secondary">
-                                  <i className="icon-trash"></i>
-                                </a>
+
                               </td>
                             </tr>
                           ))

@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
+import { getCookie } from "../../components/Auth/Auth";
+import Notification from "../../components/Notification";
 class ViewClass extends React.Component {
   state = {
     ProjectsData: [],
@@ -11,18 +13,24 @@ class ViewClass extends React.Component {
     gradeFilter: '',
     nameFilter: '',
     selectedClassIds: [], // Thêm trạng thái để lưu các lớp đã chọn
+    showNotification: false,
+    notificationText: "",
+    notificationType: "success",
   };
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState({ ProjectsData: data });
-      })
-      .catch((error) => {
-        console.error("Error fetching class data: ", error);
-      });
+    const user = getCookie("user");
+    console.log(user, "sdsdsd");
+    this.fetchClasses();
+    // fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     this.setState({ ProjectsData: data });
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error fetching class data: ", error);
+    //   });
 
     fetch(`${process.env.REACT_APP_API_URL}/api/Grade`)
       .then((response) => response.json())
@@ -59,7 +67,7 @@ class ViewClass extends React.Component {
     }
   };
   handleFileChange = async (event) => {
-    
+
     const file = event.target.files[0];
 
     if (!file) {
@@ -144,7 +152,7 @@ class ViewClass extends React.Component {
           const classId = selectedClassIds[i];
 
           try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Class/UpdateStatusClass/${classId}/1`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Class/UpdateStatusClass/${classId}/2`, {
               method: 'PUT',
               headers: {
                 'Content-Type': 'application/json',
@@ -152,9 +160,18 @@ class ViewClass extends React.Component {
             });
 
             const data = await response.json();
-            console.log(`Class ${classId} updated successfully:`, data);
+            this.setState({
+              notificationText: "Class updated successfully",
+              notificationType: "success",
+              showNotification: true,
+            });
           } catch (error) {
             console.error(`Error updating class ${classId}:`, error);
+            this.setState({
+              notificationText: "Error updating class",
+              notificationType: "error",
+              showNotification: true,
+            });
           }
         }
 
@@ -168,7 +185,50 @@ class ViewClass extends React.Component {
       console.log('No classes selected.');
     }
   };
+  handleSubmitToPrin = () => {
+    const { selectedClassIds } = this.state;
 
+    if (selectedClassIds.length > 0) {
+      // Duyệt qua từng classId và gọi API lần lượt
+      const updateClassStatus = async () => {
+        for (let i = 0; i < selectedClassIds.length; i++) {
+          const classId = selectedClassIds[i];
+
+          try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Class/UpdateStatusClass/${classId}/1`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            const data = await response.json();
+            console.log(`Class ${classId} updated successfully:`, data);
+            this.setState({
+              notificationText: "Class updated successfully",
+              notificationType: "success",
+              showNotification: true,
+            });
+          } catch (error) {
+            console.error(`Error updating class ${classId}:`, error);
+            this.setState({
+              notificationText: "Error updating class",
+              notificationType: "error",
+              showNotification: true,
+            });
+          }
+        }
+
+        // Reset lại các lớp đã chọn sau khi hoàn thành
+        this.setState({ selectedClassIds: [] }, this.fetchClasses); // Gọi lại API để tải lại danh sách lớp học
+      };
+
+      // Gọi hàm updateStatusClass
+      updateClassStatus();
+    } else {
+      console.log('No classes selected.');
+    }
+  };
 
   handleReject = () => {
     const { selectedClassIds } = this.state;
@@ -188,9 +248,18 @@ class ViewClass extends React.Component {
             });
 
             const data = await response.json();
-            console.log(`Class ${classId} updated successfully:`, data);
+            this.setState({
+              notificationText: "Class updated successfully",
+              notificationType: "success",
+              showNotification: true,
+            });
           } catch (error) {
             console.error(`Error updating class ${classId}:`, error);
+            this.setState({
+              notificationText: "Error updating class",
+              notificationType: "error",
+              showNotification: true,
+            });
           }
         }
 
@@ -204,33 +273,87 @@ class ViewClass extends React.Component {
       console.log('No classes selected.');
     }
   };
+  // Hàm này sẽ được gọi khi người dùng click vào checkbox "Chọn tất cả"
+  handleSelectAllChange = (e) => {
+    const isChecked = e.target.checked;  // Kiểm tra trạng thái checkbox "Chọn tất cả"
+    const selectedClassIds = isChecked
+      ? this.state.ProjectsData.map(classData => classData.classId)  // Chọn tất cả các lớp
+      : [];  // Bỏ chọn tất cả nếu không chọn
 
+    this.setState({ selectedClassIds });
+  };
+
+  // Kiểm tra xem tất cả các lớp đã được chọn hay chưa
+  isAllSelected = () => {
+    return this.state.ProjectsData.length > 0 && this.state.selectedClassIds.length === this.state.ProjectsData.length;
+  };
   // Hàm fetch lại danh sách lớp học sau khi cập nhật
-  fetchClasses = () => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
-      .then((response) => response.json())
-      .then((data) => {
-        this.setState({ ProjectsData: data });
-      })
-      .catch((error) => {
-        console.error("Error fetching class data: ", error);
-      });
+  fetchClasses = async () => {
+    try {
+      const user = getCookie("user"); // Giả sử bạn đã có hàm getCookie để lấy dữ liệu cookie
+
+      if (!user) {
+        console.error("User not found in cookies");
+        return;
+      }
+
+      const roleId = user.user.roleId; // Lấy roleId từ user
+
+      // Gửi yêu cầu API với axios
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`);
+
+      // Lấy dữ liệu từ response
+      const data = response.data;
+
+      // Lọc dữ liệu lớp theo roleId
+      let filteredData;
+
+      if (roleId === 4) { // Nếu là admin (roleId = 4), chỉ lấy các lớp có status = 1 hoặc 2
+        filteredData = data?.filter((classItem) => classItem.status === 1 || classItem.status === 2);
+      } else if (roleId === 3) { // Nếu là staff (roleId = 3), lấy tất cả các lớp có status = 0, 1, 2
+        filteredData = data?.filter((classItem) => classItem.status === 0 || classItem.status === 1 || classItem.status === 2);
+      } else {
+        filteredData = data; // Nếu role không phải 3 hoặc 4, có thể lấy tất cả lớp (hoặc xử lý theo yêu cầu khác)
+      }
+
+      // Cập nhật state với dữ liệu đã lọc
+      this.setState({ ProjectsData: filteredData });
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error('Error fetching class data: ', error.response ? error.response.data : error.message);
+    }
   };
 
 
   render() {
-    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData } = this.state;
+    const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData, showNotification, notificationText, notificationType } = this.state;
 
-    const user = JSON.parse(sessionStorage.getItem('user'));
+    const user = getCookie('user');
     const isRole4 = user && user.user.roleId === 4;
+    const isRole3 = user && user.user.roleId === 3; // Kiểm tra roleId = 3
 
+    // Lọc dữ liệu lớp
     const filteredData = ProjectsData.filter(classData => {
-      const statusMatch = statusFilter === '' ||
-        (statusFilter === 'active' && classData.status === 1) ||
-        (statusFilter === 'inactive' && classData.status === 0);
+      // Lọc status
+      let statusMatch = false;
 
+      if (isRole4) {
+        // Nếu roleId là 4 (admin), chỉ lọc các lớp có status là 'pending' hoặc 'approved'
+        statusMatch = statusFilter === '' ||
+          (statusFilter === 'pending' && (classData.status === 1 || classData.status === 2)) ||  // Lọc status là pending (1 hoặc 2)
+          (statusFilter === 'approved' && classData.status === 0); // Lọc status là approved (0)
+      } else if (isRole3) {
+        // Nếu roleId là 3 (staff), có thể lọc các lớp có status là 'draft', 'pending' hoặc 'approved'
+        statusMatch = statusFilter === '' ||
+          (statusFilter === 'draft' && classData.status === 0) ||  // Lọc status là draft (0)
+          (statusFilter === 'pending' && (classData.status === 1 || classData.status === 2)) ||  // Lọc status là pending (1 hoặc 2)
+          (statusFilter === 'approved' && classData.status === 0); // Lọc status là approved (0)
+      }
+
+      // Lọc grade
       const gradeMatch = gradeFilter === '' || classData.gradeId === parseInt(gradeFilter);
 
+      // Lọc name
       const nameMatch = nameFilter === '' || classData.className.toLowerCase().includes(nameFilter.toLowerCase());
 
       return statusMatch && gradeMatch && nameMatch;
@@ -247,6 +370,15 @@ class ViewClass extends React.Component {
                 { name: "View Class", navigate: "" },
               ]}
             />
+            {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <div className="row clearfix">
               <div className="col-lg-12 col-md-12">
                 <div className="card">
@@ -272,10 +404,21 @@ class ViewClass extends React.Component {
                           onChange={this.handleStatusFilterChange}
                         >
                           <option value="">All</option>
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
+                          {user && user.user.roleId === 3 ? (
+                            <>
+                              <option value="draft">Draft</option>
+                              <option value="pending">Pending</option>
+                              <option value="approved">Approved</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="pending">Pending</option>
+                              <option value="approved">Approved</option>
+                            </>
+                          )}
                         </select>
                       </div>
+
 
                       <div className="form-group mr-3">
                         <label htmlFor="gradeFilter" className="mr-2">Grade:</label>
@@ -322,13 +465,19 @@ class ViewClass extends React.Component {
                       <table className="table m-b-0 table-hover">
                         <thead className="thead-light">
                           <tr>
-                            {isRole4 && <th>
-                              <button
-                                className="btn btn-primary"
-                                onClick={this.handleSelectAll}
-                              >
-                                Select All
-                              </button></th>} {/* Thêm cột checkbox nếu là roleId 4 */}
+                            <th>
+                              <div className="fancy-checkbox d-inline-block">
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={this.isAllSelected()}  // Kiểm tra nếu tất cả lớp đã được chọn
+                                    onChange={this.handleSelectAllChange}  // Gọi hàm để chọn/bỏ chọn tất cả
+                                  />
+                                  <span></span>
+                                </label>
+                              </div>
+                            </th>
+
                             <th>Class Name</th>
                             <th>Number of Students</th>
                             <th>Grade</th>
@@ -340,33 +489,36 @@ class ViewClass extends React.Component {
                         <tbody>
                           {filteredData.map((classData, classIndex) => (
                             <tr key={"class" + classIndex}>
-                              {isRole4 && (
-                                <td>
-                                  <div className="fancy-checkbox d-inline-block">
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        checked={this.state.selectedClassIds.includes(classData.classId)}
-                                        onChange={() => this.handleCheckboxChange(classData.classId)}
-                                      />
-                                      <span></span>
-                                    </label>
-                                  </div>
-                                </td>
-                              )}
+
+                              <td>
+                                <div className="fancy-checkbox d-inline-block">
+                                  <label>
+                                    <input
+                                      type="checkbox"
+                                      checked={this.state.selectedClassIds.includes(classData.classId)}  // Kiểm tra nếu classId có trong selectedClassIds
+                                      onChange={() => this.handleCheckboxChange(classData.classId)}  // Xử lý khi người dùng click vào checkbox của một lớp
+                                    />
+                                    <span></span>
+                                  </label>
+                                </div>
+                              </td>
+
+
                               <td>{classData.className}</td>
                               <td>{classData.number}</td>
                               <td>{this.getGradeName(classData.gradeId)}</td>
                               <td>
-                                {classData.status === 1 ? (
-                                  <span className="badge badge-success">Active</span>
+                                {classData.status === 0 ? (
+                                  <span className="badge badge-default">Draft</span>
+                                ) : classData.status === 1 ? (
+                                  <span className="badge badge-warning">Pending</span>
                                 ) : (
-                                  <span className="badge badge-default">Inactive</span>
+                                  <span className="badge badge-success">Approved</span>
                                 )}
                               </td>
                               <td>
                                 {classData.teachers.map((teacher, teacherIndex) => (
-                                  <div key={teacherIndex}>{teacher.teacherName} - {teacher.code}</div>
+                                  <div key={teacherIndex}>+ {teacher.teacherName} - {teacher.code}</div>
                                 ))}
                               </td>
                               <td className="project-actions">
@@ -383,13 +535,21 @@ class ViewClass extends React.Component {
                       </table>
                     </div>
 
-                    {isRole4 && (
-                      <div className="form-group text-right">
+
+                    {isRole4 && ProjectsData.length > 0 && (
+                      <div className="form-group text-right m-2">
                         <button className="btn btn-danger" onClick={this.handleReject}>
                           Reject
                         </button>
                         <button className="btn btn-success ml-2" onClick={this.handleApprove}>
                           Approve
+                        </button>
+                      </div>
+                    )}
+                    {isRole3 && ProjectsData.length > 0 && (
+                      <div className="form-group text-right m-2">
+                        <button className="btn btn-primary" onClick={this.handleSubmitToPrin}>
+                          Submit to Principal
                         </button>
                       </div>
                     )}

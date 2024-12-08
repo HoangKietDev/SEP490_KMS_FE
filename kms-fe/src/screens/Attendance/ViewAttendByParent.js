@@ -167,8 +167,8 @@ class ViewAttendByParent extends React.Component {
       late: validAttendanceData.filter(
         (att) => att.attendanceDetail[0]?.status === "Muộn"
       ).length,
-      absence: validAttendanceData.filter(
-        (att) => att.attendanceDetail[0]?.status === "Absence"
+      absent: validAttendanceData.filter(
+        (att) => att.attendanceDetail[0]?.status === "Absent"
       ).length,
     };
 
@@ -414,8 +414,8 @@ class ViewAttendByParent extends React.Component {
           <div className="col-md-4">
             <div className="card bg-danger text-white">
               <div className="card-body">
-                <h5 className="card-title">Absence</h5>
-                <p className="card-text">{summary.absence}</p>
+                <h5 className="card-title">Absent</h5>
+                <p className="card-text">{summary.absent}</p>
               </div>
             </div>
           </div>
@@ -448,7 +448,7 @@ class ViewAttendByParent extends React.Component {
                         <span className="badge bg-warning">Late</span>
                       )}
                       {attendance.status === "Absence" && (
-                        <span className="badge bg-danger">Absence</span>
+                        <span className="badge bg-danger">Absent</span>
                       )}
                       {attendance.status === "No Data" && (
                         <span className="badge bg-secondary">No Data</span>

@@ -193,7 +193,7 @@ class ViewMenuByTeacherAndParent extends React.Component {
                                                             <td>{classData.number}</td>
                                                             <td>{this.getGradeName(classData.gradeId)}</td>
                                                             <td>
-                                                                {classData.status === 1 ? (
+                                                                {classData.status === 2 ? (
                                                                     <span className="badge badge-success">Active</span>
                                                                 ) : (
                                                                     <span className="badge badge-default">Inactive</span>

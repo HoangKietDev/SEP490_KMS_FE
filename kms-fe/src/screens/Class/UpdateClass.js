@@ -16,6 +16,7 @@ class UpdateClass extends React.Component {
     gradeId: 0,
     grades: [],
     semesters: [],
+    number:0,
     status: 0,
     submeet: false,
     showNotification: false,
@@ -35,12 +36,11 @@ class UpdateClass extends React.Component {
     axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassById/${classId}`)
       .then((response) => {
         const data = response.data;
-        const formattedExpireDate = data.expireDate ? new Date(data.expireDate).toISOString().slice(0, 16) : "";
 
         this.setState({
           className: data.className,
           isActive: data.isActive === 1,
-          expireDate: formattedExpireDate,
+          number: data.number,
           schoolId: data.schoolId,
           semesterId: data.semesterId,
           gradeId: data.gradeId,
@@ -192,34 +192,62 @@ class UpdateClass extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
 
-    const { classId, teachers } = this.state;
+    const { classId, className, number, isActive, schoolId, semesterId, gradeId, status, teachers } = this.state;
 
     // Kiểm tra nếu có bất kỳ thay đổi nào về giáo viên
-    const teachersToUpdate = teachers.filter((teacher) => teacher.selectedNewTeacherId && teacher.selectedNewTeacherId !== teacher.teacherId);
+    const teachersToUpdate = teachers.filter(
+      (teacher) => teacher.selectedNewTeacherId && teacher.selectedNewTeacherId !== teacher.teacherId
+    );
 
-    if (teachersToUpdate.length > 0) {
-      // Cập nhật giáo viên trong lớp
-      this.updateTeachersInClass(classId, teachersToUpdate);
+    // Cập nhật thông tin lớp học nếu có thay đổi
+    const updatedClassData = {
+      classId,
+      className,
+      number: number,
+      isActive: 1,
+      schoolId,
+      semesterId,
+      gradeId,
+      status
+    };
+        
+    // Gọi API UpdateClass để cập nhật thông tin lớp học
+    const updateClass = async () => {
+      try {
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Class/UpdateClass`, updatedClassData);
 
-      // Hiển thị thông báo thành công
-      this.setState({
-        notificationText: "Teachers have been updated successfully!",
-        notificationType: "success",
-        showNotification: true
-      });
+        if (response.status === 200) {
+          console.log("Class updated successfully");
+          this.setState({
+            notificationText: "Class has been updated successfully!",
+            notificationType: "success",
+            showNotification: true
+          });
 
-      // Chuyển hướng sau khi cập nhật
-      setTimeout(() => {
-        this.props.history.push('/viewclass');
-      }, 1000);
-    } else {
-      this.setState({
-        notificationText: "No teacher changes detected.",
-        notificationType: "error",
-        showNotification: true
-      });
-    }
+          // Nếu có thay đổi về giáo viên, cập nhật giáo viên
+          if (teachersToUpdate.length > 0) {
+            this.updateTeachersInClass(classId, teachersToUpdate);
+          }
+
+          // Chuyển hướng sau khi cập nhật lớp và giáo viên
+          setTimeout(() => {
+            this.props.history.push('/viewclass');
+          }, 1000);
+        }
+      } catch (error) {
+        console.error("Error updating class: ", error);
+        this.setState({
+          notificationText: "Failed to update class. Please try again.",
+          notificationType: "error",
+          showNotification: true
+        });
+      }
+    };
+
+    // Tiến hành cập nhật lớp học
+    updateClass();
   };
+
   handleAddNewTeacher = (index, e) => {
     e.preventDefault(); // Ngừng hành động mặc định của sự kiện
 
@@ -234,7 +262,7 @@ class UpdateClass extends React.Component {
 
     // Lấy giáo viên từ availableTeachers dựa trên selectedNewTeacherId
     const selectedTeacher = this.state.availableTeachers.find(teacher => teacher.teacherId === selectedTeacherId);
-    
+
 
     if (!selectedTeacher) {
       alert("Teacher not found.");
@@ -278,7 +306,7 @@ class UpdateClass extends React.Component {
   };
 
   render() {
-    const { className, status, expireDate, submeet, grades, semesters, gradeId, semesterId, teachers, showNotification, notificationText, notificationType, availableTeachers } = this.state;
+    const { className,number, status, expireDate, submeet, grades, semesters, gradeId, semesterId, teachers, showNotification, notificationText, notificationType, availableTeachers } = this.state;
 
     return (
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -315,7 +343,17 @@ class UpdateClass extends React.Component {
                         />
                       </div>
                     </div>
-
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Number</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={number}
+                          onChange={(e) => this.setState({ number: e.target.value })}
+                        />
+                      </div>
+                    </div>
                     <div className="col-md-6">
                       <div className="form-group">
                         <label>Grade</label>

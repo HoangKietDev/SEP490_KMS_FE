@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
 import Notification from "../../components/Notification";
-class ViewStudentById extends React.Component {
+class ViewDetailsChildren extends React.Component {
   state = {
     studentDetailId: 0,
     classId: 1,
@@ -217,7 +217,7 @@ class ViewStudentById extends React.Component {
               HeaderText="Student Management"
               Breadcrumb={[
                 { name: "Student Management", navigate: "viewallstudent" },
-                { name: "Update Student", navigate: "" },
+                { name: "Student Detail", navigate: "" },
               ]}
             />
             {showNotification && (
@@ -234,7 +234,7 @@ class ViewStudentById extends React.Component {
                 className="card-header text-white"
                 style={{ backgroundColor: "#48C3B4" }}
               >
-                <h4 className="mb-0">Update Student Information</h4>
+                <h4 className="mb-0">Student Information</h4>
               </div>
               <div className="card-body">
                 <form onSubmit={this.handleSubmit}>
@@ -249,12 +249,7 @@ class ViewStudentById extends React.Component {
                           className="rounded-circle border"
                         />
                       )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="form-control-file"
-                        onChange={this.handleFileChange}
-                      />
+                     
                     </div>
                   </div>
                   <div className="row">
@@ -406,11 +401,6 @@ class ViewStudentById extends React.Component {
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <button type="submit" className="btn btn-primary">
-                      Update Student
-                    </button>
-                  </div>
                 </form>
               </div>
             </div>
@@ -425,4 +415,4 @@ const mapStateToProps = ({ ioTReducer }) => ({
   isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(ViewStudentById));
+export default connect(mapStateToProps)(withRouter(ViewDetailsChildren));

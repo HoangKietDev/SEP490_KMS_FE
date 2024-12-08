@@ -4,7 +4,8 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Pagination from "../../components/Common/Pagination";
-
+import Notification from "../../components/Notification";
+import { addNotificationByUserId } from "../../components/Common/Notification";
 
 class TeacherList extends React.Component {
   state = {
@@ -13,9 +14,12 @@ class TeacherList extends React.Component {
     filterPhone: "", // Bộ lọc theo số điện thoại
     filterCode: "", // Bộ lọc theo mã
     filterStatus: "", // Bộ lọc theo trạng thái
-
     currentPage: 1,
     itemsPerPage: 10,
+    selectedTeacherIds: [], // Mảng lưu trữ các ID của các giáo viên đã chọn
+    showNotification: false,
+    notificationText: "",
+    notificationType: "success",
   };
 
   componentDidMount() {
@@ -34,6 +38,21 @@ class TeacherList extends React.Component {
     };
     fetchData();
   }
+  handleSelectAllChange = (e) => {
+    const isChecked = e.target.checked;
+    const selectedTeacherIds = isChecked
+      ? this.state.filteredTeacherListData.map(teacher => teacher.teacherId) // Chọn tất cả
+      : []; // Bỏ chọn tất cả
+    this.setState({ selectedTeacherIds });
+  };
+  handleIndividualCheckboxChange = (e, teacherId) => {
+    const { selectedTeacherIds } = this.state;
+    if (e.target.checked) {
+      this.setState({ selectedTeacherIds: [...selectedTeacherIds, teacherId] }); // Thêm ID khi chọn
+    } else {
+      this.setState({ selectedTeacherIds: selectedTeacherIds.filter(id => id !== teacherId) }); // Loại bỏ ID khi bỏ chọn
+    }
+  };
 
   filterTeacherList = () => {
     const { TeacherListData, filterPhone, filterCode, filterStatus } = this.state;
@@ -67,17 +86,85 @@ class TeacherList extends React.Component {
     // Chuyển hướng đến trang cập nhật thông tin học sinh
     this.props.history.push(`/teacher-detail/${teacherId}`);
   };
+  changeRole = async (userID) => {
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/User/UpdateUserRole?userID=${userID}`);
+      // Kiểm tra phản hồi từ API
+      if (response.status === 200) {
+        this.setState({
+          notificationText: "Assigned Check in/out successfully.",
+          notificationType: "success",
+          showNotification: true,
+        });
+        addNotificationByUserId("Assigned Check in/out","You have been Assign Checkin/out in this week",userID);
+        // Cập nhật lại danh sách giáo viên sau khi thay đổi role
+        this.componentDidMount(); // Hoặc có thể gọi lại API để tải lại danh sách giáo viên
+      } else {
+        this.setState({
+          notificationText: "An error occurred while assigning Check in/out.",
+          notificationType: "error",
+          showNotification: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+      alert("Error updating role");
+    }
+  };
+  assignTeachers = async () => {
+    const { selectedTeacherIds } = this.state;
+
+    if (selectedTeacherIds.length === 0) {
+      alert("Please select at least one teacher.");
+      return;
+    }
+
+    try {
+      // Chạy tất cả các yêu cầu API đồng thời bằng Promise.all
+      const responses = await Promise.all(
+        selectedTeacherIds.map((teacherId) => {
+          return axios.put(`${process.env.REACT_APP_API_URL}/api/User/UpdateUserRole?userID=${teacherId}`);
+        })
+      );
+
+      // Kiểm tra phản hồi từ API
+      const allSuccess = responses.every((response) => response.status === 200);
+
+      if (allSuccess) {
+        // alert("Assigned Check in/out successfully.");
+        this.setState({
+          notificationText: "Assigned Check in/out successfully.",
+          notificationType: "success",
+          showNotification: true,
+        });
+        this.setState({ selectedTeacherIds: [] }); // Reset selected teacher IDs
+      } else {
+        alert("Failed to assign Check in/out.");
+      }
+    } catch (error) {
+      console.error("Error during assignment:", error);
+      this.setState({
+        notificationText: "An error occurred while assigning Check in/out.",
+        notificationType: "success",
+        showNotification: true,
+      });
+      // alert("An error occurred while assigning Check in/out.");
+    }
+  };
 
   handlePageChange = (pageNumber) => {
     this.setState({ currentPage: pageNumber });
   };
 
   render() {
-    const { filteredTeacherListData } = this.state;
+    const { filteredTeacherListData, selectedTeacherIds, showNotification, notificationText, notificationType } = this.state;
 
     // phan trang
     const { currentPage, itemsPerPage } = this.state;
     const indexOfLastItem = currentPage * itemsPerPage;
+    const isAllSelected = filteredTeacherListData.length > 0 &&
+      filteredTeacherListData.every(teacher => selectedTeacherIds.includes(teacher.teacherId));
+
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredTeacherListData.slice(indexOfFirstItem, indexOfLastItem);
 
@@ -97,6 +184,15 @@ class TeacherList extends React.Component {
                 { name: "Teacher List", navigate: "" },
               ]}
             />
+            {showNotification && (
+              <Notification
+                type={notificationType}
+                position="top-right"
+                dialogText={notificationText}
+                show={showNotification}
+                onClose={() => this.setState({ showNotification: false })}
+              />
+            )}
             <div className="row clearfix">
 
               <div className="col-lg-12 col-md-12">
@@ -142,6 +238,19 @@ class TeacherList extends React.Component {
                       <table className="table m-b-0 table-hover">
                         <thead className="">
                           <tr className="theme-color">
+                            <th>
+                              <div className="fancy-checkbox d-inline-block">
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    checked={isAllSelected} // Kiểm tra nếu tất cả giáo viên đã được chọn
+                                    onChange={this.handleSelectAllChange} // Gọi hàm khi thay đổi trạng thái checkbox "Chọn tất cả"
+                                  />
+                                  <span></span>
+                                </label>
+                              </div>
+                            </th>
+
                             <th>#</th>
                             <th>First Name</th>
                             <th>Last Name</th>
@@ -157,6 +266,18 @@ class TeacherList extends React.Component {
                           {currentItems?.map((teacher, index) => (
                             <React.Fragment key={"teacher" + index}>
                               <tr>
+                                <td>
+                                  <div className="fancy-checkbox d-inline-block">
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedTeacherIds.includes(teacher.teacherId)} // Kiểm tra nếu ID của giáo viên có trong mảng selectedTeacherIds
+                                        onChange={(e) => this.handleIndividualCheckboxChange(e, teacher.teacherId)} // Gọi hàm khi thay đổi
+                                      />
+                                      <span></span>
+                                    </label>
+                                  </div>
+                                </td>
                                 <td>{index + 1}</td>
                                 <td>{teacher?.firstname}</td>
                                 <td>{teacher.lastName}</td>
@@ -181,18 +302,23 @@ class TeacherList extends React.Component {
                                     <span className="badge badge-default">InActive</span>
                                   ) : null}
                                 </td>
-                                <td>
-                                  <div className="fancy-checkbox d-inline-block ">
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                    
-                                       
-                                      />
-                                      <span></span>
-                                    </label>
-                                  </div>
+                                <td className="project-actions">
+                                  {teacher?.role === 6 ? (
+                                    <a className="btn btn-outline-success mr-1"
+                                      onClick={() => this.changeRole(teacher.teacherId)} // Gọi API với userID
+                                    >
+                                      <i className="icon-check"> Assigned</i>
+                                    </a>
+                                  ) : (
+                                    <a
+                                      className="btn btn-outline-danger mr-1"
+                                      onClick={() => this.changeRole(teacher.teacherId)} // Gọi API với userID
+                                    >
+                                      <i className="icon-close"> Assign</i>
+                                    </a>
+                                  )}
                                 </td>
+
 
                                 <td className="project-actions">
                                   <a className="btn btn-outline-secondary mr-1"
@@ -212,6 +338,11 @@ class TeacherList extends React.Component {
                           ))}
                         </tbody>
                       </table>
+                      <div className="text-right">
+                        <button className="btn btn-primary m-4 text-center" onClick={this.assignTeachers}>
+                          Assign Check in/out
+                        </button>
+                      </div>
                     </div>
                     <div className="pt-4">
                       <Pagination

@@ -204,34 +204,50 @@ class Attend extends React.Component {
     createDailyCheckin = () => {
         const { classId, selectedDate } = this.state;
         const formattedDate = this.formatDate(selectedDate);
-
+    
         fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyAttendance`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ classId: classId, date: formattedDate }),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ classId: classId, date: formattedDate }),
         })
-            .then((response) => {
-                if (!response.ok) {
-                    if (response.status === 500) {
-                        console.warn("API CreateDailyCheckin returned a 500 error, but it will be ignored.");
-                        return; // Bỏ qua lỗi 500
-                    }
-                    throw new Error("Error calling CreateDailyCheckin API: " + response.statusText);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                console.log("CreateDailyCheckin API called successfully:", data);
-            })
-            .catch((error) => {
-                if (error.message.includes("500")) {
-                    console.warn("Ignoring 500 error from CreateDailyCheckin API.");
-                } else {
-                    console.error("Error calling CreateDailyCheckin API: ", error);
-                }
+          .then((response) => {
+            if (!response.ok) {
+              if (response.status === 500) {
+                console.warn("API CreateDailyCheckin returned a 500 error, but it will be ignored.");
+                return; // Bỏ qua lỗi 500
+              }
+              throw new Error("Error calling CreateDailyCheckin API: " + response.statusText);
+            }
+    
+            // Nếu phản hồi là chuỗi văn bản (như "Daily check-in created successfully.")
+            return response.text(); // Trả về văn bản thay vì JSON
+          })
+          .then((data) => {
+            // Xử lý chuỗi văn bản từ phản hồi
+            if (data === "Daily attend created successfully.") {
+              console.log("Daily check-in created successfully.");
+              this.setState({
+                notificationText: "Attendance has been successfully created!",
+                notificationType: "success",
+                showNotification: true,
+              });
+    
+              // Sau khi tạo thành công, có thể gọi componentDidMount để làm mới dữ liệu
+              this.componentDidMount();
+            } else {
+              console.error("Unexpected response:", data);
+            }
+          })
+          .catch((error) => {
+            console.error("Error calling CreateDailyCheckin API:", error);
+            this.setState({
+              notificationText: "Error calling CreateDailyCheckin API",
+              notificationType: "error",
+              showNotification: true,
             });
+          });
     };
 
 
@@ -976,11 +992,11 @@ class Attend extends React.Component {
                                                                     Attend
                                                                 </button>
                                                                 <button
-                                                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absence" ? "btn-danger" : ""}`}
-                                                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Absence")}
+                                                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absent" ? "btn-danger" : ""}`}
+                                                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Absebt")}
                                                                     disabled={!isToday}
                                                                 >
-                                                                    Absence
+                                                                    Absent
                                                                 </button>
                                                             </td>
                                                             <td className="project-actions">

@@ -8,6 +8,7 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import './Checkin.css'; // Import CSS cho hiệu ứng nút
 import Notification from "../../components/Notification";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 class Checkin extends React.Component {
   state = {
@@ -39,17 +40,17 @@ class Checkin extends React.Component {
     selectedStudents: [], // Lưu danh sách học sinh đã chọn
     showNotification: false, // State to control notification visibility
     notificationText: "", // Text for the notification
-    notificationType: "success" // Type of notification (success or error)
+    notificationType: "success", // Type of notification (success or error)
+    isModalVisible: false,
+    isModalConfirmVisible: false,
   };
 
 
   componentDidMount() {
     // Gọi API CreateDailyCheckin khi trang được tải
     this.createDailyCheckin();
-
     // Gọi fetchAttendanceData và fetchServiceData để tải dữ liệu khác
     this.fetchAttendanceData();
-    this.fetchServiceData();
   }
   handleMouseEnter = (src, event) => {
     const rect = event.target.getBoundingClientRect();
@@ -61,6 +62,7 @@ class Checkin extends React.Component {
       },
     });
   };
+
   handleMouseLeave = () => {
     this.setState({ hoveredImageSrc: null });
   };
@@ -76,10 +78,40 @@ class Checkin extends React.Component {
     }
   };
 
+  handleShowConfirmModal = () => {
+    this.setState({ isModalConfirmVisible: true });
+  };
+
+  // Hàm đóng modal
+  handleCloseConfirmModal = () => {
+    this.setState({ isModalConfirmVisible: false });
+  };
+
+  // Hàm xác nhận attendance
+  handleConfirmAttendance = () => {
+    // Gọi hàm update attendance tại đây (ví dụ: this.updateAttendance())
+    this.updateAttendance();
+
+    // Đóng modal sau khi xác nhận
+    this.handleCloseConfirmModal();
+    // this.fetchAttendanceData();
+  };
 
   closeImageModal = () => {
-    this.setState({ showImageModal: false });
+    this.setState(
+      {
+        selectedFile: null,
+        imageSrc: "",
+        showImageModal: false,
+      },
+      () => {
+        // Callback function sẽ được gọi sau khi state đã được cập nhật
+
+
+      }
+    );
   };
+
   handleUpload = () => {
     const { selectedFile, imageSrc, activeTab } = this.state;
     if (activeTab === "checkin") {
@@ -113,7 +145,7 @@ class Checkin extends React.Component {
     return new File([u8arr], filename, { type: mime });
   };
 
-  
+
   uploadFile = (file) => {
     let currentAttendanceDetailID;
     if (!file) {
@@ -176,6 +208,7 @@ class Checkin extends React.Component {
               notificationText: `Học sinh ${matchedStudent.fullName} được nhận diện thành công.`,
               notificationType: "success",
               showNotification: true,
+
             });
 
             currentAttendanceDetailID = this.getAttendanceDetailIDByStudentID(recognizedName);
@@ -235,10 +268,74 @@ class Checkin extends React.Component {
       })
       .finally(() => {
         this.setState({ isUploading: false });
+        
       });
   };
 
+  // handleFetchPickupPersonInfo = (uuid) => {
+  //   fetch(`${process.env.REACT_APP_API_URL}/api/PickupPerson/GetPickupPersonInfoByUUI?uuid=${uuid}`)
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to fetch pickup person info: ${response.statusText}`);
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((pickupPersonInfo) => {
+  //       console.log("Pickup Person Info:", pickupPersonInfo);
+
+  //       // Cập nhật danh sách học sinh và hiển thị modal
+  //       this.setState({
+  //         studentsInModal: pickupPersonInfo.students,
+  //         isModalVisible: true,
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching pickup person info:", error);
+  //       // alert("Không thể tải thông tin người đón.");
+  //       this.setState({
+  //         notificationText: "Unable to load pick up information.",
+  //         notificationType: "error",
+  //         showNotification: true,
+  //       });
+  //     });
+  // };
+  // handleFetchPickupPersonInfo = (uuid) => {
+  //   fetch(`${process.env.REACT_APP_API_URL}/api/PickupPerson/GetPickupPersonInfoByUUI?uuid=${uuid}`)
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to fetch pickup person info: ${response.statusText}`);
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((pickupPersonInfo) => {
+  //       console.log("Pickup Person Info:", pickupPersonInfo);
+
+  //       // Lọc danh sách học sinh để chỉ giữ lại các học sinh có studentID trùng với studentID trong attendanceDetailsCheckout
+  //       const filteredStudents = pickupPersonInfo.students.filter((pickupStudent) => {
+  //         return this.state.attendanceDetailsCheckout.some(
+  //           (checkoutDetail) => checkoutDetail.studentId === pickupStudent.studentID
+  //         );
+  //       });
+
+  //       // Cập nhật danh sách học sinh lọc và hiển thị modal
+  //       this.setState({
+  //         studentsInModal: filteredStudents,
+  //         isModalVisible: true,
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching pickup person info:", error);
+  //       this.setState({
+  //         notificationText: "Unable to load pick up information.",
+  //         notificationType: "error",
+  //         showNotification: true,
+  //       });
+  //     });
+  // };
   handleFetchPickupPersonInfo = (uuid) => {
+    // this.fetchAttendanceData();
+    const check = this.state.attendanceDetailsCheckin
+    console.log(check, "log test");
     fetch(`${process.env.REACT_APP_API_URL}/api/PickupPerson/GetPickupPersonInfoByUUI?uuid=${uuid}`)
       .then((response) => {
         if (!response.ok) {
@@ -249,15 +346,31 @@ class Checkin extends React.Component {
       .then((pickupPersonInfo) => {
         console.log("Pickup Person Info:", pickupPersonInfo);
 
-        // Cập nhật danh sách học sinh và hiển thị modal
+        // Lọc danh sách học sinh theo các điều kiện:
+        // 1. Học sinh có mặt tại check-in (trong attendanceDetailsCheckin) và trạng thái là "attend".
+        // 2. Học sinh có studentID trùng với studentID trong attendanceDetailsCheckout.
+        const filteredStudents = pickupPersonInfo.students.filter((pickupStudent) => {
+
+
+          const isCheckedInAndAttend = this.state.attendanceDetailsCheckin.some(
+            (checkinDetail) => checkinDetail.studentId === pickupStudent.studentID && checkinDetail.status === "Attend"
+          );
+
+          const isCheckedOut = this.state.attendanceDetailsCheckout.some(
+            (checkoutDetail) => checkoutDetail.studentId === pickupStudent.studentID
+          );
+
+          return isCheckedInAndAttend && isCheckedOut; // Chỉ giữ lại học sinh đã check-in với status "attend" và có trong checkout.
+        });
+
+        // Cập nhật danh sách học sinh lọc và hiển thị modal
         this.setState({
-          studentsInModal: pickupPersonInfo.students,
+          studentsInModal: filteredStudents,
           isModalVisible: true,
         });
       })
       .catch((error) => {
         console.error("Error fetching pickup person info:", error);
-        // alert("Không thể tải thông tin người đón.");
         this.setState({
           notificationText: "Unable to load pick up information.",
           notificationType: "error",
@@ -265,6 +378,9 @@ class Checkin extends React.Component {
         });
       });
   };
+
+
+
   renderModal = () => {
     const { studentsInModal, isModalVisible, selectedStudents } = this.state;
 
@@ -548,6 +664,39 @@ class Checkin extends React.Component {
 
 
   // Hàm để gọi API CreateDailyCheckin
+  // createDailyCheckin = () => {
+  //   const { classId, selectedDate } = this.state;
+  //   const formattedDate = this.formatDate(selectedDate);
+
+  //   fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckin`, {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     // body: JSON.stringify({ classId: classId, date: formattedDate }),
+  //   })
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         if (response.status === 500) {
+  //           console.warn("API CreateDailyCheckin returned a 500 error, but it will be ignored.");
+  //           return; // Bỏ qua lỗi 500
+  //         }
+  //         throw new Error("Error calling CreateDailyCheckin API: " + response.statusText);
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       console.log("CreateDailyCheckin API called successfully:", data);
+  //     })
+  //     .catch((error) => {
+  //       if (error.message.includes("500")) {
+  //         console.warn("Ignoring 500 error from CreateDailyCheckin API.");
+  //       } else {
+  //         console.error("Error calling CreateDailyCheckin API: ", error);
+  //       }
+  //     });
+  // };
+
   createDailyCheckin = () => {
     const { classId, selectedDate } = this.state;
     const formattedDate = this.formatDate(selectedDate);
@@ -567,20 +716,35 @@ class Checkin extends React.Component {
           }
           throw new Error("Error calling CreateDailyCheckin API: " + response.statusText);
         }
-        return response.json();
+
+        // Nếu phản hồi là chuỗi văn bản (như "Daily check-in created successfully.")
+        return response.text(); // Trả về văn bản thay vì JSON
       })
       .then((data) => {
-        console.log("CreateDailyCheckin API called successfully:", data);
+        // Xử lý chuỗi văn bản từ phản hồi
+        if (data === "Daily check-in created successfully.") {
+          console.log("Daily check-in created successfully.");
+          this.setState({
+            notificationText: "Daily check-in created successfully.",
+            notificationType: "success",
+            showNotification: true,
+          });
+
+          // Sau khi tạo thành công, có thể gọi componentDidMount để làm mới dữ liệu
+          this.componentDidMount();
+        } else {
+          console.error("Unexpected response:", data);
+        }
       })
       .catch((error) => {
-        if (error.message.includes("500")) {
-          console.warn("Ignoring 500 error from CreateDailyCheckin API.");
-        } else {
-          console.error("Error calling CreateDailyCheckin API: ", error);
-        }
+        console.error("Error calling CreateDailyCheckin API:", error);
+        this.setState({
+          notificationText: "Error calling CreateDailyCheckin API",
+          notificationType: "error",
+          showNotification: true,
+        });
       });
   };
-
 
   fetchServiceData = () => {
     axios
@@ -725,6 +889,7 @@ class Checkin extends React.Component {
     const { activeTab, selectedDate } = this.state;
     const type = activeTab === "checkin" ? "checkin" : "checkout";
     const formattedDate = this.formatDate(selectedDate);
+    console.log("sieu ngu");
 
     // Gọi đồng thời cả hai API
     Promise.all([
@@ -733,6 +898,8 @@ class Checkin extends React.Component {
     ])
       .then(([attendanceResponse, childrenResponse]) => {
         const attendanceData = attendanceResponse.data;
+        console.log(attendanceData, "test luc");
+
         const childrenData = childrenResponse.data;
 
         // Lấy tất cả `attendanceDetail` từ tất cả lớp
@@ -829,7 +996,7 @@ class Checkin extends React.Component {
 
   handleAttendance = (studentId, status) => {
     // Mặc định status là "Absence" nếu không có giá trị status
-    const finalStatus = status || "Absence";
+    const finalStatus = status || "Absent";
 
     this.setState((prevState) => {
       if (this.state.activeTab === "checkin") {
@@ -1000,7 +1167,7 @@ class Checkin extends React.Component {
     });
   };
 
-  updateAttendance = () => {
+  updateEachStudent = (studentId) => {
     const {
       attendanceDataCheckin,
       attendanceDataCheckout,
@@ -1020,6 +1187,226 @@ class Checkin extends React.Component {
           : 115;
 
     const createdAt = new Date().toISOString();
+    const attendanceDetail =
+      activeTab === "checkin"
+        ? attendanceDetailsCheckin.find((d) => d.studentId === studentId)
+        : attendanceDetailsCheckout.find((d) => d.studentId === studentId);
+
+    const status =
+      activeTab === "checkin" ? attendanceDataCheckin[studentId] : attendanceDataCheckout[studentId];
+
+    const attendanceUpdate = [
+      {
+        attendanceId: attendanceId,
+        type: activeTab === "checkin" ? "Checkin" : "Checkout",
+        createdAt: createdAt,
+        classId: classId,
+        attendanceDetail: [
+          {
+            attendanceDetailId: attendanceDetail ? attendanceDetail.attendanceDetailId : 0,
+            attendanceId: attendanceId,
+            studentId: studentId,
+            createdAt: createdAt,
+            status: status,
+          },
+        ],
+      },
+    ];
+
+    const data = JSON.stringify(attendanceUpdate, null, 2);
+    console.log(data);
+
+    fetch(
+      `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: data,
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok " + response.statusText);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Attendance updated successfully:", data);
+        // Notification success
+        this.setState({
+          notificationText: `Điểm danh cho học sinh ${studentId} đã được cập nhật thành công!`,
+          notificationType: "success",
+          showNotification: true,
+        });
+      })
+      .catch((error) => {
+        console.error("Error updating attendance: ", error);
+        // Notification error
+        this.setState({
+          notificationText: `Có lỗi xảy ra khi cập nhật điểm danh cho học sinh ${studentId}.`,
+          notificationType: "error",
+          showNotification: true,
+        });
+      });
+  };
+
+
+  // updateAttendance = () => {
+  //   const {
+  //     attendanceDataCheckin,
+  //     attendanceDataCheckout,
+  //     attendanceDetailsCheckin,
+  //     attendanceDetailsCheckout,
+  //     classId,
+  //     activeTab,
+  //   } = this.state;
+  
+  //   const attendanceId =
+  //     activeTab === "checkin"
+  //       ? attendanceDetailsCheckin.length > 0
+  //         ? attendanceDetailsCheckin[0].attendanceId
+  //         : 115
+  //       : attendanceDetailsCheckout.length > 0
+  //       ? attendanceDetailsCheckout[0].attendanceId
+  //       : 115;
+  
+  //   const createdAt = new Date().toISOString();
+  //   const attendanceUpdate = [
+  //     {
+  //       attendanceId: attendanceId,
+  //       type: activeTab === "checkin" ? "Checkin" : "Checkout",
+  //       createdAt: createdAt,
+  //       classId: classId,
+  //       attendanceDetail: Object.keys(
+  //         activeTab === "checkin" ? attendanceDataCheckin : attendanceDataCheckout
+  //       ).map((studentId) => {
+  //         const detail =
+  //           activeTab === "checkin"
+  //             ? attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId))
+  //             : attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
+  
+  //         return {
+  //           attendanceDetailId: detail ? detail.attendanceDetailId : 0,
+  //           attendanceId: attendanceId,
+  //           studentId: Number(studentId),
+  //           createdAt: createdAt,
+  //           status: activeTab === "checkin" ? attendanceDataCheckin[studentId] : attendanceDataCheckout[studentId],
+  //         };
+  //       }),
+  //     },
+  //   ];
+  
+  //   const data = JSON.stringify(attendanceUpdate, null, 2);
+  //   console.log(data);
+  
+  //   fetch(
+  //     `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"
+  //     }`,
+  //     {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: data,
+  //     }
+  //   )
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok " + response.statusText);
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       console.log("Attendance updated successfully:", data);
+  
+  //       // Sau khi update, cập nhật lại attendanceDetailsCheckin (nếu đang ở tab checkin)
+  //       if (activeTab === "checkin") {
+  //         // Lọc lại danh sách attendanceDetailsCheckin để phản ánh trạng thái mới
+  //         const updatedCheckinDetails = Object.keys(attendanceDataCheckin).map((studentId) => {
+  //           const studentStatus = attendanceDataCheckin[studentId];
+  //           const existingDetail = attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId));
+            
+  //           return {
+  //             ...existingDetail,
+  //             status: studentStatus, // Cập nhật trạng thái mới
+  //           };
+  //         });
+  
+  //         // Cập nhật lại state với danh sách điểm danh đã được cập nhật
+  //         this.setState({
+  //           attendanceDetailsCheckin: updatedCheckinDetails,
+  //           notificationText: `Điểm danh đã được cập nhật thành công!`,
+  //           notificationType: "success",
+  //           showNotification: true,
+  //         });
+  //       }
+  
+  //       // Gọi API CreateDailyCheckout sau khi cập nhật thành công
+  //       fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckout`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ classId: classId, date: this.formatDate(this.state.selectedDate) }),
+  //       })
+  //         .then((response) => {
+  //           if (!response.ok) {
+  //             if (response.status === 500) {
+  //               console.warn("API CreateDailyCheckout returned a 500 error, but it will be ignored.");
+  //               return; // Bỏ qua lỗi 500
+  //             }
+  //             throw new Error("Error calling CreateDailyCheckout API: " + response.statusText);
+  //           }
+  //           return response.json();
+  //         })
+  //         .then((checkoutData) => {
+  //           console.log("CreateDailyCheckout API called successfully:", checkoutData);
+  //         })
+  //         .catch((error) => {
+  //           if (error.message.includes("500")) {
+  //             console.warn("Ignoring 500 error from CreateDailyCheckout API.");
+  //           } else {
+  //             console.error("Error calling CreateDailyCheckout API: ", error);
+  //           }
+  //         });
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error updating attendance: ", error);
+  //       this.setState({
+  //         notificationText: `Có lỗi xảy ra khi cập nhật điểm danh.`,
+  //         notificationType: "error",
+  //         showNotification: true,
+  //       });
+  //       this.fetchAttendanceData();
+  //     });
+  // };
+  
+
+
+
+  // Hàm để gửi tin nhắn khi học sinh vắng mặt
+  updateAttendance = () => {
+    const {
+      attendanceDataCheckin,
+      attendanceDataCheckout,
+      attendanceDetailsCheckin,
+      attendanceDetailsCheckout,
+      classId,
+      activeTab,
+    } = this.state;
+  
+    const attendanceId =
+      activeTab === "checkin"
+        ? attendanceDetailsCheckin.length > 0
+          ? attendanceDetailsCheckin[0].attendanceId
+          : 115
+        : attendanceDetailsCheckout.length > 0
+        ? attendanceDetailsCheckout[0].attendanceId
+        : 115;
+  
+    const createdAt = new Date().toISOString();
     const attendanceUpdate = [
       {
         attendanceId: attendanceId,
@@ -1033,7 +1420,7 @@ class Checkin extends React.Component {
             activeTab === "checkin"
               ? attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId))
               : attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
-
+  
           return {
             attendanceDetailId: detail ? detail.attendanceDetailId : 0,
             attendanceId: attendanceId,
@@ -1044,10 +1431,10 @@ class Checkin extends React.Component {
         }),
       },
     ];
-
+  
     const data = JSON.stringify(attendanceUpdate, null, 2);
     console.log(data);
-
+  
     fetch(
       `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"
       }`,
@@ -1067,14 +1454,51 @@ class Checkin extends React.Component {
       })
       .then((data) => {
         console.log("Attendance updated successfully:", data);
-        // alert("Điểm danh đã được cập nhật thành công!");
+  
+        // Cập nhật lại attendanceDetailsCheckin (nếu đang ở tab checkin)
+        if (activeTab === "checkin") {
+          const updatedCheckinDetails = Object.keys(attendanceDataCheckin).map((studentId) => {
+            const studentStatus = attendanceDataCheckin[studentId];
+            const existingDetail = attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId));
+  
+            return {
+              ...existingDetail,
+              status: studentStatus, // Cập nhật trạng thái mới
+            };
+          });
+  
+          // Cập nhật lại state với danh sách điểm danh checkin đã được cập nhật
+          this.setState({
+            attendanceDetailsCheckin: updatedCheckinDetails,
+          });
+        }
+  
+        // Cập nhật lại attendanceDetailsCheckout (nếu đang ở tab checkout)
+        if (activeTab === "checkout") {
+          const updatedCheckoutDetails = Object.keys(attendanceDataCheckout).map((studentId) => {
+            const studentStatus = attendanceDataCheckout[studentId];
+            const existingDetail = attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
+  
+            return {
+              ...existingDetail,
+              status: studentStatus, // Cập nhật trạng thái mới
+            };
+          });
+  
+          // Cập nhật lại state với danh sách điểm danh checkout đã được cập nhật
+          this.setState({
+            attendanceDetailsCheckout: updatedCheckoutDetails,
+          });
+        }
+  
+        // Thông báo thành công
         this.setState({
           notificationText: `Điểm danh đã được cập nhật thành công!`,
           notificationType: "success",
           showNotification: true,
         });
+  
         // Gọi API CreateDailyCheckout sau khi cập nhật thành công
-
         fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckout`, {
           method: "POST",
           headers: {
@@ -1102,22 +1526,18 @@ class Checkin extends React.Component {
               console.error("Error calling CreateDailyCheckout API: ", error);
             }
           });
-
       })
       .catch((error) => {
         console.error("Error updating attendance: ", error);
-        // alert("Có lỗi xảy ra khi cập nhật điểm danh.");
         this.setState({
           notificationText: `Có lỗi xảy ra khi cập nhật điểm danh.`,
           notificationType: "error",
           showNotification: true,
         });
+        this.fetchAttendanceData();
       });
   };
-
-
-
-  // Hàm để gửi tin nhắn khi học sinh vắng mặt
+  
   sendAbsentNotification = (studentId, messageBody) => {
     const body = {
       recipientPhoneNumber: "+84365551401", // Số điện thoại mặc định hoặc cập nhật nếu cần
@@ -1176,10 +1596,8 @@ class Checkin extends React.Component {
 
     } = this.state;
 
-    const
-
-
-      isToday = this.formatDate(new Date()) === this.formatDate(selectedDate);
+    const isToday = this.formatDate(new Date()) === this.formatDate(selectedDate);
+    console.log(attendanceDetailsCheckout, "dsdsds");
 
     return (
       <div className="container-fluid">
@@ -1256,7 +1674,7 @@ class Checkin extends React.Component {
 
                   <label
                     htmlFor="cameraFileInput"
-                    className="btn btn-outline-secondary mr-1"
+                    className="btn btn-outline-secondary m-2"
                     style={{ cursor: "pointer" }}
                   >
                     <i className="icon-camera"></i> Take Photo
@@ -1274,7 +1692,8 @@ class Checkin extends React.Component {
                     <thead className="thead-light">
                       <tr>
                         <th>Student Name</th>
-                        <th>Other Information</th>
+                        <th>Class</th>
+                        <th>Arrival Time</th>
                         <th>Parent</th>
                         <th>Contact</th>
                         <th>Attendance</th>
@@ -1292,6 +1711,20 @@ class Checkin extends React.Component {
                           )
                           .map((student, index) => {
                             const parent = this.state.parentData[student.parentId] || {}; // Lấy thông tin phụ huynh từ state
+                            const studentAttendanceDetail = attendanceDetailsCheckin.find(
+                              (detail) => detail.studentId === student.studentId
+                            );
+
+                            // Định dạng thời gian createdAt nếu có
+                            let departureTime = "n/a"; // Mặc định là n/a
+                            if (studentAttendanceDetail) {
+                              const time = new Date(studentAttendanceDetail.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                              // Kiểm tra nếu thời gian là "12:00 AM" hoặc "00:00"
+                              if (time !== "12:00 AM" && time !== "00:00") {
+                                departureTime = time;
+                              }
+                            }
                             return (
                               <tr key={index}>
                                 <td>
@@ -1306,6 +1739,7 @@ class Checkin extends React.Component {
                                   </div>
                                 </td>
                                 <td>{this.state.studentClassMap[student.studentId] || "Math 1"}</td>
+                                <td>{departureTime}</td>
                                 <td>
                                   <div className="d-flex align-items-center">
                                     <img
@@ -1328,16 +1762,23 @@ class Checkin extends React.Component {
                                     Attend
                                   </button>
                                   <button
-                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absence" || !attendanceDataCheckin[student.studentId] ? "btn-danger" : ""
+                                    className={`btn ${attendanceDataCheckin[student.studentId] === "Absent" || !attendanceDataCheckin[student.studentId] ? "btn-danger" : ""
                                       }`}
-                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Absence")}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Absent")}
                                     disabled={!isToday}
                                   >
-                                    Absence
+                                    Absent
                                   </button>
                                 </td>
 
                                 <td className="project-actions">
+                                  <label
+                                    className="btn btn-outline-secondary mr-1"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => this.updateEachStudent(student.studentId)}
+                                  >
+                                    <i className="icon-check"></i>
+                                  </label>
                                   <label
                                     className="btn btn-outline-secondary mr-1"
                                     style={{ cursor: "pointer" }}
@@ -1351,7 +1792,7 @@ class Checkin extends React.Component {
                           })
                       ) : (
                         <tr>
-                          <td colSpan="6" className="text-center">
+                          <td colSpan="7" className="text-center">
                             Không có dữ liệu
                           </td>
                         </tr>
@@ -1359,14 +1800,38 @@ class Checkin extends React.Component {
                     </tbody>
 
                   </table>
+
                   <div className="text-right mt-3">
                     <button
                       className="btn btn-primary"
-                      onClick={this.updateAttendance}
+                      onClick={this.handleShowConfirmModal}
                       disabled={!isToday}
                     >
                       Confirm Attendance
                     </button>
+                  </div>
+                  <div className={`modal fade ${this.state.isModalConfirmVisible ? 'show' : ''}`} id="confirmModal" tabIndex="-1" aria-labelledby="confirmModalLabel" aria-hidden={!this.state.isModalVisible}>
+                    <div className="modal-dialog">
+                      <div className="modal-content">
+                        <div className="modal-header">
+                          <h5 className="modal-title" id="confirmModalLabel">Confirm Attendance</h5>
+                          <button type="button" className="close" onClick={this.handleCloseConfirmModal}>
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div className="modal-body">
+                          Are you sure you want to confirm the attendance for today?
+                        </div>
+                        <div className="modal-footer">
+                          <button type="button" className="btn btn-secondary" onClick={this.handleCloseConfirmModal}>
+                            Cancel
+                          </button>
+                          <button type="button" className="btn btn-primary" onClick={this.handleConfirmAttendance}>
+                            Confirm
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
@@ -1375,7 +1840,7 @@ class Checkin extends React.Component {
                 <>
                   <label
                     htmlFor="cameraFileInput"
-                    className="btn btn-outline-secondary mr-1"
+                    className="btn btn-outline-secondary m-2"
                     style={{ cursor: "pointer" }}
                   >
                     <i className="icon-camera"></i> Take Photo
@@ -1394,10 +1859,11 @@ class Checkin extends React.Component {
                       <tr>
                         <th>Student Name</th>
                         <th>Class</th>
-                        <th>Arrival Time</th>
+                        <th>Departure time</th>
                         <th>Pick-up Person</th>
                         <th>Contact</th>
                         <th>Status</th>
+                        <th>Action</th>
                       </tr>
 
                     </thead>
@@ -1410,6 +1876,21 @@ class Checkin extends React.Component {
                           )
                           .map((student, index) => {
                             const parent = this.state.parentData[student.parentId] || {}; // Lấy thông tin phụ huynh từ state
+                            const studentAttendanceDetail = attendanceDetailsCheckout.find(
+                              (detail) => detail.studentId === student.studentId
+                            );
+
+                            // Định dạng thời gian createdAt nếu có
+                            let departureTime = "n/a"; // Mặc định là n/a
+                            if (studentAttendanceDetail) {
+                              const time = new Date(studentAttendanceDetail.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                              // Kiểm tra nếu thời gian là "12:00 AM" hoặc "00:00"
+                              if (time !== "12:00 AM" && time !== "00:00") {
+                                departureTime = time;
+                              }
+                            }
+
                             return (
                               <tr key={index}>
                                 <td>
@@ -1424,7 +1905,7 @@ class Checkin extends React.Component {
                                   </div>
                                 </td>
                                 <td>{this.state.studentClassMap[student.studentId] || "Không có lớp"}</td>
-                                <td>n/a</td>
+                                <td>{departureTime}</td>
                                 <td>
                                   <div className="d-flex align-items-center">
                                     <img
@@ -1447,7 +1928,7 @@ class Checkin extends React.Component {
                                     Arrived
                                   </button>
                                   <button
-                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Arrived" || !attendanceDataCheckout[student.studentId] ? "btn-danger" : ""? "btn-danger" : ""
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Arrived" || !attendanceDataCheckout[student.studentId] ? "btn-danger" : "" ? "btn-danger" : ""
                                       }`}
                                     onClick={() => isToday && this.handleAttendance(student.studentId, "Not Arrived")}
                                     disabled={!isToday}
@@ -1455,12 +1936,28 @@ class Checkin extends React.Component {
                                     Not Arrived
                                   </button>
                                 </td>
+                                <td className="project-actions">
+                                  <label
+                                    className="btn btn-outline-secondary mr-1"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => this.updateEachStudent(student.studentId)}
+                                  >
+                                    <i className="icon-check"></i>
+                                  </label>
+                                  <label
+                                    className="btn btn-outline-secondary mr-1"
+                                    style={{ cursor: "pointer" }}
+                                    onClick={this.toggleModal}
+                                  >
+                                    <i className="icon-speech"></i>
+                                  </label>
+                                </td>
                               </tr>
                             );
                           })
                       ) : (
                         <tr>
-                          <td colSpan="6" className="text-center">
+                          <td colSpan="7" className="text-center">
                             No data for this day
                           </td>
                         </tr>
@@ -1470,7 +1967,7 @@ class Checkin extends React.Component {
 
 
                   <div className="text-right mt-3">
-                    <button className="btn btn-primary" onClick={this.updateAttendance} disabled={!isToday}>
+                    <button className="btn btn-primary" onClick={this.handleShowConfirmModal} disabled={!isToday}>
                       Confirm Attendance
                     </button>
                   </div>
@@ -1479,7 +1976,29 @@ class Checkin extends React.Component {
             </div>
           </div>
         </div>
-
+        <div className={`modal fade ${this.state.isModalConfirmVisible ? 'show' : ''}`} id="confirmModal" tabIndex="-1" aria-labelledby="confirmModalLabel" aria-hidden={!this.state.isModalVisible}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="confirmModalLabel">Confirm Attendance</h5>
+                <button type="button" className="close" onClick={this.handleCloseConfirmModal}>
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                Are you sure you want to confirm the attendance for today?
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={this.handleCloseConfirmModal}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-primary" onClick={this.handleConfirmAttendance}>
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="modal" tabIndex="-1" role="dialog" style={{ display: showModal ? 'block' : 'none' }}>
           <div className="modal-dialog" role="document">
             <div className="modal-content">
@@ -1577,7 +2096,7 @@ class Checkin extends React.Component {
                     Upload
                   </button>
                   <button className="btn btn-secondary" onClick={this.closeImageModal}>
-                    Đóng
+                    Cancel
                   </button>
                 </div>
               </div>

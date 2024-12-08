@@ -135,7 +135,7 @@ class NavbarMenu extends React.Component {
       this.activeMenutabContainer("dashboradContainer");
     }
     else if (
-      activeKey === "/dashboardprin" 
+      activeKey === "/dashboardprin"
     ) {
       this.activeMenutabContainer("DasboardPrinContainer");
     }
@@ -344,16 +344,16 @@ class NavbarMenu extends React.Component {
 
             <div className="navbar-brand">
               <a href="">
-              <img
-                src={
-                  document.body.classList.contains("full-dark")
-                    ? LogoWhite
-                    : Logo
-                }
-                alt="EduNest Logo"
-                className="img-responsive logo"
-                style={{width: "100px"}}
-              />
+                <img
+                  src={
+                    document.body.classList.contains("full-dark")
+                      ? LogoWhite
+                      : Logo
+                  }
+                  alt="EduNest Logo"
+                  className="img-responsive logo"
+                  style={{ width: "100px" }}
+                />
               </a>
             </div>
 
@@ -545,7 +545,7 @@ class NavbarMenu extends React.Component {
                         </a>
                       </li>
                     ) : null}
-                      {/* Dashboard prin */}
+                    {/* Dashboard prin */}
                     {roleId === 4 ? (
                       <li id="DasboardPrinContainer" className="DasboardPrinContainer">
                         <a
@@ -582,7 +582,7 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Classes */}
-                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
                       <li id="ClassContainer" className="">
                         <a
                           href="#!"
@@ -611,7 +611,7 @@ class NavbarMenu extends React.Component {
                               <Link to="/viewclass2">View Class</Link>
                             </li>
                           ) : null}
-                          {roleId === 5 ? (
+                          {roleId === 5 || roleId === 6 ? (
                             <li
                               className={activeKey === "viewclass2" ? "active" : ""}
                               onClick={() => { }}
@@ -720,7 +720,7 @@ class NavbarMenu extends React.Component {
 
 
                     {/* Menu */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 || roleId === 4 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 5 || roleId === 4 || roleId === 6  ? (
                       <li id="MenuContainer" className="">
                         <a
                           href="#!"
@@ -733,7 +733,7 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Menu Management</span>
                         </a>
                         <ul className="collapse">
-                          {roleId === 2 || roleId === 5 ? (
+                          {roleId === 2 || roleId === 5 || roleId === 6 ? (
                             <li
                               className={activeKey === "viewmenu2" ? "active" : ""}
                               onClick={() => { }}
@@ -764,7 +764,7 @@ class NavbarMenu extends React.Component {
                     ) : null}
 
                     {/* Daily Schedule */}
-                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
                       <li id="scheduleContainer" className="">
                         <a
                           href="#!"
@@ -782,7 +782,7 @@ class NavbarMenu extends React.Component {
 
 
                     {/* Albums */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 5 || roleId === 6 ? (
                       <li id="AlbumContainer" className="">
                         <a
                           href="#!"
@@ -868,7 +868,7 @@ class NavbarMenu extends React.Component {
                       </li>
                     ) : null}
                     {/* Requests */}
-                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 ? (
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
                       <li id="RequestContainer" className="">
                         <a
                           href="#!"
@@ -943,7 +943,7 @@ class NavbarMenu extends React.Component {
 
 
                     {/* Check in/out */}
-                    {roleId === 5 ? (
+                    {roleId === 5 || roleId === 6  ? (
                       <li id="attendanceContainer" className="">
                         <a
                           href="#!"
@@ -956,12 +956,15 @@ class NavbarMenu extends React.Component {
                           <i className="icon-grid"></i> <span>Attendance</span>
                         </a>
                         <ul className="collapse">
-                          <li
-                            className={activeKey === "listclasscheckin" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/checkin">Check in/out</Link>
-                          </li>
+                          {roleId === 6 ? (
+                            <li
+                              className={activeKey === "listclasscheckin" ? "active" : ""}
+                              onClick={() => { }}
+                            >
+                              <Link to="/checkin">Check in/out</Link>
+                            </li>
+                          ) : null}
+
                           <li
                             className={activeKey === "listclassattendance" ? "active" : ""}
                             onClick={() => { }}

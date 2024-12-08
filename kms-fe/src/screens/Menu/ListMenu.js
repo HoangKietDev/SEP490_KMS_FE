@@ -388,6 +388,10 @@ import "../Menu/ListMenu.css";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Notification from "../../components/Notification";
+import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
+import Button from "react-bootstrap/Button";
+import { ProgressBar } from "react-loader-spinner"; // Import spinner
+
 
 class ListMenu extends React.Component {
     state = {
@@ -404,6 +408,7 @@ class ListMenu extends React.Component {
         notificationText: "",
         notificationType: "success",
         selectedFile: null,
+        loading: false
     };
 
     componentDidMount() {
@@ -439,7 +444,43 @@ class ListMenu extends React.Component {
         }
         return date.toISOString().split('T')[0];
     };
+    handleSendMailNotification = () => {
+        this.setState({ showConfirmModal: true });
+    };
+    handleConfirmSendMail = async () => {
+        this.setState({ showConfirmModal: false, loading: true }); // Bật loading
 
+        // Lấy classId từ URL
+
+        try {
+            // API call sử dụng fetch
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/SendMenuToAllParentsMail`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                this.setState({
+                    notificationText: "Mail sent successfully!",
+                    notificationType: "success",
+                    showNotification: true
+                });
+            }
+        } catch (error) {
+            this.setState({
+                notificationText: "Mail sent Error!",
+                notificationType: "error",
+                showNotification: true
+            });
+        } finally {
+            this.setState({ loading: false }); // Kết thúc loading
+        }
+    };
+    handleCloseConfirmModal = () => {
+        this.setState({ showConfirmModal: false });
+    };
     fetchGrades = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Grade`);
@@ -507,14 +548,17 @@ class ListMenu extends React.Component {
     // Hàm hỗ trợ chuyển đổi status thành văn bản
     getStatusText = (status) => {
         switch (status) {
+            case 0:
+                return <span className="badge badge-default">Draft</span>; // Màu mặc định (xám) cho Draft
             case 1:
-                return "Pending";
+                return <span className="badge badge-warning">Pending</span>; // Màu vàng cho Pending
             case 2:
-                return "Approved";
+                return <span className="badge badge-success">Approved</span>; // Màu xanh lá cây cho Approved
             default:
-                return "";
+                return <span className="badge badge-secondary">Unknown</span>; // Màu xám cho Unknown
         }
     };
+
 
     updateMenuStatus = async (gradeID, newStatus) => {
         const { selectedWeek, menus } = this.state;
@@ -663,8 +707,8 @@ class ListMenu extends React.Component {
                             <tr>
                                 <td className="sticky-col"><strong>Breakfast</strong></td>
                                 {daysOfWeek.map((day, index) => {
-                                    const menuItems = menuDetails.filter(menu => 
-                                        menu.mealCode === "BS" && 
+                                    const menuItems = menuDetails.filter(menu =>
+                                        menu.mealCode === "BS" &&
                                         this.mapDayToEnglish(menu.dayOfWeek) === day
                                     );
                                     return (
@@ -681,17 +725,18 @@ class ListMenu extends React.Component {
                                         </td>
                                     );
                                 })}
-                                <td rowSpan={3} className="text-center align-middle ">
+                                <td rowSpan={3} className="text-center align-middle">
                                     {menuForGrade && this.getStatusText(menuForGrade.status)}
                                 </td>
+
                             </tr>
 
                             {/* Lunch */}
                             <tr>
                                 <td className="sticky-col"><strong>Lunch</strong></td>
                                 {daysOfWeek.map((day, index) => {
-                                    const menuItems = menuDetails.filter(menu => 
-                                        menu.mealCode === "BT" && 
+                                    const menuItems = menuDetails.filter(menu =>
+                                        menu.mealCode === "BT" &&
                                         this.mapDayToEnglish(menu.dayOfWeek) === day
                                     );
                                     return (
@@ -714,8 +759,8 @@ class ListMenu extends React.Component {
                             <tr>
                                 <td className="sticky-col"><strong>Snack</strong></td>
                                 {daysOfWeek.map((day, index) => {
-                                    const menuItems = menuDetails.filter(menu => 
-                                        menu.mealCode === "BC" && 
+                                    const menuItems = menuDetails.filter(menu =>
+                                        menu.mealCode === "BC" &&
                                         this.mapDayToEnglish(menu.dayOfWeek) === day
                                     );
                                     return (
@@ -749,7 +794,7 @@ class ListMenu extends React.Component {
                                     </td>
                                 </tr>
                             )}
-                            
+
                         </tbody>
                     </table>
                 </div>
@@ -764,7 +809,9 @@ class ListMenu extends React.Component {
             showNotification,
             notificationText,
             notificationType,
-            grades
+            grades,
+            showConfirmModal,
+            loading
         } = this.state;
 
         return (
@@ -794,7 +841,7 @@ class ListMenu extends React.Component {
                                 Selected week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
                             </div>
 
-                           
+
                         </div>
 
                         {showCalendar && (
@@ -807,7 +854,22 @@ class ListMenu extends React.Component {
                                 />
                             </div>
                         )}
+                        <>
+                            <button
+                                className="btn btn-primary ml-3"
+                                onClick={this.handleSendMailNotification}
+                                disabled={loading} // Nút bị vô hiệu hóa nếu loading = true
+                            >
+                                {loading ? "Sending..." : "Send Mail Notification"}
+                            </button>
 
+                            {/* Nếu loading, hiển thị spinner */}
+                            {loading && (
+                                <div className="loading-container">
+                                    <ProgressBar color="#00BFFF" height={40} width={100} />
+                                </div>
+                            )}
+                        </>
                         {/* Lặp qua tất cả các grade để render bảng */}
                         {grades && grades.length > 0 ? (
                             grades.map((grade) => this.renderTable(grade))
@@ -816,6 +878,22 @@ class ListMenu extends React.Component {
                         )}
                     </div>
                 </div>
+                <Modal show={showConfirmModal} onHide={this.handleCloseConfirmModal}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Confirm Mail Notification</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        Are you sure you want to send mail notifications with the current filters?
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={this.handleCloseConfirmModal}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={this.handleConfirmSendMail}>
+                            Confirm
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         );
     }
