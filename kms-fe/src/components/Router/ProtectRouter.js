@@ -5,11 +5,6 @@ import { getCookie, getSession } from "../Auth/Auth";
 // Utility function to get token and roleId
 const getAuthDetails = () => {
     const user = getCookie('user'); // Assuming the user details (like roleId) are stored here
-    console.log(user);
-    
-    const user1 = getSession('user'); // Assuming the user details (like roleId) are stored here
-    console.log(user1);
-
     if (user) {
         return { user, roleId: user?.user?.roleId }; // Returns roleId if available
     }
@@ -19,8 +14,6 @@ const getAuthDetails = () => {
 // Higher-order component to protect routes based on role
 const ProtectedRoute = ({ component: Component, allowedRoles, ...rest }) => {
     const { user, roleId } = getAuthDetails();
-    console.log(user);
-
     return (
         <Route
             {...rest}

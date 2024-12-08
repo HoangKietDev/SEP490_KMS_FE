@@ -14,6 +14,7 @@ import Pagination from "../../components/Common/Pagination";
 class ScheduleList extends React.Component {
   state = {
     ScheduleListData: [],
+    filteredSchedules: [],
     classData: [],
     semesterListData: [],
     myChild: [],
@@ -24,6 +25,9 @@ class ScheduleList extends React.Component {
 
     searchText: "",
     filterStatus: "all", // Giá trị 'all', '1', hoặc '0' để lọc trạng thái
+
+    selectedItems: [], // Mảng lưu trữ các dịch vụ đã chọn
+
 
     currentPage: 1,
     itemsPerPage: 5,
@@ -77,7 +81,7 @@ class ScheduleList extends React.Component {
             const filteredSchedules = (roleId === 5 || roleId === 2)
               ? allSchedules.filter((schedule) => allowedClassIds.includes(schedule.classId))
               : allSchedules;
-            this.setState({ ScheduleListData: filteredSchedules });
+            this.setState({ ScheduleListData: filteredSchedules, filteredSchedules: filteredSchedules });
           })
           .catch((error) => {
             console.error("Error fetching data: ", error);
@@ -170,21 +174,105 @@ class ScheduleList extends React.Component {
     }
   };
 
+  handleBulkStatusUpdate = async (newStatus) => {
+    const { selectedItems, filteredSchedules } = this.state;
+    const scheduleToUpdate = filteredSchedules.filter(schedule => selectedItems.includes(schedule.scheduleId));
+
+    if (scheduleToUpdate.length === 0) {
+      this.setState({
+        notificationText: "No schedule selected!",
+        notificationType: "error",
+        showNotification: true,
+      });
+      return;
+    }
+    try {
+      // Gửi từng yêu cầu cập nhật cho mỗi service
+      for (const item of scheduleToUpdate) {
+        const updated = {
+          scheduleId: item?.scheduleId,
+          startDate: item?.startDate,
+          endDate: item?.endDate,
+          classId: item?.classId,
+          status: newStatus,
+          classId: item?.classId,
+          teacherName: item?.teacherName
+        };
+
+        // Gửi yêu cầu cập nhật cho từng bản ghi
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Schedule/UpdateSchedule`, updated);
+
+        // Sau khi mỗi yêu cầu thành công, cập nhật filteredServices
+        this.setState(prevState => {
+          const updatedListData = prevState.filteredSchedules.map(item =>
+            item.scheduleId === updated.scheduleId ? { ...item, status: newStatus } : item
+          );
+          return { filteredSchedules: updatedListData };
+        });
+
+
+      }
+      // Thông báo thành công cho mỗi bản ghi
+      this.setState({
+        notificationText: `${scheduleToUpdate.length} Schedule status updated successfully!`,
+        notificationType: "success",
+        showNotification: true,
+      });
+      // Sau khi hoàn thành tất cả, reset selectedItems
+      this.setState({ selectedItems: [] });
+      this.fetchData();
+
+    } catch (error) {
+      console.log(error);
+      const errorMessage = error?.response?.data?.message
+      this.setState({
+        notificationText: errorMessage || "Error updating status for one or more Schedule!",
+        notificationType: "error",
+        showNotification: true,
+      });
+    }
+  };
+
+  handleSelect = (id) => {
+    this.setState(prevState => {
+      const selectedItems = prevState.selectedItems.includes(id)
+        ? prevState.selectedItems.filter(id => id !== id)
+        : [...prevState.selectedItems, id];
+      return { selectedItems };
+    });
+    console.log(this.state.selectedItems);
+
+  };
+
+  handleSelectAll = () => {
+    this.setState(prevState => {
+      if (prevState.selectedItems.length === prevState.filteredSchedules.length) {
+        return { selectedItems: [] }; // Unselect all
+      }
+      const allServiceIds = prevState.filteredSchedules.map(item => item.scheduleId);
+      return { selectedItems: allServiceIds }; // Select all
+    });
+    console.log(this.state.selectedItems, this.state.filteredSchedules);
+
+  };
+
+
+
   handlePageChange = (pageNumber) => {
     this.setState({ currentPage: pageNumber });
   };
 
   render() {
-    const { ScheduleListData, classData, semesterListData, myChild, selectedClassId } = this.state;
+    const { ScheduleListData, classData, semesterListData, myChild, selectedClassId, selectedItems } = this.state;
     const { searchText, filterStatus } = this.state;
 
     const { showNotification, notificationText, notificationType } = this.state;
 
 
     const statusOptions = [
-      { value: 1, label: "Aprroved", className: "badge-success" },
-      { value: 2, label: "Rejected", className: "badge-danger" },
-      { value: 0, label: "Pending", className: "badge-default" },
+      { value: 0, label: "Draft", className: "badge-default" },
+      { value: 1, label: "Pending", className: "badge-info" },
+      { value: 2, label: "Approved", className: "badge-success" },
     ];
 
     const userData = getCookie('user')?.user;
@@ -197,7 +285,6 @@ class ScheduleList extends React.Component {
 
     const filteredSchedules = ScheduleListData
       .filter((item) => {
-
         const classDetail = classData?.find(i => i.classId === item?.classId);
         const semesterDetail = semesterListData?.find(i => i.semesterId === classDetail?.semesterId);
 
@@ -213,9 +300,7 @@ class ScheduleList extends React.Component {
 
         // Kết hợp tất cả các điều kiện
         return (classNameMatch || semesterNameMatch) && statusMatch && classIdMatch;
-
-      }
-      );
+      });
 
     // phan trang
     const { currentPage, itemsPerPage } = this.state;
@@ -283,9 +368,9 @@ class ScheduleList extends React.Component {
                           onChange={this.handleStatusFilterChange}
                         >
                           <option value="all">All Status</option>
-                          <option value="1">Active</option>
-                          <option value="2">Inactive</option>
-                          <option value="0">Pending</option>
+                          <option value="1">Approved</option>
+                          <option value="2">Pending</option>
+                          <option value="0">Draft</option>
                         </select>
                       </div>
                       : <></>}
@@ -303,9 +388,19 @@ class ScheduleList extends React.Component {
                       <table className="table m-b-0 table-hover">
                         <thead className="theme-color">
                           <tr>
-                            <th>#</th>
+                            <th>
+                              {roleId === 4 &&
+                                <button
+                                  className="btn btn-primary"
+                                  onClick={this.handleSelectAll}
+                                >
+                                  Select All
+                                </button>
+
+                              } {/* Thêm cột checkbox nếu là roleId 4 */}
+                            </th>
                             <th>Class</th>
-                            <th>Semeter</th>
+                            <th>School Year</th>
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Create By</th>
@@ -319,7 +414,21 @@ class ScheduleList extends React.Component {
                             return (
                               <React.Fragment key={"schedule" + index}>
                                 <tr>
-                                  <td>{index + 1}</td>
+                                  <td>
+                                    <div className="fancy-checkbox d-inline-block">
+                                      <label>
+                                        {roleId === 4 && (
+                                          <input
+                                            type="checkbox"
+                                            onChange={() => this.handleSelect(request.scheduleId)}
+                                            checked={selectedItems.includes(request.scheduleId)}  // Đảm bảo rằng checkbox được đánh dấu nếu serviceId nằm trong selectedServices
+
+                                          />
+                                        )}
+                                        <span>{index + 1}</span>
+                                      </label>
+                                    </div>
+                                  </td>
                                   <td
                                     onClick={() => this.handleDetailSchedule(request?.classId)}
                                     style={{ cursor: 'pointer' }}
@@ -337,7 +446,7 @@ class ScheduleList extends React.Component {
                                       <select
                                         value={request.status}
                                         onChange={(e) => this.handleStatusChange(request, request.scheduleId, parseInt(e.target.value))}
-                                        className={`form-control ${request?.status === 1 ? 'badge-success' : request?.status === 2 ? 'badge-danger' : 'badge-default'}`}
+                                        className={`form-control ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}
                                       >
                                         {statusOptions.map(option => (
                                           <option key={option.value} value={option.value} className={option.className}>
@@ -348,7 +457,7 @@ class ScheduleList extends React.Component {
                                     </td>
                                   ) : (roleId === 2 || roleId === 3 || roleId === 5) && (
                                     <td>
-                                      <span className={`badge ${request?.status === 1 ? 'badge-success' : request?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
+                                      <span className={`badge ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}>
                                         {statusOptions.find(option => option.value === request.status)?.label || 'Unknown'}
                                       </span>
                                     </td>
@@ -362,6 +471,17 @@ class ScheduleList extends React.Component {
                         </tbody>
                       </table>
                     </div>
+
+                    {roleId === 4 && (
+                      <div className="form-group text-right">
+                        <button className="btn btn-danger" onClick={() => this.handleBulkStatusUpdate(0)}>
+                          Reject
+                        </button>
+                        <button className="btn btn-success ml-2" onClick={() => this.handleBulkStatusUpdate(1)}>
+                          Approve
+                        </button>
+                      </div>
+                    )}
                     <div className="pt-4">
                       <Pagination
                         currentPage={currentPage}

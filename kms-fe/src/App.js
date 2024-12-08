@@ -571,13 +571,13 @@ class App extends React.Component {
                   component={AddPickupPerson}
                   allowedRoles={[2]}
                 />
+                <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/listpickupperson`}
                   component={ListPickupPerson}
                   allowedRoles={[2]}
                 />
-                <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
               </Switch>
             </div>
           </>

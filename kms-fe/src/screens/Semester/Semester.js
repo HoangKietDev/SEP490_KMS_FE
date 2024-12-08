@@ -161,7 +161,7 @@ class Semester extends React.Component {
                       <thead className="">
                         <tr className="theme-color">
                           <th>#</th>
-                          <th>Semester Name</th>
+                          <th>School Year</th>
                           <th>Start Date</th>
                           <th>End Date</th>
                           <th>Status</th>

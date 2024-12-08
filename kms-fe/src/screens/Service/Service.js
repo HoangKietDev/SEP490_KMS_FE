@@ -10,7 +10,6 @@ import Pagination from "../../components/Common/Pagination";
 class Service extends React.Component {
   state = {
     services: [],
-    services: [],
     filteredServices: [],
     searchText: "", // Dùng để lọc theo serviceName
     filterStatus: "", // Dùng để lọc theo status
@@ -104,9 +103,9 @@ class Service extends React.Component {
         return { filteredServices: updatedListData };
       });
     } catch (error) {
-      console.log(error);
+      const errorMessage = error?.response?.data?.message
       this.setState({
-        notificationText: "Status updating error!",
+        notificationText: errorMessage || "Status updating error!",
         notificationType: "error",
         showNotification: true,
       });
@@ -163,8 +162,9 @@ class Service extends React.Component {
       this.fetchData();
 
     } catch (error) {
+      const errorMessage = error?.response?.data?.message
       this.setState({
-        notificationText: "Error updating status for one or more services!",
+        notificationText: errorMessage || "Error updating status for one or more services!",
         notificationType: "error",
         showNotification: true,
       });
@@ -179,6 +179,7 @@ class Service extends React.Component {
         : [...prevState.selectedServices, serviceId];
       return { selectedServices };
     });
+    
   };
 
   handleSelectAll = () => {
@@ -274,34 +275,6 @@ class Service extends React.Component {
                         <a onClick={() => this.handleCreateCategory()} class="btn btn-success text-white">Create New Service</a>
                       ) : null}
                     </div>
-                    {roleId === 4 ? (
-                      <div className="col-md-6 d-flex justify-content-between pt-4">
-                        <div>
-                          <input
-                            type="checkbox"
-                            checked={selectedServices.length === filteredServices.length}
-                            onChange={this.handleSelectAll}
-                            className='mr-2'
-                            style={{ width: '20px', height: '20px' }}
-                          />
-                          <span>Select All</span>
-                        </div>
-                        <button
-                          className="btn btn-success"
-                          onClick={() => this.handleBulkStatusUpdate(1)} // Update status to Active
-                        >
-                          Update Status to Active
-                        </button>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => this.handleBulkStatusUpdate(0)} // Update status to InActive
-                        >
-                          Update Status to InActive
-                        </button>
-
-                      </div>
-                    ) : null}
-
                   </div>
                 </div>
               </div>
@@ -315,15 +288,15 @@ class Service extends React.Component {
                       <thead className="">
                         <tr className='theme-color'>
                           <th>
-                            {roleId === 4 ? (
-                              <input
-                                type="checkbox"
-                                checked={selectedServices.length === filteredServices.length}
-                                onChange={this.handleSelectAll}
-                                className='mr-2'
-                              />
-                            ) : null}
-                            <span>#</span>
+                            {roleId === 4 &&
+                              <button
+                                className="btn btn-primary"
+                                onClick={this.handleSelectAll}
+                              >
+                                Select All
+                              </button>
+
+                            } {/* Thêm cột checkbox nếu là roleId 4 */}
                           </th>
                           <th>ServiceName</th>
                           <th>Price</th>
@@ -338,17 +311,22 @@ class Service extends React.Component {
                         {currentItems.map((service, i) => {
                           return (
                             <tr key={"dihf" + i}>
-                              <td className="project-title">
-                                {roleId === 4 ? (
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedServices.includes(service.serviceId)}
-                                    onChange={() => this.handleSelectService(service.serviceId)}
-                                    className='mr-2'
-                                  />
-                                ) : null}
-                                <span>{i + 1}</span>
+
+                              <td>
+                                <div className="fancy-checkbox d-inline-block">
+                                  <label>
+                                    {roleId === 4 && (
+                                      <input
+                                        type="checkbox"
+                                        onChange={() => this.handleSelectService(service.serviceId)}
+                                        checked={selectedServices.includes(service.serviceId)}  // Đảm bảo rằng checkbox được đánh dấu nếu serviceId nằm trong selectedServices
+                                      />
+                                    )}
+                                    <span>{i + 1}</span>
+                                  </label>
+                                </div>
                               </td>
+
                               <td>
                                 {service?.serviceName}
                               </td>
@@ -398,6 +376,17 @@ class Service extends React.Component {
                       </tbody>
                     </table>
                   </div>
+
+                  {roleId === 4 && (
+                    <div className="form-group text-right">
+                      <button className="btn btn-danger" onClick={() => this.handleBulkStatusUpdate(0)}>
+                        Reject
+                      </button>
+                      <button className="btn btn-success ml-2" onClick={() => this.handleBulkStatusUpdate(1)}>
+                        Approve
+                      </button>
+                    </div>
+                  )}
                   <div className="pt-4">
                     <Pagination
                       currentPage={currentPage}

@@ -68,8 +68,12 @@ class ServiceCreate extends React.Component {
                 }
             }, 1000);
         } catch (error) {
+            const errorText = error?.response?.data?.message
+            // Chia chuỗi tại dấu ": " và lấy phần cuối cùng
+            const parts = errorText.split(": ");
+            const errorMessage = parts[parts.length - 1];
             this.setState({
-                notificationText: "Service create error!",
+                notificationText: errorMessage || "Service create error!",
                 notificationType: "error",
                 showNotification: true,
             });

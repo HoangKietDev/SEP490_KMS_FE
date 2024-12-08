@@ -7,7 +7,7 @@ import { withRouter } from 'react-router-dom';
 import { getCookie } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 import Notification from "../../components/Notification";
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Table } from 'react-bootstrap';
 import { RotatingLines } from 'react-loader-spinner';
 
 class Paymenttuition extends React.Component {
@@ -32,6 +32,9 @@ class Paymenttuition extends React.Component {
 
         isUploading: false,  // Biến để theo dõi trạng thái upload
         isUploadingStaff: false,  // Biến để theo dõi trạng thái upload
+
+        isModalOpen: false,
+        tuitionData: [],
     };
 
     // Hàm lấy ngày bắt đầu và ngày kết thúc của tháng hiện tại
@@ -111,6 +114,38 @@ class Paymenttuition extends React.Component {
 
     };
 
+    // generateTuition = async () => {
+    //     try {
+    //         // Hiển thị trạng thái đang tải (nếu cần)
+    //         this.setState({ isProcessing: true });
+
+    //         // Gửi yêu cầu POST để tạo học phí
+    //         const response = await axios.post(
+    //             "http://localhost:5124/api/Tuition/generate-tuition"
+    //         );
+
+    //         // Xử lý thành công
+    //         this.setState({
+    //             notificationText: "Tuition generated successfully!",
+    //             notificationType: "success",
+    //             showNotification: true,
+    //         });
+
+    //         await this.fetchData() // Gọi lại hàm fetch dữ liệu
+    //     } catch (error) {
+    //         // Xử lý lỗi
+    //         const errorMessage = error.response?.data?.message || "Failed to generate tuition!";
+    //         this.setState({
+    //             notificationText: errorMessage,
+    //             notificationType: "error",
+    //             showNotification: true,
+    //         });
+    //     } finally {
+    //         // Tắt trạng thái đang tải
+    //         this.setState({ isProcessing: false });
+    //     }
+    // };
+
     generateTuition = async () => {
         try {
             // Hiển thị trạng thái đang tải (nếu cần)
@@ -120,15 +155,17 @@ class Paymenttuition extends React.Component {
             const response = await axios.post(
                 "http://localhost:5124/api/Tuition/generate-tuition"
             );
-
-            // Xử lý thành công
+            // Lưu dữ liệu vào trạng thái để hiển thị trong modal
             this.setState({
                 notificationText: "Tuition generated successfully!",
                 notificationType: "success",
                 showNotification: true,
+                tuitionData: response.data, // Giả sử dữ liệu trả về là tuitionData
+                isModalOpen: true, // Mở modal để xác nhận
             });
 
-            await this.fetchData() // Gọi lại hàm fetch dữ liệu
+            // await this.fetchData(); // Gọi lại hàm fetch dữ liệu
+
         } catch (error) {
             // Xử lý lỗi
             const errorMessage = error.response?.data?.message || "Failed to generate tuition!";
@@ -142,6 +179,67 @@ class Paymenttuition extends React.Component {
             this.setState({ isProcessing: false });
         }
     };
+
+    handleSave = async () => {
+        // Thực hiện lưu khi người dùng nhấn Save
+        try {
+            // Lưu dữ liệu vào hệ thống (nếu cần)
+            // Bạn có thể gọi API khác nếu cần lưu thêm dữ liệu
+            this.setState({ isModalOpen: false });
+
+            // Thông báo khi lưu thành công
+            this.setState({
+                notificationText: "Tuition saved successfully!",
+                notificationType: "success",
+                showNotification: true,
+            });
+
+            await this.fetchData(); // Gọi lại hàm fetch dữ liệu
+
+        } catch (error) {
+            // Xử lý lỗi nếu có
+            const errorMessage = error.response?.data?.message || "Failed to save tuition!";
+            this.setState({
+                notificationText: errorMessage,
+                notificationType: "error",
+                showNotification: true,
+            });
+        }
+    };
+
+    handleClose = async () => {
+        // Thực hiện xóa dữ liệu khi người dùng nhấn Close
+        try {
+
+            const confirmation = window.prompt("Please confirm by typing 'yes' to close Modal and Delete Data:", "");
+
+            if (confirmation === "yes") {
+                // Người dùng nhập "yes", thực hiện hành động cần thiết
+
+                // Gọi API để xóa dữ liệu đã tạo
+                await axios.delete(
+                    `http://localhost:5124/api/Tuition/deleteTuitionFalse`
+                );
+
+                // Đóng modal và hiển thị thông báo xóa thành công
+                this.setState({ isModalOpen: false });
+                this.setState({
+                    notificationText: "Tuition deleted successfully!",
+                    notificationType: "success",
+                    showNotification: true,
+                });
+            }
+        } catch (error) {
+            // Xử lý lỗi nếu có
+            const errorMessage = error.response?.data?.message || "Failed to delete tuition!";
+            this.setState({
+                notificationText: errorMessage,
+                notificationType: "error",
+                showNotification: true,
+            });
+        }
+    };
+
 
     handleSendMailByPrin = async () => {
         try {
@@ -260,7 +358,7 @@ class Paymenttuition extends React.Component {
 
     render() {
 
-        const { paymentAll, searchText, startDate, endDate, classList } = this.state;
+        const { paymentAll, searchText, startDate, endDate, classList, tuitionData } = this.state;
 
         const { showNotification, notificationText, notificationType } = this.state;
 
@@ -441,7 +539,7 @@ class Paymenttuition extends React.Component {
                                                                 {item?.endDate?.split("T")[0]}
                                                             </td>
                                                             <td>
-                                                                {item?.tuitionFee}
+                                                                {item?.tuitionFee?.toLocaleString('vi-VN')}
                                                             </td>
                                                             <td>
                                                                 {item?.dueDate?.split("T")[0]}
@@ -527,6 +625,53 @@ class Paymenttuition extends React.Component {
                                 </Modal.Footer>
                             </Modal>
                         )}
+                        {this.state.isModalOpen && (
+                            <Modal show={this.state.isModalOpen} onHide={this.handleClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Confirm Tuition Data</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    {tuitionData && tuitionData.length > 0 ? (
+                                        <Table striped bordered hover responsive>
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Children</th>
+                                                    <th>StartDate</th>
+                                                    <th>EndDate</th>
+                                                    <th>tuitionFee</th>
+                                                    <th>Due Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {tuitionData.map((tuition, index) => (
+                                                    <tr key={index}>
+                                                        <td>{index+1}</td>
+                                                        <td>{tuition?.studentId}</td>
+                                                        <td>{tuition?.startDate?.split("T")[0]}</td>
+                                                        <td>{tuition?.endDate?.split("T")[0]}</td>
+                                                        <td>{tuition.tuitionFee?.toLocaleString('vi-VN')}</td>
+                                                        <td>{tuition?.dueDate?.split("T")[0]}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    ) : (
+                                        <p>No data available</p>
+                                    )}
+                                    <p>Do you want to save or delete this data?</p>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={this.handleClose}>
+                                        Delete
+                                    </Button>
+                                    <Button variant="primary" onClick={this.handleSave}>
+                                        Save
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal>
+                        )}
+
                     </div>
                 </div >
             </div >

@@ -94,8 +94,12 @@ class ServiceUpdate extends React.Component {
                 }
             }, 1000);
         } catch (error) {
+            const errorText = error?.response?.data?.message
+            // Chia chuỗi tại dấu ": " và lấy phần cuối cùng
+            const parts = errorText.split(": ");
+            const errorMessage = parts[parts.length - 1];
             this.setState({
-                notificationText: "Error updating Service!",
+                notificationText: errorMessage|| "Error updating Service!",
                 notificationType: "error",
                 showNotification: true,
             });

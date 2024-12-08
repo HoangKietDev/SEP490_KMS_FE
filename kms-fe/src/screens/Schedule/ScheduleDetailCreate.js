@@ -94,13 +94,13 @@ class ScheduleDetailCreate extends React.Component {
 
 
         console.log(activitydata);
-        
+
         // Update state with the default class and then fetch schedule data
         this.setState({
           classData: data,
           selectId: defaultClassId,
-          activities: activitydata?.filter(i=>i.status == 1),
-          locations: locationdata?.filter(i=>i.status == 1),
+          activities: activitydata?.filter(i => i.status == 1),
+          locations: locationdata?.filter(i => i.status == 1),
         }, async () => {
           // Fetch schedule data only after state update
           const { selectId } = this.state;
@@ -220,20 +220,20 @@ class ScheduleDetailCreate extends React.Component {
       }
     }
 
-    // Kiểm tra xem tất cả các slotDetails có đầy đủ dữ liệu không
-    const incompleteSlots = allSlotKeys.filter(slotKey => {
-      const slot = slotDetails[slotKey];
-      return !slot || !slot.activity || !slot.location;
-    });
+    // // Kiểm tra xem tất cả các slotDetails có đầy đủ dữ liệu không
+    // const incompleteSlots = allSlotKeys.filter(slotKey => {
+    //   const slot = slotDetails[slotKey];
+    //   return !slot || !slot.activity || !slot.location;
+    // });
 
-    if (incompleteSlots.length > 0) {
-      this.setState({
-        notificationText: "Please ensure all activity and location fields are filled out for all weekslots before saving.!",
-        notificationType: "info",
-        showNotification: true
-      });
-      return; // Dừng thực hiện nếu có bản ghi chưa điền đủ
-    }
+    // if (incompleteSlots.length > 0) {
+    //   this.setState({
+    //     notificationText: "Please ensure all activity and location fields are filled out for all weekslots before saving.!",
+    //     notificationType: "info",
+    //     showNotification: true
+    //   });
+    //   return; // Dừng thực hiện nếu có bản ghi chưa điền đủ
+    // }
 
     // Parse start and end week
     const [startYear, startWeekNumber] = startWeek.split('-W');
@@ -254,15 +254,6 @@ class ScheduleDetailCreate extends React.Component {
     const endWeekInt = parseInt(endWeekNumber);
     const yearInt = parseInt(startYear);
 
-    // Check if the input weeks are valid
-    if (startWeekInt > endWeekInt) {
-      this.setState({
-        notificationText: "Invalid week range! Start week should be before end week.",
-        notificationType: "info",
-        showNotification: true
-      });
-      return;
-    }
 
     // Loop through each week and duplicate schedule
     for (let week = startWeekInt; week <= endWeekInt; week++) {
@@ -285,20 +276,24 @@ class ScheduleDetailCreate extends React.Component {
       try {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/ScheduleDetail/AddListScheduleDetails`, formattedDetails);
         console.log(`Schedule for week ${weekString} saved successfully!`, response.data);
-
-      } catch (error) {
         this.setState({
-          notificationText: "Failed to save schedule. Please try again !",
+          notificationText: "Save and Duplicate Schedule successfully!",
+          notificationType: "success",
+          showNotification: true
+        });
+      } catch (error) {
+        console.log(error);
+        const errorMessage = error?.response?.data?.details
+        const startIdx = errorMessage.indexOf("Weekdate");
+        const result = errorMessage.substring(startIdx);
+        this.setState({
+          notificationText: result || "Failed to save schedule. Please try again !",
           notificationType: "error",
           showNotification: true
         });
       }
     }
-    this.setState({
-      notificationText: "Save and Duplicate Schedule successfully!",
-      notificationType: "success",
-      showNotification: true
-    });
+
   };
 
 
@@ -420,7 +415,7 @@ class ScheduleDetailCreate extends React.Component {
     const { showNotification, notificationText, notificationType } = this.state;
 
     console.log(this.state.activities);
-    
+
 
     const userData = (getCookie("user")?.user);
     const roleId = userData.roleId;
