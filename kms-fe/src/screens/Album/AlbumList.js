@@ -87,8 +87,10 @@ class Albumlist extends React.Component {
 
         // Lọc album chỉ với những album có classId nằm trong mảng classIds
         const approvedStudentAlbums = albumData.filter(
-          album => album.status === 1 && classIds.includes(album.classId)
+          album => album.status === 2 && classIds.includes(album.classId)
         );
+        console.log(approvedStudentAlbums);
+
 
         // Cập nhật state với dữ liệu children đã lọc và danh sách album đã lọc
         this.setState({
@@ -275,7 +277,7 @@ class Albumlist extends React.Component {
         notificationText: "Status updated successfully!",
         notificationType: "success",
         showNotification: true
-    });
+      });
 
       // Cập nhật trạng thái trong state
       this.setState((prevState) => {
@@ -290,7 +292,7 @@ class Albumlist extends React.Component {
         notificationText: "Error updating status!",
         notificationType: "error",
         showNotification: true
-    });
+      });
 
     }
   };
@@ -309,7 +311,7 @@ class Albumlist extends React.Component {
         notificationText: "Status updated successfully!",
         notificationType: "success",
         showNotification: true
-    });
+      });
 
       // Cập nhật trạng thái trong state
       this.setState((prevState) => {
@@ -326,7 +328,7 @@ class Albumlist extends React.Component {
         notificationText: "Error updating status!",
         notificationType: "success",
         showNotification: true
-    });
+      });
     }
   };
 
@@ -341,7 +343,8 @@ class Albumlist extends React.Component {
   render() {
     const { AlbumListData, selectedChildren, classListData, teacherListData, selectedClassId, filteredAlbumListData, filteredChildrenData, showModal, reason } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
-
+    console.log(filteredChildrenData);
+    
     const statusOptions = [
       { value: 1, label: "Aprroved", className: "badge-success" },
       { value: 2, label: "Reject", className: "badge-danger" },

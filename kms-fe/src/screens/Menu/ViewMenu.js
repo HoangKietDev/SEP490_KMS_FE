@@ -686,9 +686,8 @@ class ViewMenu extends React.Component {
               grades.map((grade) => {
                 const gradeId = grade.gradeId;
                 // Tìm tất cả menuDetails từ menus mà có chứa gradeId này
-                const combinedMenuDetails = menus
-                  .filter(m => m.gradeIDs.includes(gradeId))  // Lọc menu có gradeID này
-                  .flatMap(m => m.menuDetails);  // Kết hợp tất cả menuDetails của các menu có gradeId này
+                const combinedMenuDetails = menus?.filter(m => m.gradeIDs?.includes(gradeId))  // Lọc menu có gradeID này
+                ?.flatMap(m => m.menuDetails);  // Kết hợp tất cả menuDetails của các menu có gradeId này
 
                 return (
                   <div key={gradeId}>

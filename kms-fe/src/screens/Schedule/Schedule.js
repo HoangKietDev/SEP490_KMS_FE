@@ -347,8 +347,10 @@ class Schedule extends React.Component {
       }
     } catch (error) {
       console.error("Error importing schedule: ", error);
+      const errorMessage = error?.response?.data?.message
+
       this.setState({
-        notificationText: "Failed to import schedule. Please try again.!!",
+        notificationText: errorMessage || "Failed to import schedule. Please try again.!!",
         notificationType: "error",
         showNotification: true
       });

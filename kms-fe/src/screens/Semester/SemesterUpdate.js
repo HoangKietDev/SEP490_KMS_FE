@@ -115,7 +115,7 @@ class SemesterUpdate extends React.Component {
                                     <div className="body">
                                         <form onSubmit={this.handleSubmit}>
                                             <div className="form-group">
-                                                <label>Semester Name</label>
+                                                <label>School Year</label>
                                                 <input
                                                     className={`form-control`}
                                                     value={name} // Bind value from state

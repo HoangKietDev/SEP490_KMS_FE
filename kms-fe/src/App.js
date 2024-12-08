@@ -137,7 +137,7 @@ class App extends React.Component {
       "grade", "create-grade", "grade-detail", "grade-update",
       "semester", "create-semester", "semester-detail", "semester-update",
       "user", "create-user", "locationActivity",
-      "viewallstudent", "createstudent", " viewstudentbyID",
+      "viewallstudent", "createstudent", "viewstudentbyID",
       "viewclass", "viewclass2", "viewclass3", "createclass", "updateclass", "updateclass2", "viewchildrenbyclassid",
       "listmenu", "viewmenu", "viewmenu2", "updatemenu",
       "listschedule", "schedule", "create-schedule", "create-scheduledetail",

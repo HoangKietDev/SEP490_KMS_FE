@@ -159,7 +159,7 @@ class ScheduleCreate extends React.Component {
                     </div>
                     <div className="row">
                       <div className="form-group col-md-12">
-                        <label>Semeter</label>
+                        <label>School Year</label>
                         <input
                           className="form-control"
                           value={this.state.semesterName}
