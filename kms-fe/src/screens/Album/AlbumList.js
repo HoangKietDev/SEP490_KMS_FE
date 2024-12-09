@@ -49,7 +49,7 @@ class Albumlist extends React.Component {
       const albumResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Album/GetAllAlbums`);
       const albumData = albumResponse.data;
 
-      if (roleId === 5) {
+      if (roleId === 5 || roleId === 6) {
         // Gọi API lấy lớp học theo teacherId
         const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${userData?.userId}`);
         const teacherClassId = classResponse.data[0]?.classId;
@@ -87,7 +87,7 @@ class Albumlist extends React.Component {
 
         // Lọc album chỉ với những album có classId nằm trong mảng classIds
         const approvedStudentAlbums = albumData.filter(
-          album => album.status === 2 && classIds.includes(album.classId)
+          album => album.status === 1 && classIds.includes(album.classId)
         );
         console.log(approvedStudentAlbums);
 
@@ -393,7 +393,7 @@ class Albumlist extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Album Manager</h2>
-                    {roleId === 5 ? (
+                    {roleId === 5 ||roleId === 6 ? (
                       <a onClick={() => this.handleCreateAlbum()} class="btn btn-success text-white">Create New Album</a>
                     ) : null}
                   </div>
@@ -533,7 +533,7 @@ class Albumlist extends React.Component {
                                       </select>
                                     </td>
                                   )}
-                                  {(roleId === 5 || roleId === 2) && ( // Nếu roleId = 5,2 chỉ hiển thị trạng thái mà không có select
+                                  {(roleId === 5||roleId ===6 || roleId === 2) && ( // Nếu roleId = 5,2 chỉ hiển thị trạng thái mà không có select
                                     <td>
                                       <span className={`badge ${album?.status === 1 ? 'badge-success' : album?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
                                         {statusOptions.find(option => option.value === album?.status)?.label} {/* Hiển thị trạng thái */}

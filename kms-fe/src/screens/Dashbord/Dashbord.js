@@ -11,7 +11,7 @@ const DashboardAdmin = () => {
 
   // Fetch data from system status API
   useEffect(() => {
-    axios.get("http://localhost:5124/api/system/GetStatus") // Thay URL API của bạn
+    axios.get(`${process.env.REACT_APP_API_URL}/api/system/GetStatus`) // Thay URL API của bạn
       .then(response => {
         setData(response.data);
       })
@@ -22,7 +22,7 @@ const DashboardAdmin = () => {
 
   // Fetch account statistics from API
   useEffect(() => {
-    axios.get(`http://localhost:5124/api/Dashboard/GetAccountmentStatistics`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetAccountmentStatistics`)
       .then(response => {
         
         const allYears = response.data.map(item => item.year); // Lấy danh sách năm từ dữ liệu trả về

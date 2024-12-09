@@ -169,7 +169,7 @@ class AlbumDetail extends React.Component {
         });
 
         // Gửi request upload ảnh
-        await axios.post("http://localhost:5124/api/Images/CreateImages", formData, {
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/Images/CreateImages`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -350,7 +350,7 @@ class AlbumDetail extends React.Component {
                         </div>
                       </div>
                       <div className="form-group col-md-6 d-flex justify-content-end align-items-start">
-                        {roleId === 5 && (
+                        {roleId === 5 ||roleId === 6 && (
                           <>
                             <button
                               onClick={(e) => {

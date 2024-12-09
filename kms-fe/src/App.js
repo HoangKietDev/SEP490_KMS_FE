@@ -472,7 +472,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/create-album`}
                   component={AlbumCreate}
-                  allowedRoles={[3, 5]}
+                  allowedRoles={[3, 5, 6]}
                 />
                 <ProtectedRoute
                   exact

@@ -24,7 +24,7 @@ class ViewAttendByParent extends React.Component {
       total: 0,
       attended: 0,
       late: 0,
-      absence: 0,
+      absent: 0,
     },
   };
 
@@ -447,7 +447,7 @@ class ViewAttendByParent extends React.Component {
                       {attendance.status === "Muộn" && (
                         <span className="badge bg-warning">Late</span>
                       )}
-                      {attendance.status === "Absence" && (
+                      {attendance.status === "Absent" && (
                         <span className="badge bg-danger">Absent</span>
                       )}
                       {attendance.status === "No Data" && (

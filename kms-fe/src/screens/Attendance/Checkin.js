@@ -9,6 +9,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import './Checkin.css'; // Import CSS cho hiệu ứng nút
 import Notification from "../../components/Notification";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import Pagination from "../../components/Common/Pagination";
 
 class Checkin extends React.Component {
   state = {
@@ -43,6 +44,8 @@ class Checkin extends React.Component {
     notificationType: "success", // Type of notification (success or error)
     isModalVisible: false,
     isModalConfirmVisible: false,
+    currentPage: 1,
+    itemsPerPage: 10,
   };
 
 
@@ -111,7 +114,9 @@ class Checkin extends React.Component {
       }
     );
   };
-
+  handlePageChange = (pageNumber) => {
+    this.setState({ currentPage: pageNumber });
+  };
   handleUpload = () => {
     const { selectedFile, imageSrc, activeTab } = this.state;
     if (activeTab === "checkin") {
@@ -268,7 +273,7 @@ class Checkin extends React.Component {
       })
       .finally(() => {
         this.setState({ isUploading: false });
-        
+
       });
   };
 
@@ -1234,7 +1239,41 @@ class Checkin extends React.Component {
       })
       .then((data) => {
         console.log("Attendance updated successfully:", data);
-        // Notification success
+
+        // Cập nhật lại attendanceDetailsCheckin hoặc attendanceDetailsCheckout sau khi cập nhật thành công
+        if (activeTab === "checkin") {
+          const updatedCheckinDetails = attendanceDetailsCheckin.map((detail) =>
+            detail.studentId === studentId
+              ? { ...detail, status: status } // Cập nhật trạng thái cho học sinh hiện tại
+              : detail
+          );
+
+          this.setState({
+            attendanceDetailsCheckin: updatedCheckinDetails,
+            attendanceDataCheckin: {
+              ...attendanceDataCheckin,
+              [studentId]: status, // Cập nhật trạng thái checkin của học sinh trong attendanceDataCheckin
+            },
+          });
+        }
+
+        if (activeTab === "checkout") {
+          const updatedCheckoutDetails = attendanceDetailsCheckout.map((detail) =>
+            detail.studentId === studentId
+              ? { ...detail, status: status } // Cập nhật trạng thái cho học sinh hiện tại
+              : detail
+          );
+
+          this.setState({
+            attendanceDetailsCheckout: updatedCheckoutDetails,
+            attendanceDataCheckout: {
+              ...attendanceDataCheckout,
+              [studentId]: status, // Cập nhật trạng thái checkout của học sinh trong attendanceDataCheckout
+            },
+          });
+        }
+
+        // Thông báo thành công
         this.setState({
           notificationText: `Điểm danh cho học sinh ${studentId} đã được cập nhật thành công!`,
           notificationType: "success",
@@ -1243,7 +1282,7 @@ class Checkin extends React.Component {
       })
       .catch((error) => {
         console.error("Error updating attendance: ", error);
-        // Notification error
+        // Thông báo lỗi
         this.setState({
           notificationText: `Có lỗi xảy ra khi cập nhật điểm danh cho học sinh ${studentId}.`,
           notificationType: "error",
@@ -1251,6 +1290,7 @@ class Checkin extends React.Component {
         });
       });
   };
+
 
 
   // updateAttendance = () => {
@@ -1262,7 +1302,7 @@ class Checkin extends React.Component {
   //     classId,
   //     activeTab,
   //   } = this.state;
-  
+
   //   const attendanceId =
   //     activeTab === "checkin"
   //       ? attendanceDetailsCheckin.length > 0
@@ -1271,7 +1311,7 @@ class Checkin extends React.Component {
   //       : attendanceDetailsCheckout.length > 0
   //       ? attendanceDetailsCheckout[0].attendanceId
   //       : 115;
-  
+
   //   const createdAt = new Date().toISOString();
   //   const attendanceUpdate = [
   //     {
@@ -1286,7 +1326,7 @@ class Checkin extends React.Component {
   //           activeTab === "checkin"
   //             ? attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId))
   //             : attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
-  
+
   //         return {
   //           attendanceDetailId: detail ? detail.attendanceDetailId : 0,
   //           attendanceId: attendanceId,
@@ -1297,10 +1337,10 @@ class Checkin extends React.Component {
   //       }),
   //     },
   //   ];
-  
+
   //   const data = JSON.stringify(attendanceUpdate, null, 2);
   //   console.log(data);
-  
+
   //   fetch(
   //     `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"
   //     }`,
@@ -1320,20 +1360,20 @@ class Checkin extends React.Component {
   //     })
   //     .then((data) => {
   //       console.log("Attendance updated successfully:", data);
-  
+
   //       // Sau khi update, cập nhật lại attendanceDetailsCheckin (nếu đang ở tab checkin)
   //       if (activeTab === "checkin") {
   //         // Lọc lại danh sách attendanceDetailsCheckin để phản ánh trạng thái mới
   //         const updatedCheckinDetails = Object.keys(attendanceDataCheckin).map((studentId) => {
   //           const studentStatus = attendanceDataCheckin[studentId];
   //           const existingDetail = attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId));
-            
+
   //           return {
   //             ...existingDetail,
   //             status: studentStatus, // Cập nhật trạng thái mới
   //           };
   //         });
-  
+
   //         // Cập nhật lại state với danh sách điểm danh đã được cập nhật
   //         this.setState({
   //           attendanceDetailsCheckin: updatedCheckinDetails,
@@ -1342,7 +1382,7 @@ class Checkin extends React.Component {
   //           showNotification: true,
   //         });
   //       }
-  
+
   //       // Gọi API CreateDailyCheckout sau khi cập nhật thành công
   //       fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckout`, {
   //         method: "POST",
@@ -1382,7 +1422,7 @@ class Checkin extends React.Component {
   //       this.fetchAttendanceData();
   //     });
   // };
-  
+
 
 
 
@@ -1396,16 +1436,16 @@ class Checkin extends React.Component {
       classId,
       activeTab,
     } = this.state;
-  
+
     const attendanceId =
       activeTab === "checkin"
         ? attendanceDetailsCheckin.length > 0
           ? attendanceDetailsCheckin[0].attendanceId
           : 115
         : attendanceDetailsCheckout.length > 0
-        ? attendanceDetailsCheckout[0].attendanceId
-        : 115;
-  
+          ? attendanceDetailsCheckout[0].attendanceId
+          : 115;
+
     const createdAt = new Date().toISOString();
     const attendanceUpdate = [
       {
@@ -1420,7 +1460,7 @@ class Checkin extends React.Component {
             activeTab === "checkin"
               ? attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId))
               : attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
-  
+
           return {
             attendanceDetailId: detail ? detail.attendanceDetailId : 0,
             attendanceId: attendanceId,
@@ -1431,10 +1471,10 @@ class Checkin extends React.Component {
         }),
       },
     ];
-  
+
     const data = JSON.stringify(attendanceUpdate, null, 2);
     console.log(data);
-  
+
     fetch(
       `${process.env.REACT_APP_API_URL}/api/Attendance/UpdateAttendanceByType?type=${activeTab === "checkin" ? "Checkin" : "Checkout"
       }`,
@@ -1454,50 +1494,50 @@ class Checkin extends React.Component {
       })
       .then((data) => {
         console.log("Attendance updated successfully:", data);
-  
+
         // Cập nhật lại attendanceDetailsCheckin (nếu đang ở tab checkin)
         if (activeTab === "checkin") {
           const updatedCheckinDetails = Object.keys(attendanceDataCheckin).map((studentId) => {
             const studentStatus = attendanceDataCheckin[studentId];
             const existingDetail = attendanceDetailsCheckin.find((d) => d.studentId === Number(studentId));
-  
+
             return {
               ...existingDetail,
               status: studentStatus, // Cập nhật trạng thái mới
             };
           });
-  
+
           // Cập nhật lại state với danh sách điểm danh checkin đã được cập nhật
           this.setState({
             attendanceDetailsCheckin: updatedCheckinDetails,
           });
         }
-  
+
         // Cập nhật lại attendanceDetailsCheckout (nếu đang ở tab checkout)
         if (activeTab === "checkout") {
           const updatedCheckoutDetails = Object.keys(attendanceDataCheckout).map((studentId) => {
             const studentStatus = attendanceDataCheckout[studentId];
             const existingDetail = attendanceDetailsCheckout.find((d) => d.studentId === Number(studentId));
-  
+
             return {
               ...existingDetail,
               status: studentStatus, // Cập nhật trạng thái mới
             };
           });
-  
+
           // Cập nhật lại state với danh sách điểm danh checkout đã được cập nhật
           this.setState({
             attendanceDetailsCheckout: updatedCheckoutDetails,
           });
         }
-  
+
         // Thông báo thành công
         this.setState({
           notificationText: `Điểm danh đã được cập nhật thành công!`,
           notificationType: "success",
           showNotification: true,
         });
-  
+
         // Gọi API CreateDailyCheckout sau khi cập nhật thành công
         fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyCheckout`, {
           method: "POST",
@@ -1537,7 +1577,7 @@ class Checkin extends React.Component {
         this.fetchAttendanceData();
       });
   };
-  
+
   sendAbsentNotification = (studentId, messageBody) => {
     const body = {
       recipientPhoneNumber: "+84365551401", // Số điện thoại mặc định hoặc cập nhật nếu cần
@@ -1594,11 +1634,27 @@ class Checkin extends React.Component {
       notificationText,
       showNotification,
 
+
     } = this.state;
 
     const isToday = this.formatDate(new Date()) === this.formatDate(selectedDate);
     console.log(attendanceDetailsCheckout, "dsdsds");
-
+    const { currentPage, itemsPerPage } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const dataCheckin = studentDataCheckin
+      .filter(
+        (student) =>
+          this.state.selectedClass === "Tất cả" ||
+          (this.state.studentClassMap[student.studentId] || "").includes(this.state.selectedClass)
+      );
+    const dataCheckout = studentDataCheckout
+      .filter(
+        (student) =>
+          attendanceDataCheckin[student.studentId] === "Attend" // Chỉ hiển thị học sinh có trạng thái "Attend"
+      )
+    const currentItems = dataCheckin.slice(indexOfFirstItem, indexOfLastItem);
+    
     return (
       <div className="container-fluid">
         <PageHeader
@@ -1703,12 +1759,7 @@ class Checkin extends React.Component {
                     </thead>
                     <tbody>
                       {attendanceDetailsCheckin.length > 0 ? (
-                        studentDataCheckin
-                          .filter(
-                            (student) =>
-                              this.state.selectedClass === "Tất cả" ||
-                              (this.state.studentClassMap[student.studentId] || "").includes(this.state.selectedClass)
-                          )
+                        currentItems
                           .map((student, index) => {
                             const parent = this.state.parentData[student.parentId] || {}; // Lấy thông tin phụ huynh từ state
                             const studentAttendanceDetail = attendanceDetailsCheckin.find(
@@ -1809,6 +1860,14 @@ class Checkin extends React.Component {
                     >
                       Confirm Attendance
                     </button>
+                  </div>
+                  <div className="pt-4">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalItems={dataCheckin.length}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={this.handlePageChange}
+                    />
                   </div>
                   <div className={`modal fade ${this.state.isModalConfirmVisible ? 'show' : ''}`} id="confirmModal" tabIndex="-1" aria-labelledby="confirmModalLabel" aria-hidden={!this.state.isModalVisible}>
                     <div className="modal-dialog">

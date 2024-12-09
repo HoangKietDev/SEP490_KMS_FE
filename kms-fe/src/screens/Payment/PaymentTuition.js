@@ -64,7 +64,7 @@ class Paymenttuition extends React.Component {
 
     fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:5124/api/Tuition/GetAllTuitionsCheckGene');
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Tuition/GetAllTuitionsCheckGene`);
 
             const data = response.data;
             this.setState({
@@ -153,7 +153,7 @@ class Paymenttuition extends React.Component {
 
             // Gửi yêu cầu POST để tạo học phí
             const response = await axios.post(
-                "http://localhost:5124/api/Tuition/generate-tuition"
+                `${process.env.REACT_APP_API_URL}/api/Tuition/generate-tuition`
             );
             // Lưu dữ liệu vào trạng thái để hiển thị trong modal
             this.setState({
@@ -218,7 +218,7 @@ class Paymenttuition extends React.Component {
 
                 // Gọi API để xóa dữ liệu đã tạo
                 await axios.delete(
-                    `http://localhost:5124/api/Tuition/deleteTuitionFalse`
+                    `${process.env.REACT_APP_API_URL}/api/Tuition/deleteTuitionFalse`
                 );
 
                 // Đóng modal và hiển thị thông báo xóa thành công
@@ -247,7 +247,7 @@ class Paymenttuition extends React.Component {
             this.setState({ isUploading: true });  // Bật loading khi bắt đầu upload
 
             // Gửi yêu cầu POST để gửi thông báo nhắc nhở học phí
-            const response = await axios.post("http://localhost:5124/api/Tuition/approve-and-send-email");
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Tuition/approve-and-send-email`);
 
             // Xử lý thành công
             this.setState({
@@ -279,7 +279,7 @@ class Paymenttuition extends React.Component {
             this.setState({ isUploadingStaff: true });  // Bật loading khi bắt đầu upload
 
             // Gửi yêu cầu POST để gửi thông báo nhắc nhở học phí
-            const response = await axios.post("http://localhost:5124/api/Tuition/SendTuitionReminder");
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Tuition/SendTuitionReminder`);
 
 
             if (response.data.success) {
