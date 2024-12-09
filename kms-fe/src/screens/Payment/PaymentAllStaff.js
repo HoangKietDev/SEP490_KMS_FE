@@ -23,8 +23,8 @@ class PaymentAllStaff extends React.Component {
         window.scrollTo(0, 0);
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:5124/api/Payment/get-all-payment-histories');
-                const responseClass = await axios.get('http://localhost:5124/api/Class/GetAllClass');
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Payment/get-all-payment-histories`);
+                const responseClass = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`);
 
                 const data = response.data;
                 const dataClass = responseClass.data;

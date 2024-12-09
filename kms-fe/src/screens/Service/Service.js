@@ -139,7 +139,7 @@ class Service extends React.Component {
         };
 
         // Gửi yêu cầu cập nhật cho từng bản ghi
-        const response = await axios.put(`http://localhost:5124/api/Service/UpdateService`, updatedService);
+        const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Service/UpdateService`, updatedService);
 
         // Sau khi mỗi yêu cầu thành công, cập nhật filteredServices
         this.setState(prevState => {

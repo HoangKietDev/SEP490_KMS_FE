@@ -77,7 +77,7 @@ class UserList extends React.Component {
   handleStatusChange = async (userId) => {
     try {
       // API call to update the status of the user
-      const response = await axios.put('http://localhost:5124/api/User/UpdateUserStatus', {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/User/UpdateUserStatus`, {
         userId,
       });
 
@@ -130,7 +130,7 @@ class UserList extends React.Component {
     formData.append('file', file); // Thêm file vào FormData
 
     try {
-      const response = await axios.post(`http://localhost:5124/api/Account/ImportListAccounts`, formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Account/ImportListAccounts`, formData, {
         headers: {
           'accept': '*/*', // Chỉ để header này
         },

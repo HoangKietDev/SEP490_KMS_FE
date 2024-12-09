@@ -169,7 +169,7 @@ class AlbumDetail extends React.Component {
         });
 
         // Gửi request upload ảnh
-        await axios.post("http://localhost:5124/api/Images/CreateImages", formData, {
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/Images/CreateImages`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
