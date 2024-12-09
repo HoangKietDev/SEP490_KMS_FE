@@ -18,7 +18,7 @@ class SemserterDetail extends React.Component {
         const { semesterId } = this.props.match.params; // Get categoryServiceId from URL
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5124/api/Semester/GetAllSemester`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`);
                 const data = response.data;
                 const dataDetail = data?.find(i => i.semesterId == semesterId)
                 console.log(dataDetail);

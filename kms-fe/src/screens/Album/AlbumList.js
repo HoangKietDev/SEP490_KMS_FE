@@ -77,17 +77,32 @@ class Albumlist extends React.Component {
         // Lấy ra danh sách classIds từ filteredChildren
         const classIds = await Promise.all(
           filteredChildren.map(async (child) => {
-            // Gọi API lấy class theo children id
-            const classchildrenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${child.studentId}`);
-            const classChildren = classchildrenResponse?.data;
-            return classChildren[0]?.classId; // Trả về classId từ API
+            try {
+              // Gọi API lấy class theo children id
+              const classchildrenResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${child.studentId}`);
+              const classChildren = classchildrenResponse?.data;
+
+              // Kiểm tra nếu có classChildren và classId
+              if (classChildren && classChildren.length > 0) {
+                return classChildren[0]?.classId; // Trả về classId từ API
+              } else {
+                return null; // Trường hợp không có class, trả về null hoặc giá trị mặc định khác
+              }
+            } catch (error) {
+              console.error("Error fetching class data:", error);
+              return null; // Trường hợp lỗi API, trả về null
+            }
           })
         );
+        // Lọc bỏ các giá trị null
+        const filteredClassIds = classIds.filter(id => id !== null);
+        console.log(filteredClassIds);
+        
 
 
         // Lọc album chỉ với những album có classId nằm trong mảng classIds
         const approvedStudentAlbums = albumData.filter(
-          album => album.status === 1 && classIds.includes(album.classId)
+          album => album.status === 1 && filteredClassIds.includes(album.classId)
         );
         console.log(approvedStudentAlbums);
 
@@ -344,7 +359,7 @@ class Albumlist extends React.Component {
     const { AlbumListData, selectedChildren, classListData, teacherListData, selectedClassId, filteredAlbumListData, filteredChildrenData, showModal, reason } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
     console.log(filteredChildrenData);
-    
+
     const statusOptions = [
       { value: 1, label: "Aprroved", className: "badge-success" },
       { value: 2, label: "Reject", className: "badge-danger" },
@@ -393,7 +408,7 @@ class Albumlist extends React.Component {
                 <div className="card planned_task">
                   <div className="header d-flex justify-content-between">
                     <h2>Album Manager</h2>
-                    {roleId === 5 ||roleId === 6 ? (
+                    {roleId === 5 || roleId === 6 ? (
                       <a onClick={() => this.handleCreateAlbum()} class="btn btn-success text-white">Create New Album</a>
                     ) : null}
                   </div>
@@ -533,7 +548,7 @@ class Albumlist extends React.Component {
                                       </select>
                                     </td>
                                   )}
-                                  {(roleId === 5||roleId ===6 || roleId === 2) && ( // Nếu roleId = 5,2 chỉ hiển thị trạng thái mà không có select
+                                  {(roleId === 5 || roleId === 6 || roleId === 2) && ( // Nếu roleId = 5,2 chỉ hiển thị trạng thái mà không có select
                                     <td>
                                       <span className={`badge ${album?.status === 1 ? 'badge-success' : album?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
                                         {statusOptions.find(option => option.value === album?.status)?.label} {/* Hiển thị trạng thái */}

@@ -466,7 +466,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/album`}
                   component={AlbumList}
-                  allowedRoles={[2, 3, 4, 5,6]}
+                  allowedRoles={[2, 3, 4, 5, 6]}
                 />
                 <ProtectedRoute
                   exact
@@ -478,7 +478,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/album-detail/:albumId`}
                   component={AlbumDetail}
-                  allowedRoles={[2, 3, 4, 5,6]}
+                  allowedRoles={[2, 3, 4, 5, 6]}
                 />
                 <ProtectedRoute
                   exact

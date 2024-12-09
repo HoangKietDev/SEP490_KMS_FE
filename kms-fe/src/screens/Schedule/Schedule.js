@@ -421,7 +421,7 @@ class Schedule extends React.Component {
 
     try {
       // API call sử dụng fetch
-      const response = await fetch(`http://localhost:5124/api/Class/SendMailToParentsByClassId/${classId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Class/SendMailToParentsByClassId/${classId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

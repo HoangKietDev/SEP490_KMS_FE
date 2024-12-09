@@ -114,38 +114,6 @@ class Paymenttuition extends React.Component {
 
     };
 
-    // generateTuition = async () => {
-    //     try {
-    //         // Hiển thị trạng thái đang tải (nếu cần)
-    //         this.setState({ isProcessing: true });
-
-    //         // Gửi yêu cầu POST để tạo học phí
-    //         const response = await axios.post(
-    //             "http://localhost:5124/api/Tuition/generate-tuition"
-    //         );
-
-    //         // Xử lý thành công
-    //         this.setState({
-    //             notificationText: "Tuition generated successfully!",
-    //             notificationType: "success",
-    //             showNotification: true,
-    //         });
-
-    //         await this.fetchData() // Gọi lại hàm fetch dữ liệu
-    //     } catch (error) {
-    //         // Xử lý lỗi
-    //         const errorMessage = error.response?.data?.message || "Failed to generate tuition!";
-    //         this.setState({
-    //             notificationText: errorMessage,
-    //             notificationType: "error",
-    //             showNotification: true,
-    //         });
-    //     } finally {
-    //         // Tắt trạng thái đang tải
-    //         this.setState({ isProcessing: false });
-    //     }
-    // };
-
     generateTuition = async () => {
         try {
             // Hiển thị trạng thái đang tải (nếu cần)
