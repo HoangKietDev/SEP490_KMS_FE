@@ -541,11 +541,7 @@ class Schedule extends React.Component {
                       </div>
 
                       {/* Button để gửi email */}
-<<<<<<< HEAD
-                      {roleId ===  6? (
-=======
                       {roleId === 5 || roleId === 6 ? (
->>>>>>> parent of 42a2bce (Revert "fix code  semester and checkboxcx")
                         <>
                           <button
                             className="btn btn-primary ml-3"
