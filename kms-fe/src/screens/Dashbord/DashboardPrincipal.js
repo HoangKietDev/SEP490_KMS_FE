@@ -20,7 +20,7 @@ class DashboardPrincipal extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    this.loadClassSummaryData();
+    // this.loadClassSummaryData();
     this.loadEnrollmentData();
     this.loadTeacherData();
     this.loadFinancialData(this.state.selectedYear); // Load dữ liệu doanh thu
@@ -188,82 +188,82 @@ class DashboardPrincipal extends React.Component {
     });
   };
 
-  loadClassSummaryData = async () => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetDashboardSummary`);
-      const data = response.data;
+  // loadClassSummaryData = async () => {
+  //   try {
+  //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetDashboardSummary`);
+  //     const data = response.data;
 
-      const classNames = data.classSummaries.map((cls) => cls.classId);
-      const maleData = data.classSummaries.map((cls) => cls.male);
-      const femaleData = data.classSummaries.map((cls) => cls.female);
+  //     const classNames = data.classSummaries.map((cls) => cls.classId);
+  //     const maleData = data.classSummaries.map((cls) => cls.male);
+  //     const femaleData = data.classSummaries.map((cls) => cls.female);
 
-      this.setState({
-        classSummaryData: {
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true,
-          },
-          xAxis: {
-            type: 'category',
-            data: classNames,
-            axisLabel: {
-              rotate: 45,
-              interval: 0,
-            },
-          },
-          yAxis: {
-            type: 'value',
-          },
-          series: [
-            {
-              name: 'Male',
-              type: 'bar',
-              data: maleData,
-              itemStyle: { color: '#4CAF50' },
-            },
-            {
-              name: 'Female',
-              type: 'bar',
-              data: femaleData,
-              itemStyle: { color: '#FF5722' },
-            },
-          ],
-          legend: {
-            data: ['Male', 'Female'],
-          },
-          tooltip: {
-            trigger: 'axis',
-          },
-          dataZoom: [
-            {
-              type: 'slider',
-              show: true,
-              xAxisIndex: 0,
-              start: 0,
-              end: Math.min(100, (800 / classNames.length) * 100),
-            },
-          ],
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching class summary data: ", error);
-    }
-  };
+  //     this.setState({
+  //       classSummaryData: {
+  //         grid: {
+  //           left: '3%',
+  //           right: '4%',
+  //           bottom: '3%',
+  //           containLabel: true,
+  //         },
+  //         xAxis: {
+  //           type: 'category',
+  //           data: classNames,
+  //           axisLabel: {
+  //             rotate: 45,
+  //             interval: 0,
+  //           },
+  //         },
+  //         yAxis: {
+  //           type: 'value',
+  //         },
+  //         series: [
+  //           {
+  //             name: 'Male',
+  //             type: 'bar',
+  //             data: maleData,
+  //             itemStyle: { color: '#4CAF50' },
+  //           },
+  //           {
+  //             name: 'Female',
+  //             type: 'bar',
+  //             data: femaleData,
+  //             itemStyle: { color: '#FF5722' },
+  //           },
+  //         ],
+  //         legend: {
+  //           data: ['Male', 'Female'],
+  //         },
+  //         tooltip: {
+  //           trigger: 'axis',
+  //         },
+  //         dataZoom: [
+  //           {
+  //             type: 'slider',
+  //             show: true,
+  //             xAxisIndex: 0,
+  //             start: 0,
+  //             end: Math.min(100, (800 / classNames.length) * 100),
+  //           },
+  //         ],
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching class summary data: ", error);
+  //   }
+  // };
 
   loadEnrollmentData = async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetEnrollmentStatistics`);
       const data = response.data;
-
+  
       const months = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
       const newStudents = Array.from({ length: 12 }, (_, i) => {
         const monthIndex = i + 1;
         const enrollment = data.monthlyEnrollments.find((e) => e.month === monthIndex);
-        return enrollment ? enrollment.newStudents : 0;
+        return enrollment ? enrollment.newStudents : 0; // Nếu không có dữ liệu cho tháng, trả về 0
       });
-
+  
       this.setState({
         enrollmentData: {
           xAxis: {
@@ -293,6 +293,7 @@ class DashboardPrincipal extends React.Component {
       console.error("Error fetching enrollment data: ", error);
     }
   };
+  
 
   loadTeacherData = async () => {
     try {

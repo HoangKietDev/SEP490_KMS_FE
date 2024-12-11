@@ -4,14 +4,17 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Button } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 
-class ChooseService extends React.Component {
+class ViewCheckService extends React.Component {
     state = {
         studentId: "",
-        childerParent: [],
-        services: [],
-        selectedServices: [],
+        childrenParent: [],
+        date: "",
+        checkServices: [],
+        loading: false,
+        error: null,
+        allServices: [], // To store all services for name resolution
     };
 
     componentDidMount() {
@@ -22,6 +25,7 @@ class ChooseService extends React.Component {
 
         if (!parentID) {
             console.error("Parent ID not found");
+            this.setState({ error: "Parent ID not found." });
             return;
         }
 
@@ -29,92 +33,124 @@ class ChooseService extends React.Component {
         axios
             .get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentID}`)
             .then((response) => {
-                this.setState({ childerParent: response.data });
+                this.setState({ childrenParent: response.data });
             })
             .catch((error) => {
                 console.error("Error fetching student data:", error);
+                this.setState({ error: "Failed to fetch student data." });
             });
 
-        // Fetch services data
+        // Fetch all services for name resolution
         axios
             .get(`${process.env.REACT_APP_API_URL}/api/Service/GetAllServices`)
             .then((response) => {
-                this.setState({ services: response.data });
+                this.setState({ allServices: response.data });
             })
             .catch((error) => {
-                console.error("Error fetching service data:", error);
+                console.error("Error fetching all services:", error);
+                // Optional: You can set an error state if needed
             });
     }
 
     handleStudentChange = (e) => {
         const studentId = e.target.value;
-        this.setState({
-            studentId,
-            selectedServices: [] // Đặt lại danh sách dịch vụ được chọn khi thay đổi học sinh
-        });
-    };
+        const today = this.formatDate(new Date());
 
-    toggleServiceSelection = (serviceId) => {
-        this.setState((prevState) => {
-            const selectedServices = [...prevState.selectedServices];
-            const serviceIndex = selectedServices.indexOf(serviceId);
-
-            if (serviceIndex === -1) {
-                selectedServices.push(serviceId);
-            } else {
-                selectedServices.splice(serviceIndex, 1);
+        this.setState(
+            {
+                studentId,
+                date: today, // Automatically set to today's date
+                checkServices: [], // Reset check services when changing student
+                error: null, // Reset any existing errors
+            },
+            () => {
+                if (studentId && this.state.date) {
+                    this.fetchCheckServices(studentId, this.state.date);
+                }
             }
-
-            return { selectedServices };
-        });
+        );
     };
 
-    handleConfirm = () => {
-        const { studentId, selectedServices } = this.state;
+    handleDateChange = (e) => {
+        const date = e.target.value;
+        const { studentId } = this.state;
 
-        if (!studentId) {
-            alert("Please select a student.");
-            return;
-        }
+        this.setState(
+            {
+                date,
+                checkServices: [], // Reset check services when changing date
+                error: null, // Reset any existing errors
+            },
+            () => {
+                if (studentId && date) {
+                    this.fetchCheckServices(studentId, date);
+                }
+            }
+        );
+    };
 
-        if (selectedServices.length === 0) {
-            alert("Please select at least one service.");
-            return;
-        }
+    // Utility function to format date to YYYY-MM-DD
+    formatDate = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = (`0${d.getMonth() + 1}`).slice(-2);
+        const day = (`0${d.getDate()}`).slice(-2);
+        return `${year}-${month}-${day}`;
+    };
 
-        // Gửi yêu cầu cho từng service đã chọn
-        selectedServices.forEach((serviceId) => {
-            const body = {
-                chidrenServicesId: 0, // Giữ mặc định là 0
-                time: new Date().toISOString().split('T')[0], // Lấy ngày hiện tại
-                status: 0, // Trạng thái mặc định là 0
-                serviceId: serviceId,
-                studentId: studentId,
-            };
+    fetchCheckServices = (studentId, date) => {
+        this.setState({ loading: true, error: null });
 
-            axios
-                .post(`${process.env.REACT_APP_API_URL}/api/Service/AddChildService`, body)
-                .then((response) => {
-                    console.log("Service added successfully:", response.data);
-                    alert(`Service with ID ${serviceId} added successfully for student ${studentId}.`);
-                })
-                .catch((error) => {
-                    console.error("Error adding service:", error);
-                    alert(`Failed to add service with ID ${serviceId} for student ${studentId}.`);
-                });
-        });
+        axios
+            .get(
+                `${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`
+            )
+            .then((response) => {
+                this.setState({ checkServices: response.data, loading: false });
+            })
+            .catch((error) => {
+                console.error("Error fetching check services:", error);
+                this.setState({ error: "Failed to fetch check services.", loading: false });
+            });
+    };
+
+    // Function to get service name by ID
+    getServiceName = (serviceId) => {
+        const { allServices } = this.state;
+        const service = allServices.find((s) => s.serviceId === serviceId);
+        return service ? service.serviceName : "Unknown Service";
+    };
+
+    // Helper to get student name
+    getStudentName = (id) => {
+        const student = this.state.childrenParent.find(
+            (child) => child.studentId === parseInt(id)
+        );
+        return student ? student.fullName : "";
     };
 
     render() {
-        const { childerParent, studentId, services, selectedServices } = this.state;
+        const {
+            childrenParent,
+            studentId,
+            date,
+            checkServices,
+            loading,
+            error,
+        } = this.state;
 
         return (
-            <div className="container mt-4">
+            <div
+                style={{ flex: 1 }}
+                onClick={() => {
+                    document.body.classList.remove("offcanvas-active");
+                }}
+            >
                 <PageHeader
-                    HeaderText="Service Selection"
+                    HeaderText="View Check Services"
                     Breadcrumb={[
                         { name: "Service Management", navigate: "" },
-                        { name: "Choose Services", navigate: "" },
+                        { name: "View Check Services", navigate: "" },
                     ]}
                 />
 
@@ -140,66 +176,123 @@ class ChooseService extends React.Component {
                                     <option value="" disabled>
                                         Choose Student
                                     </option>
-                                    {childerParent.map((option) => (
+                                    {childrenParent.map((option) => (
                                         <option key={option.studentId} value={option.studentId}>
                                             {option.fullName}
                                         </option>
                                     ))}
                                 </select>
                             </div>
-                            <small className="text-muted">Select a child to assign services.</small>
+                            <small className="text-muted">Select a child to view services.</small>
+                        </div>
+                    </div>
+
+                    <div className="col-md-6">
+                        <div className="form-group">
+                            <label className="form-label fw-bold">
+                                <i className="bi bi-calendar-event me-2"></i> Select Date
+                            </label>
+                            <div className="input-group mb-3">
+                                <span className="input-group-text bg-light">
+                                    <i className="bi bi-calendar-date"></i>
+                                </span>
+                                <input
+                                    type="date"
+                                    className="form-control border-primary"
+                                    value={date}
+                                    onChange={this.handleDateChange}
+                                    style={{
+                                        borderRadius: "0.5rem",
+                                        boxShadow: "0 0 5px rgba(0, 123, 255, 0.25)",
+                                    }}
+                                // The 'type="date"' ensures the format is YYYY-MM-DD
+                                />
+                            </div>
+                            <small className="text-muted">Select a date to view services.</small>
                         </div>
                     </div>
                 </div>
 
-                <div className="row mt-4">
-                    <div className="col-12">
-                        <h5>Select Services for the Selected Child</h5>
-                        <table className="table table-bordered table-hover">
-                            <thead className="table-light">
-                                <tr>
-                                    <th>Service Name</th>
-                                    <th>Price</th>
-                                    <th>Select</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {services.map((service) => (
-                                    <tr key={service.serviceId}>
-                                        <td>{service.serviceName}</td>
-                                        <td>{service.servicePrice} VND</td>
-                                        <td>
-                                            <div class="fancy-checkbox d-inline-block">
-                                                <label>
-                                                    <input class="select-all" type="checkbox" name="checkbox"
-                                                        checked={selectedServices.includes(service.serviceId)}
-                                                        onChange={() => this.toggleServiceSelection(service.serviceId)} />
-                                                    <span>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                {loading && (
+                    <div className="row mb-4">
+                        <div className="col-12 text-center">
+                            <Spinner animation="border" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </Spinner>
+                        </div>
                     </div>
-                </div>
+                )}
 
-                <div className="row mt-4">
-                    <div className="col-12 text-end">
-                        <Button variant="primary" onClick={this.handleConfirm}>
-                            Confirm Selection
-                        </Button>
+                {error && (
+                    <div className="row mb-4">
+                        <div className="col-12">
+                            <div className="alert alert-danger" role="alert">
+                                {error}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {checkServices.length > 0 ? (
+                    <div className="row mt-4">
+                        <div className="col-12">
+                            <h5>
+                                Check Services for {this.getStudentName(studentId)} on {date}
+                            </h5>
+                            <table className="table table-bordered table-hover">
+                                <thead className="table-light">
+                                    <tr>
+                                        <th>Service ID</th>
+                                        <th>Service Name</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Payment Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {checkServices.map((checkService) => (
+                                        <tr key={checkService.checkServiceId}>
+                                            <td>{checkService.serviceId}</td>
+                                            <td>{this.getServiceName(checkService.serviceId)}</td>
+                                            <td>{checkService.date}</td>
+                                            <td>
+                                                {checkService.status === 0
+                                                    ? "Pending"
+                                                    : checkService.status === 1
+                                                        ? "Completed"
+                                                        : "Unknown"}
+                                            </td>
+                                            <td>
+                                                {checkService.payService === 0
+                                                    ? "Unpaid"
+                                                    : checkService.payService === 1
+                                                        ? "Paid"
+                                                        : "Unknown"}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    // Show a message when no check services are found
+                    (!loading && studentId && date) && (
+                        <div className="row mt-4">
+                            <div className="col-12">
+                                <div className="alert alert-info" role="alert">
+                                    No check services found for the selected student and date.
+                                </div>
+                            </div>
+                        </div>
+                    )
+                )}
             </div>
         );
     }
 }
-
 const mapStateToProps = ({ ioTReducer }) => ({
     isSecuritySystem: ioTReducer.isSecuritySystem,
 });
 
-export default connect(mapStateToProps)(withRouter(ChooseService));
+export default connect(mapStateToProps)(withRouter(ViewCheckService));

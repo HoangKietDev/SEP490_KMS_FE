@@ -580,7 +580,21 @@ class NavbarMenu extends React.Component {
                         </ul>
                       </li>
                     ) : null}
-
+                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
+                      <li id="scheduleContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/listschedule");
+                            this.activeMenutabContainer("scheduleContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Daily Schedule</span>
+                        </a>
+                      </li>
+                    ) : null}
                     {/* Classes */}
                     {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
                       <li id="ClassContainer" className="">
@@ -589,45 +603,19 @@ class NavbarMenu extends React.Component {
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
+                            if (roleId === 3 || roleId === 4){
+                              this.props.history.push("/viewclass");
+                            } else if (roleId === 2 ){
+                              this.props.history.push("/viewclass2");
+                            } else if (roleId === 5 || roleId === 6 ) {
+                              this.props.history.push("/viewclass3");
+                            }
                             this.activeMenutabContainer("ClassContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>CLass Management</span>
+                          <i className="icon-grid"></i> <span>Class Management</span>
                         </a>
-                        <ul className="collapse">
-                          {roleId === 3 || roleId === 4 ? (
-                            <li
-                              className={activeKey === "viewclass" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/viewclass">View Class</Link>
-                            </li>
-                          ) : null}
-                          {roleId === 2 ? (
-                            <li
-                              className={activeKey === "viewclass2" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/viewclass2">View Class</Link>
-                            </li>
-                          ) : null}
-                          {roleId === 5 || roleId === 6 ? (
-                            <li
-                              className={activeKey === "viewclass2" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/viewclass3">View Class</Link>
-                            </li>
-                          ) : null}
-                          {roleId === 3 ? (
-                            <li
-                              className={activeKey === "createclass" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/createclass">Create Class</Link>
-                            </li>
-                          ) : null}
-                        </ul>
+                        
                       </li>
                     ) : null}
 
@@ -720,46 +708,26 @@ class NavbarMenu extends React.Component {
 
 
                     {/* Menu */}
-                    {roleId === 2 || roleId === 3 || roleId === 5 || roleId === 4 || roleId === 6  ? (
+                    {roleId === 2 || roleId === 3 || roleId === 5 || roleId === 4 || roleId === 6 ? (
                       <li id="MenuContainer" className="">
                         <a
                           href="#!"
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
+                            if(roleId === 2 || roleId === 5 || roleId === 6){
+                              this.props.history.push("/viewmenu2");
+                            } else if (roleId === 3){
+                              this.props.history.push("/viewmenu");
+                            } else if (roleId === 4){
+                              this.props.history.push("/listmenu");
+                            }
                             this.activeMenutabContainer("MenuContainer");
                           }}
                         >
                           <i className="icon-grid"></i> <span>Menu Management</span>
                         </a>
-                        <ul className="collapse">
-                          {roleId === 2 || roleId === 5 || roleId === 6 ? (
-                            <li
-                              className={activeKey === "viewmenu2" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/viewmenu2">View Menu</Link>
-                            </li>
-                          ) : null}
-
-                          {roleId === 3 ? (
-                            <li
-                              className={activeKey === "viewmenu" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/viewmenu">View Menu</Link>
-                            </li>
-                          ) : null}
-
-                          {roleId === 4 ? (
-                            <li
-                              className={activeKey === "listmenu" ? "active" : ""}
-                              onClick={() => { }}
-                            >
-                              <Link to="/listmenu">List Menu</Link>
-                            </li>
-                          ) : null}
-                        </ul>
+                      
                       </li>
                     ) : null}
 
@@ -807,26 +775,13 @@ class NavbarMenu extends React.Component {
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
+                            this.props.history.push("/viewallstudent");
+
                             this.activeMenutabContainer("ChildrenContainer");
                           }}
                         >
                           <i className="icon-grid"></i> <span>Student Management</span>
                         </a>
-                        <ul className="collapse">
-
-                          <li
-                            className={activeKey === "viewallstudent" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/viewallstudent">View All Student</Link>
-                          </li>
-                          <li
-                            className={activeKey === "classviewclass" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/createstudent">Create Student</Link>
-                          </li>
-                        </ul>
                       </li>
                     ) : null}
 
@@ -943,7 +898,7 @@ class NavbarMenu extends React.Component {
 
 
                     {/* Check in/out */}
-                    {roleId === 5 || roleId === 6  ? (
+                    {roleId === 5 || roleId === 6 ? (
                       <li id="attendanceContainer" className="">
                         <a
                           href="#!"
@@ -983,20 +938,13 @@ class NavbarMenu extends React.Component {
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
+                            this.props.history.push("/viewattendparent");
+
                             this.activeMenutabContainer("AttendParentContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Attend</span>
+                          <i className="icon-grid"></i> <span>Attend Management</span>
                         </a>
-                        <ul className="collapse">
-                          <li
-                            className={activeKey === "checkattendparent" ? "active" : ""}
-                            onClick={() => { }}
-                          >
-                            <Link to="/viewattendparent">Attend</Link>
-                          </li>
-
-                        </ul>
                       </li>
                     ) : null}
 

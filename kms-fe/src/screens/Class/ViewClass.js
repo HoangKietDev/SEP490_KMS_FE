@@ -119,7 +119,9 @@ class ViewClass extends React.Component {
   handleGradeFilterChange = (event) => {
     this.setState({ gradeFilter: event.target.value });
   };
-
+  handleCreateClass = (event) => {
+    this.props.history.push(`/createclass`);
+  }
   handleNameFilterChange = (event) => {
     this.setState({ nameFilter: event.target.value });
   };
@@ -459,6 +461,14 @@ class ViewClass extends React.Component {
                           onChange={this.handleFileChange} // Tự động gọi API khi chọn file
                           accept=".xls,.xlsx" // Chỉ chấp nhận file Excel
                         />
+                      </div>
+                      <div className="form-group mr-3">
+                        <a
+                          onClick={this.handleCreateClass}
+                          className="btn btn-success text-white d-flex align-items-center"
+                        >
+                          <i className="icon-plus mr-2"></i>Create Class
+                        </a>
                       </div>
                     </div>
                     <div className="table-responsive">

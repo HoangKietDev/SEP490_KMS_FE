@@ -1,314 +1,3 @@
-// import React from "react";
-// import { withRouter } from "react-router-dom";
-// import Calendar from "react-calendar";
-// import "react-calendar/dist/Calendar.css";
-// import "./ViewMenu.css";
-// import PageHeader from "../../components/PageHeader";
-// import axios from "axios";
-// import Notification from "../../components/Notification";
-// class ViewMenuByTeacherAndParent extends React.Component {
-//     state = {
-//         selectedWeek: {
-//             startOfWeek: new Date(),
-//             endOfWeek: new Date(),
-//         },
-//         menuData: {
-//             "0-3": [],
-//             "3-6": [],
-//         },
-//         daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-//         showCalendar: false,
-//         selectedFile: null,
-//         showNotification: false, // State to control notification visibility
-//         notificationText: "", // Text for the notification
-//         notificationType: "success" // Type of notification (success or error)
-//     };
-
-//     componentDidMount() {
-//         const { startOfWeek, endOfWeek } = this.getWeekRange(new Date());
-//         this.setState({ selectedWeek: { startOfWeek, endOfWeek } }, () => {
-//             this.fetchMenuData(startOfWeek, endOfWeek); // Fetch data from the API
-//         });
-//     }
-
-//     getWeekRange = (date) => {
-//         const startOfWeek = new Date(date);
-//         const day = startOfWeek.getDay();
-//         const diff = day === 0 ? 6 : day - 1;
-//         startOfWeek.setDate(startOfWeek.getDate() - diff);
-
-//         const endOfWeek = new Date(startOfWeek);
-//         endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-//         return { startOfWeek, endOfWeek };
-//     };
-
-//     handleWeekSelect = (date) => {
-//         const { startOfWeek, endOfWeek } = this.getWeekRange(date);
-//         this.setState({ selectedWeek: { startOfWeek, endOfWeek }, showCalendar: false }, () => {
-//             this.fetchMenuData(startOfWeek, endOfWeek);
-//         });
-//     };
-
-//     formatDate = (date) => {
-//         const year = date.getFullYear();
-//         const month = String(date.getMonth() + 1).padStart(2, "0");
-//         const day = String(date.getDate()).padStart(2, "0");
-//         return `${year}-${month}-${day}`;
-//     };
-
-// fetchMenuData = async (startOfWeek, endOfWeek) => {
-//     const startDate = this.formatDate(startOfWeek);
-//     const endDate = this.formatDate(endOfWeek);
-
-//     try {
-//         const response1 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=1`);
-//         const response2 = await fetch(`${process.env.REACT_APP_API_URL}/api/Menu/GetMenuByDate?startDate=${startDate}&endDate=${endDate}&gradeId=2`);
-
-//         const menuData1 = await response1.json();
-//         const menuData2 = await response2.json();
-
-//         // Check the status of menuData1
-//         if (menuData1.length > 0 && menuData1[0].status === 1) {
-//             this.setState((prevState) => ({
-//                 menuData: {
-//                     ...prevState.menuData,
-//                     "0-3": menuData1[0]?.menuDetails || [],
-//                 },
-//             }));
-//         } else {
-//             console.log("Menu for age group 0-3 is not available due to status 0.");
-//             this.setState((prevState) => ({
-//                 menuData: {
-//                     ...prevState.menuData,
-//                     "0-3": [],
-//                 },
-//             }));
-//         }
-
-//         // Check the status of menuData2
-//         if (menuData2.length > 0 && menuData2[0].status === 1) {
-//             this.setState((prevState) => ({
-//                 menuData: {
-//                     ...prevState.menuData,
-//                     "3-6": menuData2[0]?.menuDetails || [],
-//                 },
-//             }));
-//         } else {
-//             console.log("Menu for age group 3-6 is not available due to status 0.");
-//             this.setState((prevState) => ({
-//                 menuData: {
-//                     ...prevState.menuData,
-//                     "3-6": [],
-//                 },
-//             }));
-//         }
-//     } catch (error) {
-//         console.error("Error fetching menu data:", error);
-//     }
-// };
-
-//     handleFileChange = (event) => {
-//         this.setState({ selectedFile: event.target.files[0] });
-//     };
-
-//     handleUpload = async () => {
-//         const { selectedFile } = this.state;
-//         if (!selectedFile) {
-//             // alert("Please select a file first!");
-//             this.setState({
-//                 notificationText: "Please select a file first!",
-//                 notificationType: "error",
-//                 showNotification: true
-//               }); 
-//             return;
-//         }
-
-//         const formData = new FormData();
-//         formData.append("file", selectedFile);
-
-//         try {
-//             const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Menu/ImportMenuExcel`, formData, {
-//                 headers: {
-//                     "Content-Type": "multipart/form-data",
-//                 },
-//             });
-//             // alert("File uploaded successfully!");
-//             this.setState({
-//                 notificationText: "File uploaded successfully!",
-//                 notificationType: "success",
-//                 showNotification: true
-//               }); 
-//             this.fetchMenuData(new Date());
-//         } catch (error) {
-//             console.error("Error uploading file:", error);
-//             // alert("Error uploading file.");
-//             this.setState({
-//                 notificationText: "Error uploading file.",
-//                 notificationType: "error",
-//                 showNotification: true
-//               }); 
-//         }
-//     };
-
-//     toggleCalendar = () => {
-//         this.setState((prevState) => ({ showCalendar: !prevState.showCalendar }));
-//     };
-
-//     renderTable = (ageGroup) => {
-//         const { menuData, daysOfWeek, } = this.state;
-
-//         return (
-//             <div className="table-wrapper">
-//                 <table className="custom-table table table-bordered">
-//                     <thead className="thead-light">
-//                         <tr>
-//                             <th></th>
-//                             {daysOfWeek.map((day, index) => (
-//                                 <th key={index}>{day}</th>
-//                             ))}
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         <tr>
-//                             <td className="sticky-col"><strong>Breakfast</strong></td>
-//                             {daysOfWeek.map((day, index) => {
-//                                 const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BS" && this.mapDayToEnglish(menu.dayOfWeek) === day);
-//                                 return (
-//                                     <td key={index}>
-//                                         {menuItems.length > 0 ? (
-//                                             <ul>
-//                                                 {menuItems.map((menuItem, itemIndex) => (
-//                                                     <li key={`${menuItem.foodName}-${day}-${itemIndex}`}>{menuItem.foodName}</li>
-//                                                 ))}
-//                                             </ul>
-//                                         ) : (
-//                                             "No data available"
-//                                         )}
-//                                     </td>
-//                                 );
-//                             })}
-//                         </tr>
-//                         <tr>
-//                             <td className="sticky-col"><strong>Lunch</strong></td>
-//                             {daysOfWeek.map((day, index) => {
-//                                 const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BT" && this.mapDayToEnglish(menu.dayOfWeek) === day);
-//                                 return (
-//                                     <td key={index}>
-//                                         {menuItems.length > 0 ? (
-//                                             <ul>
-//                                                 {menuItems.map((menuItem, itemIndex) => (
-//                                                     <li key={`${menuItem.foodName}-${day}-${itemIndex}`}>{menuItem.foodName}</li>
-//                                                 ))}
-//                                             </ul>
-//                                         ) : (
-//                                             "No data available"
-//                                         )}
-//                                     </td>
-//                                 );
-//                             })}
-//                         </tr>
-//                         <tr>
-//                             <td className="sticky-col"><strong>Snack</strong></td>
-//                             {daysOfWeek.map((day, index) => {
-//                                 const menuItems = menuData[ageGroup].filter(menu => menu.mealCode === "BC" && this.mapDayToEnglish(menu.dayOfWeek) === day);
-//                                 return (
-//                                     <td key={index}>
-//                                         {menuItems.length > 0 ? (
-//                                             <ul>
-//                                                 {menuItems.map((menuItem, itemIndex) => (
-//                                                     <li key={`${menuItem.foodName}-${day}-${itemIndex}`}>{menuItem.foodName}</li>
-//                                                 ))}
-//                                             </ul>
-//                                         ) : (
-//                                             "No data available"
-//                                         )}
-//                                     </td>
-//                                 );
-//                             })}
-//                         </tr>
-//                     </tbody>
-//                 </table>
-//             </div>
-//         );
-//     };
-
-//     mapDayToEnglish = (day) => {
-//         const dayMap = {
-//             Monday: "Monday",
-//             Tuesday: "Tuesday",
-//             Wednesday: "Wednesday",
-//             Thursday: "Thursday",
-//             Friday: "Friday",
-//             Saturday: "Saturday",
-//             Sunday: "Sunday",
-//         };
-//         return dayMap[day] || day;
-//     };
-
-//     render() {
-//         const { selectedWeek, showCalendar, showNotification, // State to control notification visibility
-//             notificationText, // Text for the notification
-//             notificationType } = this.state;
-
-//         return (
-//             <div className="container-fluid">
-//                 <PageHeader
-//                     HeaderText="Food Management"
-//                     Breadcrumb={[
-//                         { name: "Food Management", navigate: "" },
-//                         { name: "View Menu", navigate: "" },
-//                     ]}
-//                 />
-//                 {showNotification && (
-//                     <Notification
-//                         type={notificationType}
-//                         position="top-right"
-//                         dialogText={notificationText}
-//                         show={showNotification}
-//                         onClose={() => this.setState({ showNotification: false })}
-//                     />
-//                 )}
-//                 <div className="row">
-//                     <div className="col-lg-12 col-md-12">
-//                         <h2>Menu</h2>
-//                         <div className="row align-items-center justify-content-between mb-3">
-//                             <div className="week-selector col-lg-3" onClick={this.toggleCalendar}>
-//                                 Selected week: {selectedWeek.startOfWeek.toLocaleDateString("en-US")} - {selectedWeek.endOfWeek.toLocaleDateString("en-US")}
-//                             </div>
-//                         </div>
-//                         {showCalendar && (
-//                             <div className="calendar-dropdown">
-//                                 <Calendar
-//                                     onChange={this.handleWeekSelect}
-//                                     value={selectedWeek.startOfWeek}
-//                                     locale="en-US"
-//                                     showWeekNumbers={true}
-//                                 />
-//                             </div>
-//                         )}
-
-//                         <h4 className="menu-title">All: 0-3</h4>
-//                         <div className="table-container">{this.renderTable("0-3")}</div>
-
-//                         <h4 className="menu-title">All: 3-6</h4>
-//                         <div className="table-container">{this.renderTable("3-6")}</div>
-//                     </div>
-//                 </div>
-//             </div>
-//         );
-//     }
-// }
-
-// export default withRouter(ViewMenuByTeacherAndParent);
-// src/components/Menu/ViewMenuByTeacherAndParent.js
-
-// src/components/Menu/ViewMenuByTeacherAndParent.js
-
-// src/components/Menu/ViewMenuByTeacherAndParent.js
-
-// src/components/Menu/ViewMenuByTeacherAndParent.js
-
 import React from "react";
 import { withRouter } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -714,47 +403,41 @@ class ViewMenuByTeacherAndParent extends React.Component {
     //         </div>
     //     );
     // };
-    renderTable = (grade) => {
-        const { menus, daysOfWeek, selectedStatus } = this.state;
-        const gradeId = grade.gradeId;
-        const gradeName = grade.name;
+    renderMenus = () => {
+        const { menus, daysOfWeek } = this.state;
 
-        // Tìm menu cho grade này
-        const menuForGrade = menus.find(m => m.gradeIDs.includes(gradeId));
-        const menuDetails = menuForGrade ? menuForGrade.menuDetails : [];
+        if (menus.length === 0) {
+            return <p>No menus available for the selected week.</p>;
+        }
 
-        // Kiểm tra xem có bất kỳ menuDetail nào có dữ liệu không
-        const hasData = menuDetails.some(menu => menu.foodName && menu.foodName.trim() !== '');
-
-        return (
-            <div key={gradeId} className="table-container">
-                <h4 className="menu-title">Grade: {gradeName}</h4>
-                <div className="table-wrapper">
+        return menus.map((menu) => (
+            <div key={menu.menuID} className="menu-container mb-4">
+                <h4 className="menu-title">Grades: {menu.gradeIDs.join(", ")}</h4>
+                <div className="menu-details">
                     <table className="custom-table table table-bordered">
                         <thead className="thead-light">
                             <tr>
-                                <th></th>
+                                <th>Meal</th>
                                 {daysOfWeek.map((day, index) => (
                                     <th key={index} className="text-center">{day}</th>
                                 ))}
-                                <th className="text-center">Status</th> {/* Thêm cột Status */}
                             </tr>
                         </thead>
                         <tbody>
                             {/* Breakfast */}
                             <tr>
-                                <td className="sticky-col"><strong>Breakfast</strong></td>
+                                <td><strong>Breakfast</strong></td>
                                 {daysOfWeek.map((day, index) => {
-                                    const menuItems = menuDetails.filter(menu =>
-                                        menu.mealCode === "BS" &&
-                                        this.mapDayToEnglish(menu.dayOfWeek) === day
+                                    const breakfastItems = menu.menuDetails.filter(detail =>
+                                        detail.mealCode === "BS" &&
+                                        this.mapDayToEnglish(detail.dayOfWeek) === day
                                     );
                                     return (
                                         <td key={index}>
-                                            {menuItems.length > 0 ? (
+                                            {breakfastItems.length > 0 ? (
                                                 <ul>
-                                                    {menuItems.map((menuItem, itemIndex) => (
-                                                        <li key={`${menuItem.foodName}-${day}-${itemIndex}`}>{menuItem.foodName}</li>
+                                                    {breakfastItems.map((item, idx) => (
+                                                        <li key={idx}>{item.foodName}</li>
                                                     ))}
                                                 </ul>
                                             ) : (
@@ -763,25 +446,22 @@ class ViewMenuByTeacherAndParent extends React.Component {
                                         </td>
                                     );
                                 })}
-                                <td rowSpan={3} className="text-center align-middle ">
-                                    {menuForGrade && this.getStatusText(menuForGrade.status)}
-                                </td>
                             </tr>
 
                             {/* Lunch */}
                             <tr>
-                                <td className="sticky-col"><strong>Lunch</strong></td>
+                                <td><strong>Lunch</strong></td>
                                 {daysOfWeek.map((day, index) => {
-                                    const menuItems = menuDetails.filter(menu =>
-                                        menu.mealCode === "BT" &&
-                                        this.mapDayToEnglish(menu.dayOfWeek) === day
+                                    const lunchItems = menu.menuDetails.filter(detail =>
+                                        detail.mealCode === "BT" &&
+                                        this.mapDayToEnglish(detail.dayOfWeek) === day
                                     );
                                     return (
                                         <td key={index}>
-                                            {menuItems.length > 0 ? (
+                                            {lunchItems.length > 0 ? (
                                                 <ul>
-                                                    {menuItems.map((menuItem, itemIndex) => (
-                                                        <li key={`${menuItem.foodName}-${day}-${itemIndex}`}>{menuItem.foodName}</li>
+                                                    {lunchItems.map((item, idx) => (
+                                                        <li key={idx}>{item.foodName}</li>
                                                     ))}
                                                 </ul>
                                             ) : (
@@ -794,18 +474,18 @@ class ViewMenuByTeacherAndParent extends React.Component {
 
                             {/* Snack */}
                             <tr>
-                                <td className="sticky-col"><strong>Snack</strong></td>
+                                <td><strong>Snack</strong></td>
                                 {daysOfWeek.map((day, index) => {
-                                    const menuItems = menuDetails.filter(menu =>
-                                        menu.mealCode === "BC" &&
-                                        this.mapDayToEnglish(menu.dayOfWeek) === day
+                                    const snackItems = menu.menuDetails.filter(detail =>
+                                        detail.mealCode === "BC" &&
+                                        this.mapDayToEnglish(detail.dayOfWeek) === day
                                     );
                                     return (
                                         <td key={index}>
-                                            {menuItems.length > 0 ? (
+                                            {snackItems.length > 0 ? (
                                                 <ul>
-                                                    {menuItems.map((menuItem, itemIndex) => (
-                                                        <li key={`${menuItem.foodName}-${day}-${itemIndex}`}>{menuItem.foodName}</li>
+                                                    {snackItems.map((item, idx) => (
+                                                        <li key={idx}>{item.foodName}</li>
                                                     ))}
                                                 </ul>
                                             ) : (
@@ -815,27 +495,11 @@ class ViewMenuByTeacherAndParent extends React.Component {
                                     );
                                 })}
                             </tr>
-
-                            {/* Status selection - Chỉ hiển thị nếu có dữ liệu và status là 1 hoặc 2 */}
-                            {/* {hasData && menuForGrade && (menuForGrade.status === 1 || menuForGrade.status === 2) && (
-                                <tr>
-                                    <td colSpan={daysOfWeek.length + 2} className="text-center">
-                                        <div className="form-group text-right">
-                                            <button className="btn btn-danger" onClick={() => this.handleReject(gradeId)}>
-                                                Reject
-                                            </button>
-                                            <button className="btn btn-success ml-2" onClick={() => this.handleApprove(gradeId)}>
-                                                Approve
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )} */}
                         </tbody>
                     </table>
                 </div>
             </div>
-        );
+        ));
     };
     // Hàm chuyển đổi tên ngày nếu cần thiết
     mapDayToEnglish = (day) => {
@@ -907,11 +571,7 @@ class ViewMenuByTeacherAndParent extends React.Component {
                         )}
 
                         {/* Hiển thị tất cả các bảng cho các grade có dữ liệu */}
-                        {grades && grades.length > 0 ? (
-                            grades.map((grade) => this.renderTable(grade))
-                        ) : (
-                            <p>No grades available</p>
-                        )}
+                        {this.renderMenus()}
                     </div>
                 </div>
             </div>

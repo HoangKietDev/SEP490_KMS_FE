@@ -57,6 +57,10 @@ class ViewAllChildren extends React.Component {
     link.click();                             // Kích hoạt sự kiện click để tải file
   };
   // Xử lý khi người dùng chọn file
+
+  handleCreateStudent = (e) => {
+    this.props.history.push(`/createstudent`);
+  }
   handleFileChange = (e) => {
     this.setState({ file: e.target.files[0], error: "" });
   };
@@ -170,7 +174,14 @@ class ViewAllChildren extends React.Component {
             >
               <i className="icon-arrow-down mr-2"></i>Dowload Template
             </a>
-
+            <div className="btn btn-success text-white mr-4 ">
+              <a
+                onClick={this.handleCreateStudent}
+                className="btn btn-success text-white d-flex align-items-center"
+              >
+                <i className="icon-plus mr-2"></i>Create Student
+              </a>
+            </div>
             <form onSubmit={this.handleSubmit}>
               <div className="form-group">
                 <label>Choose Excel File</label>

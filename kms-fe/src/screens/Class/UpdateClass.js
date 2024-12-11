@@ -16,7 +16,7 @@ class UpdateClass extends React.Component {
     gradeId: 0,
     grades: [],
     semesters: [],
-    number:0,
+    number: 0,
     status: 0,
     submeet: false,
     showNotification: false,
@@ -24,7 +24,11 @@ class UpdateClass extends React.Component {
     notificationType: "success",
     teachers: [],  // Danh sách giáo viên đã có lớp
     availableTeachers: [],  // Danh sách giáo viên chưa có lớp
+
     selectedNewTeacherId: 0,  // Giáo viên mới sẽ được chọn
+    homeroomTeacherId: 0,
+    homeroomTeacherName: "",
+    availableHomeroomTeachers: [],
   };
 
   componentDidMount() {
@@ -37,6 +41,17 @@ class UpdateClass extends React.Component {
       .then((response) => {
         const data = response.data;
 
+        // Lấy danh sách giáo viên trong lớp
+        const teachers = data.teachers || [];
+        console.log(teachers, "test teacher");
+
+        // Lọc ra danh sách giáo viên có thể làm giáo viên chủ nhiệm (homeroomTeacher: 0)
+        const availableHomeroomTeachers = teachers;
+
+        // Kiểm tra nếu có giáo viên chủ nhiệm trong lớp
+        const homeroomTeacher = teachers.find(teacher => teacher.homeroomTeacher === 1);
+
+        // Cập nhật state với dữ liệu đã lấy
         this.setState({
           className: data.className,
           isActive: data.isActive === 1,
@@ -45,7 +60,10 @@ class UpdateClass extends React.Component {
           semesterId: data.semesterId,
           gradeId: data.gradeId,
           status: data.status,
-          teachers: data.teachers || [],  // Đảm bảo teachers luôn là một mảng
+          teachers: teachers,
+          availableHomeroomTeachers: availableHomeroomTeachers, // Cập nhật danh sách giáo viên chủ nhiệm có thể chọn
+          homeroomTeacherId: homeroomTeacher ? homeroomTeacher : null, // Nếu có giáo viên chủ nhiệm, gán vào state
+          homeroomTeacherName: homeroomTeacher ? homeroomTeacher.teacherName : '', // Nếu có giáo viên chủ nhiệm, gán tên giáo viên vào state
         });
       })
       .catch((error) => {
@@ -70,16 +88,16 @@ class UpdateClass extends React.Component {
       .catch((error) => {
         console.error("Error fetching semester data:", error);
       });
-
-    // Gọi API lấy danh sách giáo viên chưa có lớp
     axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetTeachersWithoutClass`)
       .then((response) => {
         this.setState({ availableTeachers: response.data });
       })
       .catch((error) => {
-        console.error("Error fetching available teachers:", error);
+        console.error("Error fetching semester data:", error);
       });
+
   }
+
 
   // Hàm xử lý thay đổi giáo viên trong bảng
   handleTeacherChange = (teacherId, newTeacherId) => {
@@ -189,47 +207,105 @@ class UpdateClass extends React.Component {
     });
   };
 
+  // handleSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   const { classId, className, number, isActive, schoolId, semesterId, gradeId, status, teachers } = this.state;
+
+  //   // Kiểm tra nếu có bất kỳ thay đổi nào về giáo viên
+  //   const teachersToUpdate = teachers.filter(
+  //     (teacher) => teacher.selectedNewTeacherId && teacher.selectedNewTeacherId !== teacher.teacherId
+  //   );
+
+  //   // Cập nhật thông tin lớp học nếu có thay đổi
+  //   const updatedClassData = {
+  //     classId,
+  //     className,
+  //     number: number,
+  //     isActive: 1,
+  //     schoolId,
+  //     semesterId,
+  //     gradeId,
+  //     status
+  //   };
+
+  //   // Gọi API UpdateClass để cập nhật thông tin lớp học
+  //   const updateClass = async () => {
+  //     try {
+  //       const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Class/UpdateClass`, updatedClassData);
+
+  //       if (response.status === 200) {
+  //         console.log("Class updated successfully");
+  //         this.setState({
+  //           notificationText: "Class has been updated successfully!",
+  //           notificationType: "success",
+  //           showNotification: true
+  //         });
+
+  //         // Nếu có thay đổi về giáo viên, cập nhật giáo viên
+  //         if (teachersToUpdate.length > 0) {
+  //           this.updateTeachersInClass(classId, teachersToUpdate);
+  //         }
+
+  //         // Chuyển hướng sau khi cập nhật lớp và giáo viên
+  //         setTimeout(() => {
+  //           this.props.history.push('/viewclass');
+  //         }, 1000);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error updating class: ", error);
+  //       this.setState({
+  //         notificationText: "Failed to update class. Please try again.",
+  //         notificationType: "error",
+  //         showNotification: true
+  //       });
+  //     }
+  //   };
+
+  //   // Tiến hành cập nhật lớp học
+  //   updateClass();
+  // };
   handleSubmit = (e) => {
     e.preventDefault();
 
-    const { classId, className, number, isActive, schoolId, semesterId, gradeId, status, teachers } = this.state;
-
-    // Kiểm tra nếu có bất kỳ thay đổi nào về giáo viên
+    const { classId, className, number, isActive, schoolId, semesterId, gradeId, status, homeroomTeacherId, teachers } = this.state;
     const teachersToUpdate = teachers.filter(
       (teacher) => teacher.selectedNewTeacherId && teacher.selectedNewTeacherId !== teacher.teacherId
     );
-
-    // Cập nhật thông tin lớp học nếu có thay đổi
+    // Cập nhật thông tin lớp học
     const updatedClassData = {
       classId,
       className,
-      number: number,
+      number,
       isActive: 1,
       schoolId,
       semesterId,
       gradeId,
-      status
+      status,
     };
-        
-    // Gọi API UpdateClass để cập nhật thông tin lớp học
+    console.log(homeroomTeacherId, "tesst ID");
+    if (homeroomTeacherId != null) {
+      this.updateHomeroomTeacher(classId, homeroomTeacherId.teacherId);
+    }
     const updateClass = async () => {
       try {
         const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Class/UpdateClass`, updatedClassData);
 
         if (response.status === 200) {
           console.log("Class updated successfully");
+
+          // Nếu có giáo viên chủ nhiệm mới, gọi API để cập nhật giáo viên chủ nhiệm
+
+          if (teachersToUpdate.length > 0) {
+            this.updateTeachersInClass(classId, teachersToUpdate);
+          }
           this.setState({
             notificationText: "Class has been updated successfully!",
             notificationType: "success",
             showNotification: true
           });
 
-          // Nếu có thay đổi về giáo viên, cập nhật giáo viên
-          if (teachersToUpdate.length > 0) {
-            this.updateTeachersInClass(classId, teachersToUpdate);
-          }
-
-          // Chuyển hướng sau khi cập nhật lớp và giáo viên
+          // Chuyển hướng sau khi cập nhật
           setTimeout(() => {
             this.props.history.push('/viewclass');
           }, 1000);
@@ -244,8 +320,17 @@ class UpdateClass extends React.Component {
       }
     };
 
-    // Tiến hành cập nhật lớp học
     updateClass();
+  };
+
+  // Hàm cập nhật giáo viên chủ nhiệm
+  updateHomeroomTeacher = async (classId, teacherId) => {
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Class/UpdateHomeroomTeacher/${classId}/${teacherId}`);
+      console.log("Homeroom teacher updated successfully.");
+    } catch (error) {
+      console.error("Error updating homeroom teacher:", error);
+    }
   };
 
   handleAddNewTeacher = (index, e) => {
@@ -306,7 +391,7 @@ class UpdateClass extends React.Component {
   };
 
   render() {
-    const { className,number, status, expireDate, submeet, grades, semesters, gradeId, semesterId, teachers, showNotification, notificationText, notificationType, availableTeachers } = this.state;
+    const { className, number, status, expireDate, submeet, grades, semesters, gradeId, semesterId, teachers, showNotification, notificationText, notificationType, availableTeachers } = this.state;
 
     return (
       <div style={{ flex: 1 }} onClick={() => document.body.classList.remove("offcanvas-active")}>
@@ -388,12 +473,38 @@ class UpdateClass extends React.Component {
                       </div>
                     </div>
 
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Homeroom Teacher</label>
+                        <select
+                          className="form-control"
+                          value={this.state.homeroomTeacherId ? this.state.homeroomTeacherId.teacherId : ""}
+                          onChange={(e) => {
+                            const selectedTeacherId = parseInt(e.target.value, 10);
+                            const selectedTeacher = this.state.availableHomeroomTeachers.find(
+                              (teacher) => teacher.teacherId === selectedTeacherId
+                            );
+                            this.setState({ homeroomTeacherId: selectedTeacher || null });
+                          }}
+                        >
+                          {this.state.availableHomeroomTeachers.map((teacher) => (
+                            <option key={teacher.teacherId} value={teacher.teacherId}>
+                              {teacher.teacherName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+
+
                     <div className="col-md-12">
                       <h5>Assigned Teachers</h5>
                       <table className="table table-bordered">
                         <thead>
                           <tr>
                             <th>Teacher Name</th>
+                            <th>Homeroom Teacher</th>
                             <th>Change Teacher</th>
                             <th>Action</th>
                           </tr>
@@ -402,6 +513,9 @@ class UpdateClass extends React.Component {
                           {teachers.map((teacher, index) => (
                             <tr key={index}>
                               <td>{teacher.teacherName}</td>
+                              <td>
+                                {teacher.homeroomTeacher === 1 ? <i className="fa fa-check"></i> : ''}
+                              </td>
                               <td>
                                 <select
                                   className="form-control"
