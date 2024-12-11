@@ -33,7 +33,7 @@ class RequestList extends React.Component {
 
         let filteredData = [];
 
-        if (roleId === 5 || roleId === 6) {
+        if (roleId === 5) {
           filteredData = reversedData;
         } else if (roleId === 3) {
           filteredData = reversedData.filter(
@@ -182,7 +182,6 @@ class RequestList extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
-                    {currentItems && currentItems.length !== 0 ? 
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
                         <thead className="">
@@ -270,7 +269,7 @@ class RequestList extends React.Component {
                                   </button>
                                   {(roleId === 3 &&
                                     request.statusRequest === 2) ||
-                                    (roleId === 5 || roleId === 6 &&
+                                    (roleId === 5 &&
                                       request.statusRequest === 1) ||
                                     (roleId === 2 &&
                                       request.statusRequest === 1) ? (
@@ -290,8 +289,6 @@ class RequestList extends React.Component {
                         </tbody>
                       </table>
                     </div>
-                    : <p className="">No data available</p>
-                    }
                     <div className="pt-4">
                       <Pagination
                         currentPage={currentPage}

@@ -55,7 +55,7 @@ class Login extends React.Component {
 
       // Gọi API để lấy thông tin chi tiết người dùng (bao gồm avatar)
       const profileResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${userId}`);
-
+  
       if (profileResponse.status !== 200) {
         throw new Error("Failed to fetch user profile");
       }
@@ -136,7 +136,7 @@ class Login extends React.Component {
         )}
         <div className="page-loader-wrapper" style={{ display: this.state.isLoad ? 'block' : 'none' }}>
           <div className="loader">
-            <div className="m-t-30"><img src={require('../assets/images/logo-white.png')} width="200px" height="auto" alt="EduNest" /></div>
+            <div className="m-t-30"><img src={require('../assets/images/logo.png')} width="48" height="48" alt="EduNest" /></div>
             <p>Please wait...</p>
           </div>
         </div>

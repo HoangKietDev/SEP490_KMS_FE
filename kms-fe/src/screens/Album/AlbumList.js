@@ -6,6 +6,7 @@ import axios from "axios";
 import { modifyAlpha } from "echarts-gl";
 import { getCookie } from "../../components/Auth/Auth";
 import Pagination from "../../components/Common/Pagination";
+import { Modal, Button } from "react-bootstrap"; // Thêm modal từ react-bootstrap
 import Notification from "../../components/Notification";
 
 class Albumlist extends React.Component {
@@ -27,6 +28,7 @@ class Albumlist extends React.Component {
     selectedStatusId: "", // Duy trì giá trị chọn trạng thái
     searchTerm: "", // Thêm trường tìm kiếm
 
+    showModal: false, // State để kiểm soát hiển thị modal
     reason: "", // State để lưu lý do
     currentAlbumId: null, // Lưu albumId của album đang cập nhật
 
@@ -95,7 +97,7 @@ class Albumlist extends React.Component {
         // Lọc bỏ các giá trị null
         const filteredClassIds = classIds.filter(id => id !== null);
         console.log(filteredClassIds);
-
+        
 
 
         // Lọc album chỉ với những album có classId nằm trong mảng classIds
@@ -256,8 +258,27 @@ class Albumlist extends React.Component {
     });
   };
 
+  // Phương thức để mở modal
+  openModal = (albumId) => {
+    this.setState({ showModal: true, currentAlbumId: albumId });
+  };
+
+  // Phương thức để đóng modal
+  closeModal = () => {
+    this.setState({ showModal: false, reason: "" });
+  };
+
   handleStatusChange = async (albumId, newStatus) => {
     let reason = "";
+
+    // Kiểm tra newStatus
+    if (newStatus === 1) {
+      reason = ""; // Nếu status là 1, lý do là rỗng
+    } else if (newStatus === 2) {
+      this.openModal(albumId); // Nếu status là 2, mở modal
+      return; // Trả về để không thực hiện tiếp
+    }
+
     try {
       console.log(albumId, newStatus, reason);
 
@@ -291,6 +312,40 @@ class Albumlist extends React.Component {
     }
   };
 
+  // Phương thức để xử lý khi nhấn cập nhật trong modal
+  handleUpdateStatus = async () => {
+    const { currentAlbumId, reason } = this.state;
+    try {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Album/UpdateStatusAlbum`, {
+        albumId: currentAlbumId,
+        status: 2, // Cập nhật status là 2
+        reason: reason // Lý do được nhập trong modal
+      });
+      console.log("Status updated successfully:", response.data);
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
+
+      // Cập nhật trạng thái trong state
+      this.setState((prevState) => {
+        const updatedAlbumListData = prevState.filteredAlbumListData.map((item) =>
+          item.albumId === currentAlbumId ? { ...item, status: 2 } : item
+        );
+        return { filteredAlbumListData: updatedAlbumListData };
+      });
+
+      this.closeModal(); // Đóng modal sau khi cập nhật
+    } catch (error) {
+      console.error("Error updating status:", error);
+      this.setState({
+        notificationText: "Error updating status!",
+        notificationType: "success",
+        showNotification: true
+      });
+    }
+  };
 
   formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -301,13 +356,14 @@ class Albumlist extends React.Component {
   };
 
   render() {
-    const { AlbumListData, selectedChildren, classListData, teacherListData, selectedClassId, filteredAlbumListData, filteredChildrenData } = this.state;
+    const { AlbumListData, selectedChildren, classListData, teacherListData, selectedClassId, filteredAlbumListData, filteredChildrenData, showModal, reason } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
     console.log(filteredChildrenData);
 
     const statusOptions = [
-      { value: 1, label: "Public", className: "badge-success" },
-      { value: 0, label: "Draff", className: "badge-default" },
+      { value: 1, label: "Aprroved", className: "badge-success" },
+      { value: 2, label: "Reject", className: "badge-danger" },
+      { value: 0, label: "Pending", className: "badge-default" },
     ];
 
     // phan trang
@@ -437,79 +493,75 @@ class Albumlist extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
-                    {currentItems && currentItems.length !== 0 ?
+                    <div className="table-responsive">
+                      <table className="table m-b-0 table-hover">
+                        <thead className="">
+                          <tr className="theme-color">
+                            <th>#</th>
+                            <th>AlbumTitle</th>
+                            <th>TimePost</th>
+                            <th>Class</th>
+                            <th>Desciption</th>
+                            <th>CreateBy</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentItems?.map((album, index) => {
+                            // Đặt fullname ra ngoài return của map
+                            return (
+                              <React.Fragment key={"teacher" + index}>
+                                <tr>
+                                  <td>{index + 1}</td>
+                                  <td
+                                    onClick={() => this.handleDetailAlbum(album?.albumId)}
+                                    style={{ cursor: 'pointer' }}
+                                    className="theme-color">{album?.albumName}</td>
 
-                      <div className="table-responsive">
-                        <table className="table m-b-0 table-hover">
-                          <thead className="">
-                            <tr className="theme-color">
-                              <th>#</th>
-                              <th>AlbumTitle</th>
-                              <th>TimePost</th>
-                              <th>Class</th>
-                              <th>Desciption</th>
-                              <th>CreateBy</th>
-                              <th>Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {currentItems?.map((album, index) => {
-                              // Đặt fullname ra ngoài return của map
-                              return (
-                                <React.Fragment key={"teacher" + index}>
-                                  <tr>
-                                    <td>{index + 1}</td>
-                                    <td
-                                      onClick={() => this.handleDetailAlbum(album?.albumId)}
-                                      style={{ cursor: 'pointer' }}
-                                      className="theme-color">{album?.albumName}</td>
+                                  <td>{album?.timePost ? this.formatDate(album.timePost) : "N/A"}</td>
+                                  <td>
+                                    {classListData && classListData?.find(item => item.classId === album?.classId)?.className}
+                                    {album?.className}
+                                  </td>
+                                  <td className="text-truncate" style={{ maxWidth: "150px" }}>{album?.description}</td>
 
-                                    <td>{album?.timePost ? this.formatDate(album.timePost) : "N/A"}</td>
+                                  <td>
+                                    {(() => {
+                                      const teacher = teacherListData?.find(item => item.teacherId === album?.createBy);
+                                      return teacher?.name || teacher?.firstname;
+                                    })()}
+                                  </td>
+
+
+                                  {(roleId === 3) && ( // Chỉ cho phép roleId = 3 thay đổi trạng thái
                                     <td>
-                                      {classListData && classListData?.find(item => item.classId === album?.classId)?.className}
-                                      {album?.className}
+                                      <select
+                                        value={album?.status}
+                                        onChange={(e) => this.handleStatusChange(album.albumId, parseInt(e.target.value))}
+                                        className={`form-control ${album?.status === 1 ? 'badge-success' : album?.status === 2 ? 'badge-danger' : 'badge-default'}`}
+                                      >
+                                        {statusOptions.map(option => (
+                                          <option key={option.value} value={option.value} className={option.className}>
+                                            {option.label}
+                                          </option>
+                                        ))}
+                                      </select>
                                     </td>
-                                    <td className="text-truncate" style={{ maxWidth: "150px" }}>{album?.description}</td>
-
+                                  )}
+                                  {(roleId === 5 || roleId === 6 || roleId === 2) && ( // Nếu roleId = 5,2 chỉ hiển thị trạng thái mà không có select
                                     <td>
-                                      {(() => {
-                                        const teacher = teacherListData?.find(item => item.teacherId === album?.createBy);
-                                        return teacher?.name || teacher?.firstname;
-                                      })()}
+                                      <span className={`badge ${album?.status === 1 ? 'badge-success' : album?.status === 2 ? 'badge-danger' : 'badge-default'}`}>
+                                        {statusOptions.find(option => option.value === album?.status)?.label} {/* Hiển thị trạng thái */}
+                                      </span>
                                     </td>
-
-
-                                    {(roleId === 5 || roleId === 6) && ( // Chỉ cho phép role teacher thay đổi trạng thái
-                                      <td>
-                                        <select
-                                          value={album?.status}
-                                          onChange={(e) => this.handleStatusChange(album.albumId, parseInt(e.target.value))}
-                                          className={`form-control ${album?.status === 1 ? 'badge-success' : 'badge-default'}`}
-                                        >
-                                          {statusOptions.map(option => (
-                                            <option key={option.value} value={option.value} className={option.className}>
-                                              {option.label}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </td>
-                                    )}
-                                    {(roleId === 3 || roleId === 2) && ( // Nếu roleId = 3 ,2 chỉ hiển thị trạng thái mà không có select
-                                      <td>
-                                        <span className={`badge ${album?.status === 1 ? 'badge-success' : 'badge-default'}`}>
-                                          {statusOptions.find(option => option.value === album?.status)?.label} {/* Hiển thị trạng thái */}
-                                        </span>
-                                      </td>
-                                    )}
-                                  </tr>
-                                </React.Fragment>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                      : <p className="">No data available</p>
-                    }
+                                  )}
+                                </tr>
+                              </React.Fragment>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                     <div className="pt-4">
                       <Pagination
                         currentPage={currentPage}
@@ -524,6 +576,28 @@ class Albumlist extends React.Component {
             </div>
           </div>
         </div>
+        <Modal show={showModal} onHide={this.closeModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Reason for Rejection</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <textarea
+              rows="4"
+              className="form-control"
+              value={reason}
+              onChange={(e) => this.setState({ reason: e.target.value })}
+              placeholder="Please enter the reason for rejection"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.closeModal}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={this.handleUpdateStatus}>
+              Update Status
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }

@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import defaultImage from "../../assets/images/profile-default.jpg"
 
 class TeacherDetail extends React.Component {
   state = {
@@ -20,7 +19,7 @@ class TeacherDetail extends React.Component {
       code: "TC101",
       education: "string",
       experience: "string",
-      avatar1: "",
+      avatar: "https://greekherald.com.au/wp-content/uploads/2020/07/default-avatar.png",
     }
   }
 
@@ -34,7 +33,8 @@ class TeacherDetail extends React.Component {
       try {
         const TeacherResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetTeacherById/${teacherId}`);
         const Teacherdata = TeacherResponse.data;
-        this.setState({ TeacherData: Teacherdata });
+        this.setState({ Teacherdata });
+        console.log(Teacherdata);
       } catch (error) {
         console.error('Error fetching teacher details:', error);
       }
@@ -45,7 +45,7 @@ class TeacherDetail extends React.Component {
   render() {
     // Destructure fields from TeacherData object
     const { firstName, lastName, address, phone, mail, gender, status, dob, code, education, experience, avatar } = this.state.TeacherData;
-    
+
     return (
       <div
         style={{ flex: 1 }}
@@ -150,7 +150,7 @@ class TeacherDetail extends React.Component {
                             <input
                               className="form-control"
                               type="date"
-                              value={dob?.split('T')[0]}
+                              value={dob.split('T')[0]}
                               name="dob"
                               readOnly
                             />
@@ -171,7 +171,7 @@ class TeacherDetail extends React.Component {
 
                         <div className="form-group col-md-6 d-grid">
                           <label>Avatar</label>
-                          <img src={avatar || defaultImage} className="img-thumbnail" style={{ marginLeft: "12%", height: '200px', width: '200px' }} alt="Teacher Avatar"></img>
+                          <img src={avatar} className="img-thumbnail" style={{ maxWidth: "50%", marginLeft: "12%" }} alt="Teacher Avatar"></img>
                         </div>
                       </div>
 

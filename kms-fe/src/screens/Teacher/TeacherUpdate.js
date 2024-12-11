@@ -243,7 +243,7 @@ class UpdateChildren extends React.Component {
 
                         <div className="form-group col-md-6 d-grid">
                           <label>Avatar</label>
-                          <img src={avatar} className="img-thumbnail" style={{ marginLeft: "12%", height: '200px', width: '200px' }} alt="Teacher Avatar"></img>
+                          <img src={avatar} className="img-thumbnail" style={{ maxWidth: "50%", marginLeft: "12%" }} alt="Teacher Avatar"></img>
                         </div>
                       </div>
 
