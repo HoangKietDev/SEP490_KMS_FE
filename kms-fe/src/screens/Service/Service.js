@@ -179,7 +179,7 @@ class Service extends React.Component {
         : [...prevState.selectedServices, serviceId];
       return { selectedServices };
     });
-    
+
   };
 
   handleSelectAll = () => {
@@ -280,113 +280,117 @@ class Service extends React.Component {
               </div>
               <div className="col-lg-12">
                 <div className="card">
-                  <div className="header table-responsive">
-                    <div>
-                      <strong>Total Records: </strong>{totalRecords}
-                    </div>
-                    <table className="table m-b-0 table-hover">
-                      <thead className="">
-                        <tr className='theme-color'>
-                          <th>
-                            {roleId === 4 &&
-                              <button
-                                className="btn btn-primary"
-                                onClick={this.handleSelectAll}
-                              >
-                                Select All
-                              </button>
+                  {currentItems && currentItems.length !== 0 ?
+                    <div className="header table-responsive">
+                      <div>
+                        <strong>Total Records: </strong>{totalRecords}
+                      </div>
+                      <table className="table m-b-0 table-hover">
+                        <thead className="">
+                          <tr className='theme-color'>
+                            <th>
+                              {roleId === 4 &&
+                                <button
+                                  className="btn btn-primary"
+                                  onClick={this.handleSelectAll}
+                                >
+                                  Select All
+                                </button>
 
-                            } {/* Thêm cột checkbox nếu là roleId 4 */}
-                          </th>
-                          <th>ServiceName</th>
-                          <th>Price</th>
-                          <th>Description</th>
-                          <th>CategoryName</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* Hiển thị số lượng bản ghi ở đầu bảng */}
-                        {currentItems.map((service, i) => {
-                          return (
-                            <tr key={"dihf" + i}>
+                              } {/* Thêm cột checkbox nếu là roleId 4 */}
+                            </th>
+                            <th>ServiceName</th>
+                            <th>Price</th>
+                            <th>Description</th>
+                            <th>CategoryName</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* Hiển thị số lượng bản ghi ở đầu bảng */}
+                          {currentItems.map((service, i) => {
+                            return (
+                              <tr key={"dihf" + i}>
 
-                              <td>
-                                <div className="fancy-checkbox d-inline-block">
-                                  <label>
-                                    {roleId === 4 && (
-                                      <input
-                                        type="checkbox"
-                                        onChange={() => this.handleSelectService(service.serviceId)}
-                                        checked={selectedServices.includes(service.serviceId)}  // Đảm bảo rằng checkbox được đánh dấu nếu serviceId nằm trong selectedServices
-                                      />
-                                    )}
-                                    <span>{i + 1}</span>
-                                  </label>
-                                </div>
-                              </td>
-
-                              <td>
-                                {service?.serviceName}
-                              </td>
-                              <td>
-                                {service?.servicePrice?.toLocaleString('vi-VN')}
-                              </td>
-                              <td>
-                                {service?.serviceDes}
-                              </td>
-                              <td>
-                                {service?.categoryService?.categoryName || "1"}
-                              </td>
-
-                              {(roleId === 4) && (
                                 <td>
-                                  <select
-                                    value={service?.status}
-                                    onChange={(e) => this.handleStatusChange(service, parseInt(e.target.value))}
-                                    className={`form-control ${service?.status === 1 ? 'badge-success' : 'badge-default'}`}
-                                  >
-                                    {statusOptions.map(option => (
-                                      <option key={option.value} value={option.value} className={option.className}>
-                                        {option.label}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  <div className="fancy-checkbox d-inline-block">
+                                    <label>
+                                      {roleId === 4 && (
+                                        <input
+                                          type="checkbox"
+                                          onChange={() => this.handleSelectService(service.serviceId)}
+                                          checked={selectedServices.includes(service.serviceId)}  // Đảm bảo rằng checkbox được đánh dấu nếu serviceId nằm trong selectedServices
+                                        />
+                                      )}
+                                      <span>{i + 1}</span>
+                                    </label>
+                                  </div>
                                 </td>
-                              )}
-                              {(roleId === 3) && (
-                                <td>
-                                  <span className={`badge ${service?.status === 1 ? 'badge-success' : 'badge-default'}`}>
-                                    {statusOptions.find(option => option.value === service?.status)?.label} {/* Hiển thị trạng thái */}
-                                  </span>
-                                </td>
-                              )}
-                              <td className="project-actions">
-                                <a onClick={() => this.handleViewDetail(service.serviceId)} className="btn btn-outline-secondary mr-1">
-                                  <i className="icon-eye"></i>
-                                </a>
-                                <a onClick={() => this.handleEdit(service.serviceId)} className="btn btn-outline-secondary">
-                                  <i className="icon-pencil"></i>
-                                </a>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
 
-                  {roleId === 4 && (
-                    <div className="form-group text-right">
-                      <button className="btn btn-danger" onClick={() => this.handleBulkStatusUpdate(0)}>
-                        Reject
-                      </button>
-                      <button className="btn btn-success ml-2" onClick={() => this.handleBulkStatusUpdate(1)}>
-                        Approve
-                      </button>
+                                <td>
+                                  {service?.serviceName}
+                                </td>
+                                <td>
+                                  {service?.servicePrice?.toLocaleString('vi-VN')}
+                                </td>
+                                <td>
+                                  {service?.serviceDes}
+                                </td>
+                                <td>
+                                  {service?.categoryService?.categoryName || "1"}
+                                </td>
+
+                                {(roleId === 4) && (
+                                  <td>
+                                    <select
+                                      value={service?.status}
+                                      onChange={(e) => this.handleStatusChange(service, parseInt(e.target.value))}
+                                      className={`form-control ${service?.status === 1 ? 'badge-success' : 'badge-default'}`}
+                                    >
+                                      {statusOptions.map(option => (
+                                        <option key={option.value} value={option.value} className={option.className}>
+                                          {option.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                )}
+                                {(roleId === 3) && (
+                                  <td>
+                                    <span className={`badge ${service?.status === 1 ? 'badge-success' : 'badge-default'}`}>
+                                      {statusOptions.find(option => option.value === service?.status)?.label} {/* Hiển thị trạng thái */}
+                                    </span>
+                                  </td>
+                                )}
+                                <td className="project-actions">
+                                  <a onClick={() => this.handleViewDetail(service.serviceId)} className="btn btn-outline-secondary mr-1">
+                                    <i className="icon-eye"></i>
+                                  </a>
+                                  <a onClick={() => this.handleEdit(service.serviceId)} className="btn btn-outline-secondary">
+                                    <i className="icon-pencil"></i>
+                                  </a>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                      {roleId === 4 && (
+                        <div className="form-group text-right">
+                          <button className="btn btn-danger" onClick={() => this.handleBulkStatusUpdate(0)}>
+                            Reject
+                          </button>
+                          <button className="btn btn-success ml-2" onClick={() => this.handleBulkStatusUpdate(1)}>
+                            Approve
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                    : <p className="p-4">No data available</p>
+                  }
+
+
                   <div className="pt-4">
                     <Pagination
                       currentPage={currentPage}

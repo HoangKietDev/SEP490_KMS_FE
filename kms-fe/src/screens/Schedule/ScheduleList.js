@@ -36,80 +36,83 @@ class ScheduleList extends React.Component {
   componentDidMount() {
     const userData = getCookie('user')?.user;
     const roleId = userData.roleId
-    if (!userData) {
-      this.props.history.push("/login");  // Nếu cookie không tồn tại hoặc không hợp lệ, chuyển hướng về login
-      return;
-    }
     window.scrollTo(0, 0);
-
-    const fetchData = async () => {
-      try {
-
-        // Nếu là Teacher (roleId = 5), lấy danh sách classId mà giáo viên đó dạy
-        let allowedClassIds = [];
-        if (roleId === 5) { // Teacher
-          try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${userData.userId}`);
-            allowedClassIds = response.data?.map((cls) => cls.classId) || [];
-          } catch (error) {
-            console.error("Error fetching teacher's classes: ", error);
-          }
-          console.log(allowedClassIds);
-
-        } else if (roleId === 2) { // Parent
-          try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
-            // Lấy tất cả classId từ danh sách con
-            const myChild = response.data?.filter(child => child.parentId === userData.userId)
-            allowedClassIds = myChild.reduce((acc, student) => {
-              student.classes.forEach(cls => {
-                if (!acc.includes(cls.classId)) {
-                  acc.push(cls.classId); // Thêm classId nếu chưa có trong mảng
-                }
-              });
-              return acc;
-            }, []);
-            this.setState({ myChild });
-          } catch (error) {
-            console.error("Error fetching parent's children: ", error);
-          }
-        }
-        axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetAllSchedules`)
-          .then((response) => {
-            const allSchedules = response.data;
-            // Lọc dữ liệu nếu là Teacher (roleId = 5) hoặc Parent (roleId = 2)
-            const filteredSchedules = (roleId === 5 || roleId === 2)
-              ? allSchedules.filter((schedule) => allowedClassIds.includes(schedule.classId))
-              : allSchedules;
-            this.setState({ ScheduleListData: filteredSchedules, filteredSchedules: filteredSchedules });
-          })
-          .catch((error) => {
-            console.error("Error fetching data: ", error);
-          });
-
-        axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`)
-          .then((response) => {
-            this.setState({ semesterListData: response.data });
-          })
-          .catch((error) => {
-            console.error("Error fetching data: ", error);
-          });
-
-        axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
-          .then((response) => {
-            this.setState({ classData: response.data });
-          })
-          .catch((error) => {
-            console.error("Error fetching data: ", error);
-          });
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    fetchData();
-
+    this.fetchData();
   }
+
+  fetchData = async () => {
+    const userData = getCookie('user')?.user;
+    const roleId = userData.roleId
+    try {
+      // Nếu là Teacher (roleId = 5), lấy danh sách classId mà giáo viên đó dạy
+      let allowedClassIds = [];
+      if (roleId === 5 || roleId === 6) { // Teacher
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${userData.userId}`);
+          allowedClassIds = response.data?.map((cls) => cls.classId) || [];
+        } catch (error) {
+          console.error("Error fetching teacher's classes: ", error);
+        }
+        console.log(allowedClassIds);
+
+      } else if (roleId === 2) { // Parent
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
+          // Lấy tất cả classId từ danh sách con
+          const myChild = response.data?.filter(child => child.parentId === userData.userId)
+          allowedClassIds = myChild.reduce((acc, student) => {
+            student.classes.forEach(cls => {
+              if (!acc.includes(cls.classId)) {
+                acc.push(cls.classId); // Thêm classId nếu chưa có trong mảng
+              }
+            });
+            return acc;
+          }, []);
+          this.setState({ myChild });
+        } catch (error) {
+          console.error("Error fetching parent's children: ", error);
+        }
+      }
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetAllSchedules`)
+        .then((response) => {
+          const allSchedules = response.data;
+          let filteredSchedules = []
+          // Lọc dữ liệu nếu là Teacher (roleId = 5) hoặc Parent (roleId = 2)
+          if (roleId === 5 || roleId === 6 || roleId === 2) {
+            filteredSchedules = allSchedules.filter((schedule) => allowedClassIds.includes(schedule.classId))
+          }
+          else if (roleId === 4) {
+            filteredSchedules = allSchedules.filter((schedule) => schedule?.status !== 0)
+          }
+          else filteredSchedules = allSchedules
+          console.log(filteredSchedules);
+
+          this.setState({ ScheduleListData: filteredSchedules, filteredSchedules: filteredSchedules });
+        })
+        .catch((error) => {
+          console.error("Error fetching data: ", error);
+        });
+
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Semester/GetAllSemester`)
+        .then((response) => {
+          this.setState({ semesterListData: response.data });
+        })
+        .catch((error) => {
+          console.error("Error fetching data: ", error);
+        });
+
+      axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
+        .then((response) => {
+          this.setState({ classData: response.data });
+        })
+        .catch((error) => {
+          console.error("Error fetching data: ", error);
+        });
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   // Function to handle status change and call API
   handleStatusChange = async (data, scheduleId, newStatus) => {
@@ -270,7 +273,6 @@ class ScheduleList extends React.Component {
 
 
     const statusOptions = [
-      { value: 0, label: "Draft", className: "badge-default" },
       { value: 1, label: "Pending", className: "badge-info" },
       { value: 2, label: "Approved", className: "badge-success" },
     ];
@@ -360,7 +362,7 @@ class ScheduleList extends React.Component {
                         />
                       </div>
                     }
-                    {roleId !== 2 && roleId !== 5 ?
+                    {roleId !== 2 && roleId !== 5 && roleId !== 6 ?
                       <div className="col-md-3  mb-2">
                         <select
                           className="form-control"
@@ -368,9 +370,9 @@ class ScheduleList extends React.Component {
                           onChange={this.handleStatusFilterChange}
                         >
                           <option value="all">All Status</option>
-                          <option value="1">Approved</option>
-                          <option value="2">Pending</option>
-                          <option value="0">Draft</option>
+                          {roleId === 3 ? <option value="0">Draft</option> : <></>}
+                          <option value="1">Pending</option>
+                          <option value="2">Approved</option>
                         </select>
                       </div>
                       : <></>}
@@ -384,104 +386,106 @@ class ScheduleList extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
-                    <div className="table-responsive">
-                      <table className="table m-b-0 table-hover">
-                        <thead className="theme-color">
-                          <tr>
-                            <th>
-                              {roleId === 4 &&
-                                <button
-                                  className="btn btn-primary"
-                                  onClick={this.handleSelectAll}
-                                >
-                                  Select All
-                                </button>
+                    {currentItems && currentItems.length !== 0 ?
+                      <div className="table-responsive">
+                        <table className="table m-b-0 table-hover">
+                          <thead className="theme-color">
+                            <tr>
+                              <th>
+                                {roleId === 4 &&
+                                  <button
+                                    className="btn btn-primary"
+                                    onClick={this.handleSelectAll}
+                                  >
+                                    Select All
+                                  </button>
 
-                              } {/* Thêm cột checkbox nếu là roleId 4 */}
-                            </th>
-                            <th>Class</th>
-                            <th>School Year</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Create By</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {currentItems?.map((request, index) => {
-                            const classDetail = classData?.find(i => i.classId === request?.classId)
-                            const semesterDetail = semesterListData?.find(i => i.semesterId === classDetail?.semesterId)
-                            return (
-                              <React.Fragment key={"schedule" + index}>
-                                <tr>
-                                  <td>
-                                    <div className="fancy-checkbox d-inline-block">
-                                      <label>
-                                        {roleId === 4 && (
-                                          <input
-                                            type="checkbox"
-                                            onChange={() => this.handleSelect(request.scheduleId)}
-                                            checked={selectedItems.includes(request.scheduleId)}  // Đảm bảo rằng checkbox được đánh dấu nếu serviceId nằm trong selectedServices
-
-                                          />
-                                        )}
-                                        <span>{index + 1}</span>
-                                      </label>
-                                    </div>
-                                  </td>
-                                  <td
-                                    onClick={() => this.handleDetailSchedule(request?.classId)}
-                                    style={{ cursor: 'pointer' }}
-                                    className="theme-color"
-                                  >{classDetail?.className}</td>
-                                  <td>
-                                    {semesterDetail?.name}
-                                  </td>
-                                  <td>{semesterDetail?.startDate?.split("T")[0]}</td>
-                                  <td>{semesterDetail?.endDate?.split("T")[0]}</td>
-                                  <td>{request?.createBy || 'Staff'}</td>
-
-                                  {(roleId === 4) ? (
+                                } {/* Thêm cột checkbox nếu là roleId 4 */}
+                              </th>
+                              <th>Class</th>
+                              <th>School Year</th>
+                              <th>Start Date</th>
+                              <th>End Date</th>
+                              <th>Create By</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {currentItems?.map((request, index) => {
+                              const classDetail = classData?.find(i => i.classId === request?.classId)
+                              const semesterDetail = semesterListData?.find(i => i.semesterId === classDetail?.semesterId)
+                              return (
+                                <React.Fragment key={"schedule" + index}>
+                                  <tr>
                                     <td>
-                                      <select
-                                        value={request.status}
-                                        onChange={(e) => this.handleStatusChange(request, request.scheduleId, parseInt(e.target.value))}
-                                        className={`form-control ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}
-                                      >
-                                        {statusOptions.map(option => (
-                                          <option key={option.value} value={option.value} className={option.className}>
-                                            {option.label}
-                                          </option>
-                                        ))}
-                                      </select>
+                                      <div className="fancy-checkbox d-inline-block">
+                                        <label>
+                                          {roleId === 4 && (
+                                            <input
+                                              type="checkbox"
+                                              onChange={() => this.handleSelect(request.scheduleId)}
+                                              checked={selectedItems.includes(request.scheduleId)}  // Đảm bảo rằng checkbox được đánh dấu nếu serviceId nằm trong selectedServices
+                                            />
+                                          )}
+                                          <span>{index + 1}</span>
+                                        </label>
+                                      </div>
                                     </td>
-                                  ) : (roleId === 2 || roleId === 3 || roleId === 5) && (
+                                    <td
+                                      onClick={() => this.handleDetailSchedule(request?.classId)}
+                                      style={{ cursor: 'pointer' }}
+                                      className="theme-color"
+                                    >{classDetail?.className}</td>
                                     <td>
-                                      <span className={`badge ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}>
-                                        {statusOptions.find(option => option.value === request.status)?.label || 'Unknown'}
-                                      </span>
+                                      {semesterDetail?.name}
                                     </td>
-                                  )}
+                                    <td>{semesterDetail?.startDate?.split("T")[0]}</td>
+                                    <td>{semesterDetail?.endDate?.split("T")[0]}</td>
+                                    <td>{request?.createBy || 'Staff'}</td>
+
+                                    {(roleId === 4) ? (
+                                      <td>
+                                        <select
+                                          value={request.status}
+                                          onChange={(e) => this.handleStatusChange(request, request.scheduleId, parseInt(e.target.value))}
+                                          className={`form-control ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}
+                                        >
+                                          {statusOptions.map(option => (
+                                            <option key={option.value} value={option.value} className={option.className}>
+                                              {option.label}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </td>
+                                    ) : (roleId === 2 || roleId === 3 || roleId === 5 || roleId === 6 ) && (
+                                      <td>
+                                        <span className={`badge ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}>
+                                          {statusOptions.find(option => option.value === request.status)?.label || 'Unknown'}
+                                        </span>
+                                      </td>
+                                    )}
 
 
-                                </tr>
-                              </React.Fragment>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-
-                    {roleId === 4 && (
-                      <div className="form-group text-right">
-                        <button className="btn btn-danger" onClick={() => this.handleBulkStatusUpdate(0)}>
-                          Reject
-                        </button>
-                        <button className="btn btn-success ml-2" onClick={() => this.handleBulkStatusUpdate(1)}>
-                          Approve
-                        </button>
+                                  </tr>
+                                </React.Fragment>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                        {roleId === 4 && (
+                          <div className="form-group text-right">
+                            <button className="btn btn-danger" onClick={() => this.handleBulkStatusUpdate(0)}>
+                              Reject
+                            </button>
+                            <button className="btn btn-success ml-2" onClick={() => this.handleBulkStatusUpdate(2)}>
+                              Approve
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      : <p className="">No data available</p>
+                    }
                     <div className="pt-4">
                       <Pagination
                         currentPage={currentPage}

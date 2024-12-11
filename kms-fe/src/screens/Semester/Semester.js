@@ -77,7 +77,7 @@ class Semester extends React.Component {
   render() {
 
     const { semesters, searchText, sortDirection, filterStatus } = this.state;
-    
+
     const userData = getCookie('user')?.user;
     const roleId = userData.roleId
 
@@ -156,56 +156,60 @@ class Semester extends React.Component {
               </div>
               <div className="col-lg-12">
                 <div className="card">
-                  <div className="table-responsive">
-                    <table className="table m-b-0 table-hover">
-                      <thead className="">
-                        <tr className="theme-color">
-                          <th>#</th>
-                          <th>School Year</th>
-                          <th>Start Date</th>
-                          <th>End Date</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentItems.map((item, i) => {
-                          return (
-                            <tr key={"dihf" + i}>
+                  {currentItems && currentItems.length !== 0 ?
 
-                              <td className="project-title">
-                                <th scope="row">{i + 1}</th>
-                              </td>
-                              <td>
-                                {item?.name}
-                              </td>
-                              <td>
-                                {item?.startDate?.split("T")[0]}
-                              </td>
-                              <td>
-                                {item?.endDate?.split("T")[0]}
-                              </td>
-                              <td>
-                                {item?.status === 1 ? (
-                                  <span className="badge badge-success">Active</span>
-                                ) : item?.status === 0 ? (
-                                  <span className="badge badge-default">InActive</span>
-                                ) : null}
-                              </td>
-                              <td className="project-actions">
-                                <a onClick={() => this.handleViewDetail(item.semesterId)} className="btn btn-outline-secondary mr-1">
-                                  <i className="icon-eye"></i>
-                                </a>
-                                <a onClick={() => this.handleEdit(item.semesterId)} className="btn btn-outline-secondary">
-                                  <i className="icon-pencil"></i>
-                                </a>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                    <div className="table-responsive">
+                      <table className="table m-b-0 table-hover">
+                        <thead className="">
+                          <tr className="theme-color">
+                            <th>#</th>
+                            <th>School Year</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentItems.map((item, i) => {
+                            return (
+                              <tr key={"dihf" + i}>
+
+                                <td className="project-title">
+                                  <th scope="row">{i + 1}</th>
+                                </td>
+                                <td>
+                                  {item?.name}
+                                </td>
+                                <td>
+                                  {item?.startDate?.split("T")[0]}
+                                </td>
+                                <td>
+                                  {item?.endDate?.split("T")[0]}
+                                </td>
+                                <td>
+                                  {item?.status === 1 ? (
+                                    <span className="badge badge-success">Active</span>
+                                  ) : item?.status === 0 ? (
+                                    <span className="badge badge-default">InActive</span>
+                                  ) : null}
+                                </td>
+                                <td className="project-actions">
+                                  <a onClick={() => this.handleViewDetail(item.semesterId)} className="btn btn-outline-secondary mr-1">
+                                    <i className="icon-eye"></i>
+                                  </a>
+                                  <a onClick={() => this.handleEdit(item.semesterId)} className="btn btn-outline-secondary">
+                                    <i className="icon-pencil"></i>
+                                  </a>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    : <p className="p-4">No data available</p>
+                  }
                   <div className="pt-4">
                     <Pagination
                       currentPage={currentPage}

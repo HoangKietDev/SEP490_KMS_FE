@@ -466,85 +466,88 @@ class Paymenttuition extends React.Component {
                             </div>
                             <div className="col-lg-12">
                                 <div className="card">
-                                    <div className="table-responsive">
-                                        <table className="table m-b-0 table-hover">
-                                            <thead className="">
-                                                <tr className="theme-color">
-                                                    <th>#</th>
-                                                    <th>Children</th>
-                                                    <th>Code</th>
-                                                    <th>Semester</th>
-                                                    <th>Start Date</th>
-                                                    <th>End Date</th>
-                                                    <th>tuitionFee</th>
-                                                    <th>Due Date</th>
-                                                    <th>Status</th>
-                                                    <th>Action</th>
+                                    {currentItems && currentItems.length !== 0 ?
+                                        <div className="table-responsive">
+                                            <table className="table m-b-0 table-hover">
+                                                <thead className="">
+                                                    <tr className="theme-color">
+                                                        <th>#</th>
+                                                        <th>Children</th>
+                                                        <th>Code</th>
+                                                        <th>Semester</th>
+                                                        <th>Start Date</th>
+                                                        <th>End Date</th>
+                                                        <th>tuitionFee</th>
+                                                        <th>Due Date</th>
+                                                        <th>Status</th>
+                                                        <th>Action</th>
 
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {currentItems.map((item, i) => {
-                                                    return (
-                                                        <tr key={"dihf" + i}>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {currentItems.map((item, i) => {
+                                                        return (
+                                                            <tr key={"dihf" + i}>
 
-                                                            <td className="project-title">
-                                                                <th scope="row">{i + 1}</th>
-                                                            </td>
-                                                            <td>
-                                                                {item?.studentName}
-                                                            </td>
-                                                            <td>
-                                                                {item?.code}
-                                                            </td>
-                                                            <td>
-                                                                {item?.semesterName}
-                                                            </td>
-                                                            <td>
-                                                                {item?.startDate?.split("T")[0]}
-                                                            </td>
-                                                            <td>
-                                                                {item?.endDate?.split("T")[0]}
-                                                            </td>
-                                                            <td>
-                                                                {item?.tuitionFee?.toLocaleString('vi-VN')}
-                                                            </td>
-                                                            <td>
-                                                                {item?.dueDate?.split("T")[0]}
-                                                            </td>
-                                                            <td>
-                                                                {item?.isPaid === 1 ? (
-                                                                    <span className="badge badge-success">Paid</span>
-                                                                ) : item?.isPaid === 0 ? (
-                                                                    <span className="badge badge-danger">Not Paid</span>
-                                                                ) : null}
-                                                            </td>
-                                                            {roleId === 4 ? (
+                                                                <td className="project-title">
+                                                                    <th scope="row">{i + 1}</th>
+                                                                </td>
                                                                 <td>
-                                                                    {item?.sendMailByPR === 1 ? (
-                                                                        <span className="badge badge-success">Sent Mail</span>
-                                                                    ) : item?.sendMailByPR === 0 ? (
-                                                                        <span className="badge badge-info">Not Send Mail</span>
+                                                                    {item?.studentName}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.code}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.semesterName}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.startDate?.split("T")[0]}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.endDate?.split("T")[0]}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.tuitionFee?.toLocaleString('vi-VN')}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.dueDate?.split("T")[0]}
+                                                                </td>
+                                                                <td>
+                                                                    {item?.isPaid === 1 ? (
+                                                                        <span className="badge badge-success">Paid</span>
+                                                                    ) : item?.isPaid === 0 ? (
+                                                                        <span className="badge badge-danger">Not Paid</span>
                                                                     ) : null}
                                                                 </td>
-                                                            ) : null}
-                                                            {roleId === 3 ? (
-                                                                <td>
-                                                                    {new Date(item?.lastEmailSentDate).toLocaleDateString().split('T')[0] === new Date().toLocaleDateString().split('T')[0] ? (
-                                                                        <span className="badge badge-success">Sent Mail</span>
-                                                                    ) : (
-                                                                        <span className="badge badge-info">Not Send Mail</span>
-                                                                    )}
-                                                                </td>
-                                                            ) : null}
+                                                                {roleId === 4 ? (
+                                                                    <td>
+                                                                        {item?.sendMailByPR === 1 ? (
+                                                                            <span className="badge badge-success">Sent Mail</span>
+                                                                        ) : item?.sendMailByPR === 0 ? (
+                                                                            <span className="badge badge-info">Not Send Mail</span>
+                                                                        ) : null}
+                                                                    </td>
+                                                                ) : null}
+                                                                {roleId === 3 ? (
+                                                                    <td>
+                                                                        {new Date(item?.lastEmailSentDate).toLocaleDateString().split('T')[0] === new Date().toLocaleDateString().split('T')[0] ? (
+                                                                            <span className="badge badge-success">Sent Mail</span>
+                                                                        ) : (
+                                                                            <span className="badge badge-info">Not Send Mail</span>
+                                                                        )}
+                                                                    </td>
+                                                                ) : null}
 
 
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        : <><p className='p-4'>No Have Data</p></>
+                                    }
                                     <div className="pt-4">
                                         <Pagination
                                             currentPage={currentPage}
@@ -600,7 +603,7 @@ class Paymenttuition extends React.Component {
                                 </Modal.Header>
                                 <Modal.Body>
                                     {tuitionData && tuitionData.length > 0 ? (
-                                        <Table striped bordered hover responsive>
+                                        <Table striped bordered hover responsive style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -614,7 +617,7 @@ class Paymenttuition extends React.Component {
                                             <tbody>
                                                 {tuitionData.map((tuition, index) => (
                                                     <tr key={index}>
-                                                        <td>{index+1}</td>
+                                                        <td>{index + 1}</td>
                                                         <td>{tuition?.studentId}</td>
                                                         <td>{tuition?.startDate?.split("T")[0]}</td>
                                                         <td>{tuition?.endDate?.split("T")[0]}</td>

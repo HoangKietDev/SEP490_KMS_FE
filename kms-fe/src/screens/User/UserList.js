@@ -300,65 +300,68 @@ class UserList extends React.Component {
               </div>
               <div className="col-lg-12">
                 <div className="card">
-                  <div className="table-responsive">
-                    <table className="table m-b-0 table-hover">
-                      <thead className="">
-                        <tr className="theme-color">
-                          <th>#</th>
-                          <th>FirstName</th>
-                          <th>LastName</th>
-                          <th>Email</th>
-                          <th>Phone</th>
-                          <th>Gender</th>
-                          <th>Role</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currentItems.map((item, i) => {
-                          return (
-                            <tr key={"dihf" + i}>
+                  {currentItems && currentItems.length !== 0 ?
+                    <div className="table-responsive">
+                      <table className="table m-b-0 table-hover">
+                        <thead className="">
+                          <tr className="theme-color">
+                            <th>#</th>
+                            <th>FirstName</th>
+                            <th>LastName</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentItems.map((item, i) => {
+                            return (
+                              <tr key={"dihf" + i}>
 
-                              <td className="project-title">
-                                <th scope="row">{i + 1}</th>
-                              </td>
-                              <td>
-                                {item?.firstname}
-                              </td>
-                              <td>
-                                {item?.lastName}
-                              </td>
-                              <td>
-                                {item?.mail}
-                              </td>
-                              <td>
-                                {item?.phoneNumber}
-                              </td>
-                              <td>
-                                {item?.gender === 0 ? "FeMale" : "Male"}
-                              </td>
-                              <td>
-                                {this.state.roleMap[item?.roleId] || "Unknown Role"}
-                              </td>
-                              <td>
-                                <select
-                                  value={item?.status}
-                                  onChange={(e) => this.handleStatusChange(item.userId, parseInt(e.target.value))}
-                                  className={`form-control ${item?.status === 1 ? 'badge-success' : 'badge-default'}`}
-                                >
-                                  {statusOptions.map(option => (
-                                    <option key={option.value} value={option.value} className={option.className}>
-                                      {option.label}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                                <td className="project-title">
+                                  <th scope="row">{i + 1}</th>
+                                </td>
+                                <td>
+                                  {item?.firstname}
+                                </td>
+                                <td>
+                                  {item?.lastName}
+                                </td>
+                                <td>
+                                  {item?.mail}
+                                </td>
+                                <td>
+                                  {item?.phoneNumber}
+                                </td>
+                                <td>
+                                  {item?.gender === 0 ? "FeMale" : "Male"}
+                                </td>
+                                <td>
+                                  {this.state.roleMap[item?.roleId] || "Unknown Role"}
+                                </td>
+                                <td>
+                                  <select
+                                    value={item?.status}
+                                    onChange={(e) => this.handleStatusChange(item.userId, parseInt(e.target.value))}
+                                    className={`form-control ${item?.status === 1 ? 'badge-success' : 'badge-default'}`}
+                                  >
+                                    {statusOptions.map(option => (
+                                      <option key={option.value} value={option.value} className={option.className}>
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    : <p className="">No data available</p>
+                  }
                   <div className="pt-4">
                     <Pagination
                       currentPage={currentPage}
