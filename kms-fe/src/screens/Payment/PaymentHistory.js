@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 import Pagination from "../../components/Common/Pagination";
@@ -143,7 +143,7 @@ class PaymentHistory extends React.Component {
   }
 
   loadData = async () => {
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
     if (!parentId) {
@@ -241,7 +241,7 @@ class PaymentHistory extends React.Component {
 
   // Generate PDF using react-pdf
   generatePDF = (item) => {
-    const user = getCookie('user')?.user
+    const user = getSession('user')?.user
     const fullName = user?.firstname + user?.lastName
     return (
       <Document>

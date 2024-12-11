@@ -5,7 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import axios from "axios";
 import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import * as XLSX from 'xlsx';
 import Notification from "../../components/Notification";
 import { ProgressBar } from "react-loader-spinner"; // Import spinner
@@ -84,6 +84,7 @@ class Schedule extends React.Component {
     selectedSlot: null, // Để lưu thông tin của slot được chọn
     activities: [],
     locations: [],
+    teacher: null,
 
     showNotification: false, // State to control notification visibility
     notificationText: "", // Text for the notification
@@ -96,6 +97,10 @@ class Schedule extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
+
+    const userData = getSession("user")?.user;
+    const userId = userData.userId;
+
     const fetchData = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`);
@@ -110,12 +115,21 @@ class Schedule extends React.Component {
         const locationrespone = await axios.get(`${process.env.REACT_APP_API_URL}/api/Schedule/GetAllLocations`);
         const locationdata = locationrespone.data;
 
+        let teacherdata = null
+        if (userData?.roleId == 5 || userData?.roleId == 6) {
+          const teacherrespone = await axios.get(`${process.env.REACT_APP_API_URL}/api/Teacher/GetTeacherById/${userId}`);
+          teacherdata = teacherrespone.data;
+        }
+        
+
+
         // Update state with the default class and then fetch schedule data
         this.setState({
           classData: data,
           selectId: defaultClassId,
           activities: activitydata,
-          locations: locationdata
+          locations: locationdata,
+          teacher: teacherdata
         }, async () => {
           // Fetch schedule data only after state update
           const { startDate, endDate, selectId } = this.state;
@@ -134,7 +148,7 @@ class Schedule extends React.Component {
         `${process.env.REACT_APP_API_URL}/api/Schedule/GetSchedulesByClassId?classId=${selectId}`
       );
       const scheduleData = response.data;
-      const userData = getCookie("user")?.user;
+      const userData = getSession("user")?.user;
       const roleId = userData.roleId;
 
       console.log(scheduleData);
@@ -179,7 +193,7 @@ class Schedule extends React.Component {
   };
 
   handleSlotClick = (slotDetail) => {
-    const userData = getCookie("user")?.user;
+    const userData = getSession("user")?.user;
     const roleId = userData.roleId;
     if (slotDetail && roleId === 3) {
       this.setState({
@@ -476,10 +490,10 @@ class Schedule extends React.Component {
 
 
   renderTable = () => {
-    const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek, showConfirmModal, loading } = this.state;
+    const { scheduleData, daysOfWeek, timeslots, classData, selectId, scheduleDetails, selectedWeek, showConfirmModal, loading, teacher } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = (getCookie("user")?.user);
+    const userData = (getSession("user")?.user);
     const roleId = userData.roleId;
 
     console.log(scheduleDetails);
@@ -541,7 +555,7 @@ class Schedule extends React.Component {
                       </div>
 
                       {/* Button để gửi email */}
-                      {roleId === 5 || roleId === 6 ? (
+                      {teacher && teacher?.homeroomTeacher == 1 ? (
                         <>
                           <button
                             className="btn btn-primary ml-3"
@@ -763,7 +777,7 @@ class Schedule extends React.Component {
 
                     {roleId === 3 ?
                       <div>
-                          <button className="btn btn-lg btn-success mt-3" onClick={() => this.handlePublic(scheduleData[0])}>Post Schedule To Principal</button>
+                        <button className="btn btn-lg btn-success mt-3" onClick={() => this.handlePublic(scheduleData[0])}>Post Schedule To Principal</button>
                       </div>
                       : <></>
                     }

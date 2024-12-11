@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import PageHeader from "../../components/PageHeader";
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { getCookie } from '../../components/Auth/Auth';
+import { getSession } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 import Notification from "../../components/Notification";
 import { RotatingLines } from 'react-loader-spinner';
@@ -164,7 +164,7 @@ class UserList extends React.Component {
   render() {
 
     const { users, searchText, filterStatus, filterRoles } = this.state;
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData.roleId
 
 

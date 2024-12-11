@@ -6,7 +6,6 @@ import Logo from "../assets/images/logo-white.png";
 import { updateEmail, updatePassword, onLoggedin } from "../actions";
 import { Button } from "react-bootstrap";
 import axios from 'axios';
-import { setCookie } from "../components/Auth/Auth";
 import Notification from "../components/Notification";
 
 class Login extends React.Component {
@@ -69,12 +68,8 @@ class Login extends React.Component {
         avatar: profileData.avatar, // Thêm trường avatar
       };
 
-      // Lưu lại vào localStorage và sessionStorage
-      // localStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
+      // Lưu lại vào sessionStorage
       sessionStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
-
-      // Lưu vào cookie
-      setCookie("user", { ...loginData, user: userWithAvatar }); // Lưu vào cookie
 
       // Chuyển hướng dựa trên roleId
       switch (userWithAvatar.roleId) {

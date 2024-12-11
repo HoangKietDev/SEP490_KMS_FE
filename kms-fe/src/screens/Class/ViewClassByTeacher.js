@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import { Modal, Button } from "react-bootstrap";
 import Notification from "../../components/Notification";
 
@@ -25,7 +25,7 @@ class ViewClassByTeacher extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const user = getCookie('user')?.user
+    const user = getSession('user')?.user
     const teacherId = user ? user?.userId : null;
 
     if (teacherId) {

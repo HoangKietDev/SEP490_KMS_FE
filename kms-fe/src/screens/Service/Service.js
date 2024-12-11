@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from 'axios';
 import Notification from "../../components/Notification";
-import { getCookie } from '../../components/Auth/Auth';
+import { getSession } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 
 class Service extends React.Component {
@@ -201,7 +201,7 @@ class Service extends React.Component {
     const { filteredServices, selectedServices, } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
 
     const statusOptions = [

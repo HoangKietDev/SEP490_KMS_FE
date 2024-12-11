@@ -5,7 +5,7 @@ import { withRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap nếu chưa có
 import Notification from "../../components/Notification";
 import axios from 'axios';
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 class ViewChildrenByClassID extends React.Component {
   state = {
     StudentsData: [],
@@ -297,7 +297,7 @@ class ViewChildrenByClassID extends React.Component {
 
   render() {
     const { StudentsData, GradesData, searchTerm, hoveredImageSrc, hoveredImagePosition, studentsWithoutClass, showAddModal, showNotification, notificationText, notificationType } = this.state;
-    const user = getCookie('user');
+    const user = getSession('user');
     const isRole4 = user && user.user.roleId === 4;
     const isRole3 = user && user.user.roleId === 3; // Kiểm tra roleId = 3
     const filteredStudents = StudentsData.filter((student) =>

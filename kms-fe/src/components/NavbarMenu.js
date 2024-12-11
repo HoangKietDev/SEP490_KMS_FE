@@ -19,7 +19,7 @@ import {
 import Logo from "../assets/images/logo.png";
 import LogoWhite from "../assets/images/logo-white.png";
 import UserImage from "../assets/images/user.png";
-import { clearCookie, getCookie } from "./Auth/Auth";
+import { clearSession, getSession } from "./Auth/Auth";
 import axios from "axios";
 
 
@@ -37,7 +37,7 @@ class NavbarMenu extends React.Component {
     res = res.length > 4 ? res[4] : "/";
     const { activeKey } = this.props;
     this.activeMenutabwhenNavigate("/" + activeKey);
-    const user = getCookie('user')?.user;
+    const user = getSession('user')?.user;
     this.getNotifications(user?.userId);
     this.fetchPaymentData(user?.userId)
   }
@@ -296,14 +296,14 @@ class NavbarMenu extends React.Component {
   handleLogOut = async (evt) => {
     evt.preventDefault();
     localStorage.removeItem('user')
-    clearCookie('user');
+    clearSession('user');
     window.location.href = "/";
   };
 
 
 
   render() {
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData?.roleId
     const username = userData?.firstname + " " + userData?.lastName || "User"; // Thay "User" bằng tên mặc định nếu không có
 
@@ -573,7 +573,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("UserContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>User</span>
+                          <i className="icon-grid"></i> <span>User Management</span>
                         </a>
 
                         <ul className="collapse">
@@ -673,7 +673,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("ServiceContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Services</span>
+                          <i className="icon-grid"></i> <span>Services Management</span>
                         </a>
                       </li>
                     ) : null}
@@ -690,7 +690,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("GradeContainer"); // Gọi hàm tùy chỉnh
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Grades</span>
+                          <i className="icon-grid"></i> <span>Grades Management</span>
                         </a>
 
                         <ul className="collapse">
@@ -710,7 +710,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("SemesterContainer"); // Gọi hàm tùy chỉnh
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Semesters</span>
+                          <i className="icon-grid"></i> <span>Semesters Management</span>
                         </a>
 
                         <ul className="collapse">
@@ -793,7 +793,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("AlbumContainer"); // Gọi hàm tùy chỉnh
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Albums Manager</span>
+                          <i className="icon-grid"></i> <span>Albums Management</span>
                         </a>
                       </li>
                     ) : null}
@@ -844,7 +844,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("TeacherContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Teacher Manager</span>
+                          <i className="icon-grid"></i> <span>Teacher Management</span>
                         </a>
 
                       </li>
@@ -862,7 +862,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("PickupPersonContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Pickup Person Manager</span>
+                          <i className="icon-grid"></i> <span>Pickup Person Management</span>
                         </a>
 
                       </li>
@@ -879,7 +879,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("RequestContainer"); // Gọi hàm tùy chỉnh
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Request Manager</span>
+                          <i className="icon-grid"></i> <span>Request Management</span>
                         </a>
                       </li>
                     ) : null}
@@ -918,7 +918,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("PaymentContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Payment Manager</span>
+                          <i className="icon-grid"></i> <span>Payment Management</span>
                         </a>
                       </li>
                     ) : null}
@@ -936,7 +936,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("TuitionContainer"); // Gọi hàm tùy chỉnh
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Tuition Manager</span>
+                          <i className="icon-grid"></i> <span>Tuition Management</span>
                         </a>
                       </li>
                     ) : null}
@@ -953,7 +953,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("attendanceContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Attendance</span>
+                          <i className="icon-grid"></i> <span>Attendance Management</span>
                         </a>
                         <ul className="collapse">
                           {roleId === 6 ? (
@@ -975,7 +975,7 @@ class NavbarMenu extends React.Component {
 
                       </li>
                     ) : null}
-                    {/* Payment */}
+
                     {roleId === 2 ? (
                       <li id="AttendParentContainer" className="">
                         <a
@@ -986,7 +986,7 @@ class NavbarMenu extends React.Component {
                             this.activeMenutabContainer("AttendParentContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Attend</span>
+                          <i className="icon-grid"></i> <span>Attend </span>
                         </a>
                         <ul className="collapse">
                           <li

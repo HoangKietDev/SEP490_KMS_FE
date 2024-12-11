@@ -4,7 +4,7 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Login from "../Login";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import { addNotificationByRoleId, addNotificationByUserId } from "../../components/Common/Notification";
 import Notification from "../../components/Notification";
 import Pagination from "../../components/Common/Pagination";
@@ -34,14 +34,14 @@ class ScheduleList extends React.Component {
   };
 
   componentDidMount() {
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData.roleId
     window.scrollTo(0, 0);
     this.fetchData();
   }
 
   fetchData = async () => {
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData.roleId
     try {
       // Nếu là Teacher (roleId = 5), lấy danh sách classId mà giáo viên đó dạy
@@ -277,7 +277,7 @@ class ScheduleList extends React.Component {
       { value: 2, label: "Approved", className: "badge-success" },
     ];
 
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData?.roleId
 
 
