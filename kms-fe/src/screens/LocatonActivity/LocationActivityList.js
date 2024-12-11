@@ -6,7 +6,7 @@ import axios from "axios";
 import Pagination from "../../components/Common/Pagination";
 import { Modal, Button, Form } from "react-bootstrap"; // Thêm modal từ react-bootstrap
 import Notification from "../../components/Notification";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 
 
 class LocationActivityList extends React.Component {
@@ -272,7 +272,7 @@ class LocationActivityList extends React.Component {
     const currentItemsLocation = FilterLocationListData.slice(indexOfFirstItemLocation, indexOfLastItemLocation);
 
     // Get user data from cookie
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
 
     return (

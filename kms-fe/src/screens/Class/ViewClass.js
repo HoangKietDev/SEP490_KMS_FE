@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 class ViewClass extends React.Component {
   state = {
@@ -20,7 +20,7 @@ class ViewClass extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const user = getCookie("user");
+    const user = getSession("user");
     console.log(user, "sdsdsd");
     this.fetchClasses();
     // fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetAllClass`)
@@ -292,7 +292,7 @@ class ViewClass extends React.Component {
   // Hàm fetch lại danh sách lớp học sau khi cập nhật
   fetchClasses = async () => {
     try {
-      const user = getCookie("user"); // Giả sử bạn đã có hàm getCookie để lấy dữ liệu cookie
+      const user = getSession("user"); // Giả sử bạn đã có hàm getSession để lấy dữ liệu cookie
 
       if (!user) {
         console.error("User not found in cookies");
@@ -330,7 +330,7 @@ class ViewClass extends React.Component {
   render() {
     const { ProjectsData, statusFilter, gradeFilter, nameFilter, GradesData, showNotification, notificationText, notificationType } = this.state;
 
-    const user = getCookie('user');
+    const user = getSession('user');
     const isRole4 = user && user.user.roleId === 4;
     const isRole3 = user && user.user.roleId === 3; // Kiểm tra roleId = 3
 

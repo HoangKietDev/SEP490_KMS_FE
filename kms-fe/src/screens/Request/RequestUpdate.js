@@ -5,7 +5,7 @@ import PageHeader from "../../components/PageHeader";
 // import { withRouter } from 'react-router-dom';
 import axios from "axios";
 import Notification from "../../components/Notification";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import { addNotificationByUserId } from "../../components/Common/Notification";
 
 class RequestUpdate extends React.Component {
@@ -39,7 +39,7 @@ class RequestUpdate extends React.Component {
     window.scrollTo(0, 0);
     const { requestId } = this.props.match.params;
     this.setState({ requestId: parseInt(requestId) });
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
 
     const dataRole = this.getFilteredStatusDescriptions(roleId); // Call filtering here
@@ -179,7 +179,7 @@ class RequestUpdate extends React.Component {
   render() {
     const { title, description, status, createAt, ClassRequestChangeInfor, changesClassId, ReasonReject, filteredStatuses, statusDescriptions } = this.state;
 
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const roleId = userData?.roleId;
 
     return (

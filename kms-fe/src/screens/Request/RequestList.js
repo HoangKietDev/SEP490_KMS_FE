@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import axios from "axios";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import Pagination from "../../components/Common/Pagination";
 
 class RequestList extends React.Component {
@@ -26,14 +26,14 @@ class RequestList extends React.Component {
       .get(`${process.env.REACT_APP_API_URL}/api/Request/GetAllRequests`)
       .then((response) => {
         const { data } = response;
-        const userData = getCookie("user")?.user;
+        const userData = getSession("user")?.user;
         const roleId = userData?.roleId;
 
         const reversedData = data.reverse(); // Đảo ngược thứ tự dữ liệu
 
         let filteredData = [];
 
-        if (roleId === 5) {
+        if (roleId === 5 || roleId === 6) {
           filteredData = reversedData;
         } else if (roleId === 3) {
           filteredData = reversedData.filter(
@@ -107,7 +107,7 @@ class RequestList extends React.Component {
 
   render() {
     const { NewRequestListData, UserListData } = this.state;
-    const userData = getCookie("user")?.user;
+    const userData = getSession("user")?.user;
     const roleId = userData?.roleId;
 
     const statusDescriptions = {
@@ -182,6 +182,7 @@ class RequestList extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
+                    {currentItems && currentItems.length !== 0 ? 
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">
                         <thead className="">
@@ -269,7 +270,7 @@ class RequestList extends React.Component {
                                   </button>
                                   {(roleId === 3 &&
                                     request.statusRequest === 2) ||
-                                    (roleId === 5 &&
+                                    (roleId === 5 || roleId === 6 &&
                                       request.statusRequest === 1) ||
                                     (roleId === 2 &&
                                       request.statusRequest === 1) ? (
@@ -289,6 +290,8 @@ class RequestList extends React.Component {
                         </tbody>
                       </table>
                     </div>
+                    : <p className="">No data available</p>
+                    }
                     <div className="pt-4">
                       <Pagination
                         currentPage={currentPage}

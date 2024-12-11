@@ -1,10 +1,10 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { getCookie, getSession } from "../Auth/Auth";
+import { getSession } from "../Auth/Auth";
 
 // Utility function to get token and roleId
 const getAuthDetails = () => {
-    const user = getCookie('user'); // Assuming the user details (like roleId) are stored here
+    const user = getSession('user'); // Assuming the user details (like roleId) are stored here
     if (user) {
         return { user, roleId: user?.user?.roleId }; // Returns roleId if available
     }

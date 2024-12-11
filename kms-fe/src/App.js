@@ -74,7 +74,7 @@ import ListPickupPerson from "./screens/Pickup_Person/ListPickupPerson";
 import PaymentAllStaff from "./screens/Payment/PaymentAllStaff";
 import PaymentTuition from "./screens/Payment/PaymentTuition";
 import SemesterDetail from "./screens/Semester/SemesterDetail";
-import { getCookie } from "./components/Auth/Auth";
+import { getSession } from "./components/Auth/Auth";
 import ViewDetailsChildren from "./screens/Children/ViewDetailsChildren";
 window.__DEV__ = true;
 
@@ -90,7 +90,7 @@ class App extends React.Component {
 
   componentDidMount() {
     // Kiểm tra trạng thái đăng nhập từ localStorage hoặc bất kỳ nơi nào bạn lưu trữ thông tin đăng nhập
-    const user = getCookie("user");
+    const user = getSession("user");
     const isAuthenticated = user !== null; // Kiểm tra nếu người dùng đã đăng nhập
     const roleId = isAuthenticated ? user.user.roleId : null;
     this.setState({ isAuthenticated, roleId })
@@ -263,7 +263,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/request`}
                   component={RequestList}
-                  allowedRoles={[2, 3, 4, ,6]}
+                  allowedRoles={[2, 3, 4, 5 ,6]}
                 />
                 <ProtectedRoute
                   exact

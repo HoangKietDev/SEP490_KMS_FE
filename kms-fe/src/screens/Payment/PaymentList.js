@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import { Modal, Button, Alert } from "react-bootstrap"; // Thêm modal từ react-bootstrap
 import Notification from "../../components/Notification";
 
@@ -41,7 +41,7 @@ class PaymentList extends React.Component {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
     // Lấy năm và tháng hiện tại
@@ -304,7 +304,7 @@ class PaymentList extends React.Component {
     const { ServiceListData, UserListData, tuition, showServices, Children, Class, selectedChild, Payment, ChildrenPayment } = this.state;
     const { showNotification, notificationText, notificationType } = this.state;
 
-    const userData = getCookie('user')?.user
+    const userData = getSession('user')?.user
 
     const roleId = userData.roleId
     const parentId = userData?.userId;

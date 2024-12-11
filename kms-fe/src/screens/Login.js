@@ -6,7 +6,6 @@ import Logo from "../assets/images/logo-white.png";
 import { updateEmail, updatePassword, onLoggedin } from "../actions";
 import { Button } from "react-bootstrap";
 import axios from 'axios';
-import { setCookie } from "../components/Auth/Auth";
 import Notification from "../components/Notification";
 
 class Login extends React.Component {
@@ -55,7 +54,7 @@ class Login extends React.Component {
 
       // Gọi API để lấy thông tin chi tiết người dùng (bao gồm avatar)
       const profileResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${userId}`);
-  
+
       if (profileResponse.status !== 200) {
         throw new Error("Failed to fetch user profile");
       }
@@ -69,12 +68,8 @@ class Login extends React.Component {
         avatar: profileData.avatar, // Thêm trường avatar
       };
 
-      // Lưu lại vào localStorage và sessionStorage
-      // localStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
+      // Lưu lại vào sessionStorage
       sessionStorage.setItem("user", JSON.stringify({ ...loginData, user: userWithAvatar }));
-
-      // Lưu vào cookie
-      setCookie("user", { ...loginData, user: userWithAvatar }); // Lưu vào cookie
 
       // Chuyển hướng dựa trên roleId
       switch (userWithAvatar.roleId) {
@@ -136,7 +131,7 @@ class Login extends React.Component {
         )}
         <div className="page-loader-wrapper" style={{ display: this.state.isLoad ? 'block' : 'none' }}>
           <div className="loader">
-            <div className="m-t-30"><img src={require('../assets/images/logo.png')} width="48" height="48" alt="EduNest" /></div>
+            <div className="m-t-30"><img src={require('../assets/images/logo-white.png')} width="200px" height="auto" alt="EduNest" /></div>
             <p>Please wait...</p>
           </div>
         </div>

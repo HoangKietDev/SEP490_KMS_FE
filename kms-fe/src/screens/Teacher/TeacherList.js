@@ -6,12 +6,13 @@ import axios from "axios";
 import Pagination from "../../components/Common/Pagination";
 import Notification from "../../components/Notification";
 import { addNotificationByUserId } from "../../components/Common/Notification";
+import defaultImage from "../../assets/images/profile-default.jpg"
 
 class TeacherList extends React.Component {
   state = {
     TeacherListData: [], // State để lưu trữ dữ liệu từ API
     filteredTeacherListData: [], // Dữ liệu sau khi lọc
-    filterPhone: "", // Bộ lọc theo số điện thoại
+    filterClass: "", // Bộ lọc theo số điện thoại
     filterCode: "", // Bộ lọc theo mã
     filterStatus: "", // Bộ lọc theo trạng thái
     currentPage: 1,
@@ -55,9 +56,9 @@ class TeacherList extends React.Component {
   };
 
   filterTeacherList = () => {
-    const { TeacherListData, filterPhone, filterCode, filterStatus } = this.state;
+    const { TeacherListData, filterClass, filterCode, filterStatus } = this.state;
     const filteredData = TeacherListData?.filter((teacher) => {
-      const matchesPhone = filterPhone === "" || teacher.phoneNumber?.includes(filterPhone);
+      const matchesPhone = filterClass === "" || teacher?.classes[0]?.includes(filterClass);
       const matchesCode = filterCode === "" || teacher.code?.includes(filterCode.toLocaleUpperCase());
       const matchesStatus = filterStatus === "" || teacher.status === parseInt(filterStatus);
       return matchesPhone && matchesCode && matchesStatus;
@@ -65,8 +66,8 @@ class TeacherList extends React.Component {
     this.setState({ filteredTeacherListData: filteredData });
   };
 
-  handleFilterPhoneChange = (e) => {
-    this.setState({ filterPhone: e.target.value }, this.filterTeacherList);
+  handleFilterClass = (e) => {
+    this.setState({ filterClass: e.target.value }, this.filterTeacherList);
   };
 
   handleFilterCodeChange = (e) => {
@@ -96,7 +97,7 @@ class TeacherList extends React.Component {
           notificationType: "success",
           showNotification: true,
         });
-        addNotificationByUserId("Assigned Check in/out","You have been Assign Checkin/out in this week",userID);
+        addNotificationByUserId("Assigned Check in/out", "You have been Assign Checkin/out in this week", userID);
         // Cập nhật lại danh sách giáo viên sau khi thay đổi role
         this.componentDidMount(); // Hoặc có thể gọi lại API để tải lại danh sách giáo viên
       } else {
@@ -203,16 +204,16 @@ class TeacherList extends React.Component {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Filter by Phone"
-                        value={this.state.filterPhone}
-                        onChange={this.handleFilterPhoneChange}
+                        placeholder="Search by Class"
+                        value={this.state.filterClass}
+                        onChange={this.handleFilterClass}
                       />
                     </div>
                     <div className="col-md-3">
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Filter by Code"
+                        placeholder="Search by Code"
                         value={this.state.filterCode}
                         onChange={this.handleFilterCodeChange}
                       />
@@ -234,116 +235,127 @@ class TeacherList extends React.Component {
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
-                    <div className="table-responsive">
-                      <table className="table m-b-0 table-hover">
-                        <thead className="">
-                          <tr className="theme-color">
-                            <th>
-                              <div className="fancy-checkbox d-inline-block">
-                                <label>
-                                  <input
-                                    type="checkbox"
-                                    checked={isAllSelected} // Kiểm tra nếu tất cả giáo viên đã được chọn
-                                    onChange={this.handleSelectAllChange} // Gọi hàm khi thay đổi trạng thái checkbox "Chọn tất cả"
-                                  />
-                                  <span></span>
-                                </label>
-                              </div>
-                            </th>
+                    {currentItems && currentItems.length !== 0 ?
 
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Phone</th>
-                            <th>Gender</th>
-                            <th>Code</th>
-                            <th>Status</th>
-                            <th>Assign Check in/out</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {currentItems?.map((teacher, index) => (
-                            <React.Fragment key={"teacher" + index}>
-                              <tr>
-                                <td>
-                                  <div className="fancy-checkbox d-inline-block">
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedTeacherIds.includes(teacher.teacherId)} // Kiểm tra nếu ID của giáo viên có trong mảng selectedTeacherIds
-                                        onChange={(e) => this.handleIndividualCheckboxChange(e, teacher.teacherId)} // Gọi hàm khi thay đổi
-                                      />
-                                      <span></span>
-                                    </label>
-                                  </div>
-                                </td>
-                                <td>{index + 1}</td>
-                                <td>{teacher?.firstname}</td>
-                                <td>{teacher.lastName}</td>
-                                <td>{teacher.phoneNumber}</td>
-                                <td>
-                                  {teacher.gender === 1 ? (
-                                    <span className="">
-                                      Male
-                                    </span>
-                                  ) : (
-                                    <span className="">
-                                      Female
-                                    </span>
-                                  )}
-                                </td>
-                                <td>{teacher.code}</td>
+                      <div className="table-responsive">
+                        <table className="table m-b-0 table-hover">
+                          <thead className="">
+                            <tr className="theme-color">
+                              <th>
+                                <div className="fancy-checkbox d-inline-block">
+                                  <label>
+                                    <input
+                                      type="checkbox"
+                                      checked={isAllSelected} // Kiểm tra nếu tất cả giáo viên đã được chọn
+                                      onChange={this.handleSelectAllChange} // Gọi hàm khi thay đổi trạng thái checkbox "Chọn tất cả"
+                                    />
+                                    <span></span>
+                                  </label>
+                                </div>
+                              </th>
+                              <th>#</th>
+                              <th>Name</th>
+                              <th>Code</th>
+                              <th>Phone</th>
+                              <th>Teacher</th>
+                              <th>Class</th>
+                              <th>Status</th>
+                              <th>Assign Teacher</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {currentItems?.map((teacher, index) => (
+                              <React.Fragment key={"teacher" + index}>
+                                <tr>
+                                  <td>
+                                    <div className="fancy-checkbox d-inline-block">
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedTeacherIds.includes(teacher.teacherId)} // Kiểm tra nếu ID của giáo viên có trong mảng selectedTeacherIds
+                                          onChange={(e) => this.handleIndividualCheckboxChange(e, teacher.teacherId)} // Gọi hàm khi thay đổi
+                                        />
+                                        <span></span>
+                                      </label>
+                                    </div>
+                                  </td>
+                                  <td>{index + 1}</td>
+                                  <td>
+                                    <img
+                                      src={teacher?.avatar || defaultImage}
+                                      alt="Avatar"
+                                      style={{
+                                        width: "40px",
+                                        height: "40px",
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        marginRight: "10px",
+                                      }}
+                                    />
+                                    {teacher?.firstname + " " + teacher.lastName}
+                                  </td>
+                                  <td>{teacher.code}</td>
+                                  <td>{teacher.phoneNumber}</td>
+                                  <td>
+                                    {teacher?.homeroomTeacher === 1 ? (
+                                      <span className="badge badge-success">Homeroom Teacher</span>
+                                    ) : (
+                                      <span className="badge badge-info">Teacher</span>
+                                    )}
+                                  </td>
+                                  <td>{teacher?.classes[0]}</td>
+                                  <td>
+                                    {teacher?.status === 1 ? (
+                                      <span className="badge badge-success">Active</span>
+                                    ) : teacher?.status === 0 ? (
+                                      <span className="badge badge-default">InActive</span>
+                                    ) : null}
+                                  </td>
+                                  <td className="project-actions">
+                                    {teacher?.role === 6 ? (
+                                      <a className="btn btn-outline-success mr-1"
+                                        onClick={() => this.changeRole(teacher.teacherId)} // Gọi API với userID
+                                      >
+                                        <i className="icon-check"> Assigned</i>
+                                      </a>
+                                    ) : (
+                                      <a
+                                        className="btn btn-outline-danger mr-1"
+                                        onClick={() => this.changeRole(teacher.teacherId)} // Gọi API với userID
+                                      >
+                                        <i className="icon-close"> Assign</i>
+                                      </a>
+                                    )}
+                                  </td>
 
-                                <td>
-                                  {teacher?.status === 1 ? (
-                                    <span className="badge badge-success">Active</span>
-                                  ) : teacher?.status === 0 ? (
-                                    <span className="badge badge-default">InActive</span>
-                                  ) : null}
-                                </td>
-                                <td className="project-actions">
-                                  {teacher?.role === 6 ? (
-                                    <a className="btn btn-outline-success mr-1"
-                                      onClick={() => this.changeRole(teacher.teacherId)} // Gọi API với userID
+
+                                  <td className="project-actions">
+                                    <a className="btn btn-outline-secondary mr-1"
+                                      onClick={() => this.handleDetail(teacher.teacherId)} // Gọi hàm handleEdit
                                     >
-                                      <i className="icon-check"> Assigned</i>
+                                      <i className="icon-eye"></i>
                                     </a>
-                                  ) : (
                                     <a
-                                      className="btn btn-outline-danger mr-1"
-                                      onClick={() => this.changeRole(teacher.teacherId)} // Gọi API với userID
+                                      className="btn btn-outline-secondary"
+                                      onClick={() => this.handleEdit(teacher.teacherId)} // Gọi hàm handleEdit
                                     >
-                                      <i className="icon-close"> Assign</i>
+                                      <i className="icon-pencil"></i>
                                     </a>
-                                  )}
-                                </td>
-
-
-                                <td className="project-actions">
-                                  <a className="btn btn-outline-secondary mr-1"
-                                    onClick={() => this.handleDetail(teacher.teacherId)} // Gọi hàm handleEdit
-                                  >
-                                    <i className="icon-eye"></i>
-                                  </a>
-                                  <a
-                                    className="btn btn-outline-secondary"
-                                    onClick={() => this.handleEdit(teacher.teacherId)} // Gọi hàm handleEdit
-                                  >
-                                    <i className="icon-pencil"></i>
-                                  </a>
-                                </td>
-                              </tr>
-                            </React.Fragment>
-                          ))}
-                        </tbody>
-                      </table>
-                      <div className="text-right">
-                        <button className="btn btn-primary m-4 text-center" onClick={this.assignTeachers}>
-                          Assign Check in/out
-                        </button>
+                                  </td>
+                                </tr>
+                              </React.Fragment>
+                            ))}
+                          </tbody>
+                        </table>
+                        <div className="text-right">
+                          <button className="btn btn-primary m-4 text-center" onClick={this.assignTeachers}>
+                            Assign Check in/out
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                      : <p className="">No data available</p>
+                    }
                     <div className="pt-4">
                       <Pagination
                         currentPage={currentPage}

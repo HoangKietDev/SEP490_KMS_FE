@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from 'react-router-dom';
 import axios from "axios";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 import Pagination from "../../components/Common/Pagination";
@@ -143,7 +143,7 @@ class PaymentHistory extends React.Component {
   }
 
   loadData = async () => {
-    const userData = getCookie('user')?.user;
+    const userData = getSession('user')?.user;
     const parentId = userData?.userId; // Giá trị thực tế của parentId
 
     if (!parentId) {
@@ -241,7 +241,7 @@ class PaymentHistory extends React.Component {
 
   // Generate PDF using react-pdf
   generatePDF = (item) => {
-    const user = getCookie('user')?.user
+    const user = getSession('user')?.user
     const fullName = user?.firstname + user?.lastName
     return (
       <Document>
@@ -422,29 +422,36 @@ class PaymentHistory extends React.Component {
                         </tr>
                       </thead>
                       <tbody>
-                        {currentItems.map((item, index) => (
-                          <React.Fragment key={index}>
-                            <tr>
-                              <td>{index + 1}</td>
-                              <td>{item?.childName}</td>
-                              <td>{item?.paymentDate}</td>
-                              <td>{item?.totalAmount?.toLocaleString('vi-VN')} VND</td>
-                              <td>{item?.paymentName}</td>
-                              <td>
-                                {/* Download button */}
-                                <PDFDownloadLink
-                                  document={this.generatePDF(item)}
-                                  fileName="payment-history.pdf"
-                                >
-                                  {({ loading }) => (loading ? 'Loading document...' : 'Download PDF')}
-                                </PDFDownloadLink>
-                              </td>
-                            </tr>
-                          </React.Fragment>
-                        ))}
+                        {currentItems && currentItems.length !== 0 ?
+
+
+                          currentItems.map((item, index) => (
+                            <React.Fragment key={index}>
+                              <tr>
+                                <td>{index + 1}</td>
+                                <td>{item?.childName}</td>
+                                <td>{item?.paymentDate}</td>
+                                <td>{item?.totalAmount?.toLocaleString('vi-VN')} VND</td>
+                                <td>{item?.paymentName}</td>
+                                <td>
+                                  {/* Download button */}
+                                  <PDFDownloadLink
+                                    document={this.generatePDF(item)}
+                                    fileName="payment-history.pdf"
+                                  >
+                                    {({ loading }) => (loading ? 'Loading document...' : 'Download PDF')}
+                                  </PDFDownloadLink>
+                                </td>
+                              </tr>
+                            </React.Fragment>
+                          ))
+
+                          : <p className="pt-4">No data available</p>
+                        }
                       </tbody>
                     </table>
                   </div>
+
                 </div>
               </div>
             </div>

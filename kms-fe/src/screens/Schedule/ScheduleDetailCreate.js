@@ -6,7 +6,7 @@ import axios from "axios";
 import Modal from "react-bootstrap/Modal"; // Import Bootstrap Modal
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { getCookie } from "../../components/Auth/Auth";
+import { getSession } from "../../components/Auth/Auth";
 import Notification from "../../components/Notification";
 
 
@@ -417,7 +417,7 @@ class ScheduleDetailCreate extends React.Component {
     console.log(this.state.activities);
 
 
-    const userData = (getCookie("user")?.user);
+    const userData = (getSession("user")?.user);
     const roleId = userData.roleId;
 
     const queryParams = new URLSearchParams(this.props.location.search);
