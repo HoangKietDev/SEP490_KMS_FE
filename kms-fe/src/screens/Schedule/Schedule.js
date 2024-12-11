@@ -141,18 +141,15 @@ class Schedule extends React.Component {
       if (scheduleData.length > 0) {
         const scheduleId = scheduleData[0].scheduleId;
 
-        // if (roleId === 2 && scheduleData[0].status !== 2) {
         this.setState({
           scheduleData: scheduleData,
           scheduleDetails: [], // No details for status 0
         });
-        //   return;
-        // }
 
         const detailResponse = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/ScheduleDetail/GetAllScheduleDetailsByScheduleId/${scheduleId}`
         );
-        const scheduleDetails = detailResponse.data;
+        const scheduleDetails = detailResponse.data || [];
         console.log(scheduleDetails);
 
         const weekdate = startDate + '-' + endDate
@@ -175,7 +172,7 @@ class Schedule extends React.Component {
     } catch (error) {
       console.error('Error fetching data:', error);
       this.setState({
-        scheduleData: [],    // Clear data on error as well
+        // scheduleData: [],    // Clear data on error as well
         scheduleDetails: [], // Clear details on error
       });
     }
@@ -452,6 +449,30 @@ class Schedule extends React.Component {
     this.setState({ showConfirmModal: false });
   };
 
+  handlePublic = async (data) => {
+    try {
+      let formdata = {
+        scheduleId: data?.scheduleId,
+        classId: data?.classId,
+        status: 1,
+        teacherName: data?.teacherName
+      }
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/Schedule/UpdateSchedule`, formdata);
+      this.setState({
+        notificationText: "Status updated successfully!",
+        notificationType: "success",
+        showNotification: true
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      this.setState({
+        notificationText: "Status updated Error!",
+        notificationType: "error",
+        showNotification: true
+      });
+    }
+  }
+
 
 
   renderTable = () => {
@@ -520,7 +541,7 @@ class Schedule extends React.Component {
                       </div>
 
                       {/* Button để gửi email */}
-                      {roleId === 5 ? (
+                      {roleId === 5 || roleId === 6 ? (
                         <>
                           <button
                             className="btn btn-primary ml-3"
@@ -739,6 +760,13 @@ class Schedule extends React.Component {
                         </Modal.Footer>
                       </Modal>
                     </div>
+
+                    {roleId === 3 ?
+                      <div>
+                          <button className="btn btn-lg btn-success mt-3" onClick={() => this.handlePublic(scheduleData[0])}>Post Schedule To Principal</button>
+                      </div>
+                      : <></>
+                    }
                   </div>
                 </div>
               </div>

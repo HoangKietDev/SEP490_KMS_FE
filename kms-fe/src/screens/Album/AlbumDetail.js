@@ -350,7 +350,7 @@ class AlbumDetail extends React.Component {
                         </div>
                       </div>
                       <div className="form-group col-md-6 d-flex justify-content-end align-items-start">
-                        {roleId === 5 && (
+                        {roleId === 5 || roleId === 6 && (
                           <>
                             <button
                               onClick={(e) => {
