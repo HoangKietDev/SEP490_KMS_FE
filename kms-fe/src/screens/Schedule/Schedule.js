@@ -520,7 +520,7 @@ class Schedule extends React.Component {
                       </div>
 
                       {/* Button để gửi email */}
-                      {roleId === 5 ? (
+                      {roleId ===  6? (
                         <>
                           <button
                             className="btn btn-primary ml-3"
