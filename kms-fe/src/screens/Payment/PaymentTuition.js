@@ -7,13 +7,14 @@ import { withRouter } from 'react-router-dom';
 import { getSession } from '../../components/Auth/Auth';
 import Pagination from "../../components/Common/Pagination";
 import Notification from "../../components/Notification";
-import { Modal, Button, Table } from 'react-bootstrap';
+import { Modal, Button, Table, Pagination as BootstrapPagination } from 'react-bootstrap';
 import { RotatingLines } from 'react-loader-spinner';
 
 class Paymenttuition extends React.Component {
 
     state = {
         paymentAll: [],
+        StudentAll: [],
         searchText: "",
 
         startDate: "", // Lưu trữ ngày bắt đầu
@@ -25,6 +26,9 @@ class Paymenttuition extends React.Component {
 
         currentPage: 1,
         itemsPerPage: 10,
+
+        currentPageModal: 1,
+        itemsPerPageModal: 10,
 
         showNotification: false, // Để hiển thị thông báo
         notificationText: "", // Nội dung thông báo
@@ -65,10 +69,14 @@ class Paymenttuition extends React.Component {
     fetchData = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Tuition/GetAllTuitionsCheckGene`);
+            const studentresponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Children/GetAllChildren`);
+
 
             const data = response.data;
+            const stduentdata = studentresponse.data;
             this.setState({
                 paymentAll: data,
+                StudentAll: stduentdata
             });
             console.log(data);
         } catch (error) {
@@ -118,6 +126,7 @@ class Paymenttuition extends React.Component {
         try {
             // Hiển thị trạng thái đang tải (nếu cần)
             this.setState({ isProcessing: true });
+            this.setState({ currentPageModal: 1 });
 
             // Gửi yêu cầu POST để tạo học phí
             const response = await axios.post(
@@ -323,10 +332,20 @@ class Paymenttuition extends React.Component {
     handlePageChange = (pageNumber) => {
         this.setState({ currentPage: pageNumber });
     };
+    handlePageChange1 = (pageNumber) => {
+        this.setState({ currentPageModal: pageNumber });
+    };
+
+    // Tính toán dữ liệu cho trang hiện tại
+    getCurrentTuitionData = () => {
+        const { tuitionData, currentPageModal, itemsPerPageModal } = this.state;
+        const offset = (currentPageModal - 1) * itemsPerPageModal;
+        return tuitionData.slice(offset, offset + itemsPerPageModal);
+    };
 
     render() {
 
-        const { paymentAll, searchText, startDate, endDate, classList, tuitionData } = this.state;
+        const { paymentAll, searchText, startDate, endDate, classList, tuitionData, StudentAll } = this.state;
 
         const { showNotification, notificationText, notificationType } = this.state;
 
@@ -343,6 +362,11 @@ class Paymenttuition extends React.Component {
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
         const currentItems = filteredpaymentAll.slice(indexOfFirstItem, indexOfLastItem);
+
+        const { currentPageModal, itemsPerPageModal } = this.state;
+
+        const currentTuitionData = this.getCurrentTuitionData();  // Dữ liệu trang hiện tại
+
 
         return (
             <div
@@ -602,34 +626,60 @@ class Paymenttuition extends React.Component {
                                     <Modal.Title>Confirm Tuition Data</Modal.Title>
                                 </Modal.Header>
                                 <Modal.Body>
-                                    {tuitionData && tuitionData.length > 0 ? (
-                                        <Table striped bordered hover responsive style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Children</th>
-                                                    <th>StartDate</th>
-                                                    <th>EndDate</th>
-                                                    <th>tuitionFee</th>
-                                                    <th>Due Date</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {tuitionData.map((tuition, index) => (
-                                                    <tr key={index}>
-                                                        <td>{index + 1}</td>
-                                                        <td>{tuition?.studentId}</td>
-                                                        <td>{tuition?.startDate?.split("T")[0]}</td>
-                                                        <td>{tuition?.endDate?.split("T")[0]}</td>
-                                                        <td>{tuition.tuitionFee?.toLocaleString('vi-VN')}</td>
-                                                        <td>{tuition?.dueDate?.split("T")[0]}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </Table>
-                                    ) : (
-                                        <p>No data available</p>
-                                    )}
+                                    {tuitionData && tuitionData.length > 0 ?
+                                        (
+                                            <>
+                                                <Table striped bordered hover responsive style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>ID</th>
+                                                            <th>Children</th>
+                                                            <th>StartDate</th>
+                                                            <th>EndDate</th>
+                                                            <th>tuitionFee</th>
+                                                            <th>Due Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {currentTuitionData.map((tuition, index) => (
+                                                            <tr key={index}>
+                                                                <td>{index + 1}</td>
+                                                                <td>
+                                                                    {StudentAll?.find(i => i.studentId == tuition?.studentId)?.fullName}
+                                                                </td>
+                                                                <td>{tuition?.startDate?.split("T")[0]}</td>
+                                                                <td>{tuition?.endDate?.split("T")[0]}</td>
+                                                                <td>{tuition.tuitionFee?.toLocaleString('vi-VN')}</td>
+                                                                <td>{tuition?.dueDate?.split("T")[0]}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </Table>
+
+                                                {/* Pagination */}
+                                                <BootstrapPagination>
+                                                    <BootstrapPagination.Prev
+                                                        onClick={() => this.handlePageChange1(currentPageModal - 1)}
+                                                        disabled={currentPageModal === 1}
+                                                    />
+                                                    {[...Array(Math.ceil(tuitionData.length / itemsPerPageModal))].map((_, index) => (
+                                                        <BootstrapPagination.Item
+                                                            key={index}
+                                                            active={index + 1 === currentPageModal}
+                                                            onClick={() => this.handlePageChange1(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </BootstrapPagination.Item>
+                                                    ))}
+                                                    <BootstrapPagination.Next
+                                                        onClick={() => this.handlePageChange1(itemsPerPageModal + 1)}
+                                                        disabled={currentPageModal === Math.ceil(tuitionData.length / itemsPerPageModal)}
+                                                    />
+                                                </BootstrapPagination>
+                                            </>
+                                        ) : (
+                                            <p>No data available</p>
+                                        )}
                                     <p>Do you want to save or delete this data?</p>
                                 </Modal.Body>
                                 <Modal.Footer>
