@@ -298,6 +298,7 @@ class ViewChildrenByClassID extends React.Component {
   render() {
     const { StudentsData, GradesData, searchTerm, hoveredImageSrc, hoveredImagePosition, studentsWithoutClass, showAddModal, showNotification, notificationText, notificationType } = this.state;
     const user = getSession('user');
+    const roleId = user?.user?.roleId
     const isRole4 = user && user.user.roleId === 4;
     const isRole3 = user && user.user.roleId === 3; // Kiểm tra roleId = 3
     const filteredStudents = StudentsData.filter((student) =>
@@ -315,7 +316,9 @@ class ViewChildrenByClassID extends React.Component {
           <PageHeader
             HeaderText="Student Management"
             Breadcrumb={[
-              { name: "Class Management", navigate: "/viewclass" },
+              { name: "Class Management", 
+                navigate: roleId === 5 ? "/viewclass3" : roleId === 2 ? "/viewclass2"  : "/viewclass"
+              },
               { name: "View Students", navigate: "" },
             ]}
           />
