@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import Notification from "../../components/Notification";
+import avtprofile from "../../assets/images/profile-default.jpg"
+
 class ViewAllChildren extends React.Component {
   state = {
     StudentsData: [], // State để lưu trữ dữ liệu từ API
@@ -271,7 +273,7 @@ class ViewAllChildren extends React.Component {
 
                             const avatar =
                               student.avatar ||
-                              "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg";
+                              avtprofile;
 
                             return (
                               <React.Fragment key={"student" + index}>

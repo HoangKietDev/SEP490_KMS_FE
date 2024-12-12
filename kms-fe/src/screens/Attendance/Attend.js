@@ -7,6 +7,8 @@ import "react-datepicker/dist/react-datepicker.css"; // Import CSS của DatePic
 import axios from "axios";
 import './Checkin.css'; // Import CSS cho hiệu ứng nút
 import Notification from "../../components/Notification";
+import avtprofile from "../../assets/images/profile-default.jpg"
+
 class Attend extends React.Component {
     state = {
         studentDataCheckin: [],
@@ -204,50 +206,50 @@ class Attend extends React.Component {
     createDailyCheckin = () => {
         const { classId, selectedDate } = this.state;
         const formattedDate = this.formatDate(selectedDate);
-    
+
         fetch(`${process.env.REACT_APP_API_URL}/api/Attendance/CreateDailyAttendance`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ classId: classId, date: formattedDate }),
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ classId: classId, date: formattedDate }),
         })
-          .then((response) => {
-            if (!response.ok) {
-              if (response.status === 500) {
-                console.warn("API CreateDailyCheckin returned a 500 error, but it will be ignored.");
-                return; // Bỏ qua lỗi 500
-              }
-              throw new Error("Error calling CreateDailyCheckin API: " + response.statusText);
-            }
-    
-            // Nếu phản hồi là chuỗi văn bản (như "Daily check-in created successfully.")
-            return response.text(); // Trả về văn bản thay vì JSON
-          })
-          .then((data) => {
-            // Xử lý chuỗi văn bản từ phản hồi
-            if (data === "Daily attend created successfully.") {
-              console.log("Daily check-in created successfully.");
-              this.setState({
-                notificationText: "Attendance has been successfully created!",
-                notificationType: "success",
-                showNotification: true,
-              });
-    
-              // Sau khi tạo thành công, có thể gọi componentDidMount để làm mới dữ liệu
-              this.componentDidMount();
-            } else {
-              console.error("Unexpected response:", data);
-            }
-          })
-          .catch((error) => {
-            console.error("Error calling CreateDailyCheckin API:", error);
-            this.setState({
-              notificationText: "Error calling CreateDailyCheckin API",
-              notificationType: "error",
-              showNotification: true,
+            .then((response) => {
+                if (!response.ok) {
+                    if (response.status === 500) {
+                        console.warn("API CreateDailyCheckin returned a 500 error, but it will be ignored.");
+                        return; // Bỏ qua lỗi 500
+                    }
+                    throw new Error("Error calling CreateDailyCheckin API: " + response.statusText);
+                }
+
+                // Nếu phản hồi là chuỗi văn bản (như "Daily check-in created successfully.")
+                return response.text(); // Trả về văn bản thay vì JSON
+            })
+            .then((data) => {
+                // Xử lý chuỗi văn bản từ phản hồi
+                if (data === "Daily attend created successfully.") {
+                    console.log("Daily check-in created successfully.");
+                    this.setState({
+                        notificationText: "Attendance has been successfully created!",
+                        notificationType: "success",
+                        showNotification: true,
+                    });
+
+                    // Sau khi tạo thành công, có thể gọi componentDidMount để làm mới dữ liệu
+                    this.componentDidMount();
+                } else {
+                    console.error("Unexpected response:", data);
+                }
+            })
+            .catch((error) => {
+                console.error("Error calling CreateDailyCheckin API:", error);
+                this.setState({
+                    notificationText: "Error calling CreateDailyCheckin API",
+                    notificationType: "error",
+                    showNotification: true,
+                });
             });
-          });
     };
 
 
@@ -265,7 +267,7 @@ class Attend extends React.Component {
                         // name: `${parent.firstName || ""} ${parent.lastName || ""}`.trim(),
                         name: `${parent.firstname} ${parent.lastName}`.trim(),
                         phone: parent.phoneNumber || "Không có",
-                        avatar: parent.avatar || "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg",
+                        avatar: parent.avatar || avtprofile,
                     };
                     return acc;
                 }, {});
@@ -317,7 +319,7 @@ class Attend extends React.Component {
                 console.log("SMS sent successfully:", response.data);
                 // alert("Tin nhắn đã được gửi thành công!");
                 this.setState({
-                    notificationText: "Tin nhắn đã được gửi thành công!",
+                    notificationText: "Message sent successfully!",
                     notificationType: "success",
                     showNotification: true,
                 });
@@ -327,7 +329,7 @@ class Attend extends React.Component {
                 console.error("Error sending SMS:", error);
                 // alert("Có lỗi xảy ra khi gửi tin nhắn.");
                 this.setState({
-                    notificationText: "Có lỗi xảy ra khi gửi tin nhắn.",
+                    notificationText: "An error occurred while sending the message.",
                     notificationType: "error",
                     showNotification: true,
                 });
@@ -647,7 +649,7 @@ class Attend extends React.Component {
                                     console.error("Error updating service:", error);
                                     // alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
                                     this.setState({
-                                        notificationText: "`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`",
+                                        notificationText: `An error occurred while updating the service for student ID ${studentId}`,
                                         notificationType: "success",
                                         showNotification: true,
                                     });
@@ -677,7 +679,7 @@ class Attend extends React.Component {
                                     console.error("Error adding service:", error);
                                     // alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
                                     this.setState({
-                                        notificationText: `Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`,
+                                        notificationText: `An error occurred while adding service for student ID ${studentId}`,
                                         notificationType: "error",
                                         showNotification: true,
                                     });
@@ -712,7 +714,7 @@ class Attend extends React.Component {
                                     console.error("Error updating service:", error);
                                     // alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
                                     this.setState({
-                                        notificationText: "`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`",
+                                        notificationText: `An error occurred while updating the service for student ID ${studentId}`,
                                         notificationType: "success",
                                         showNotification: true,
                                     });
@@ -805,7 +807,7 @@ class Attend extends React.Component {
                 console.log("Attendance updated successfully:", data);
                 // alert("Điểm danh đã được cập nhật thành công!");
                 this.setState({
-                    notificationText: "Điểm danh đã được cập nhật thành công!",
+                    notificationText: "Attendance has been updated successfully!",
                     notificationType: "success",
                     showNotification: true,
                 });
@@ -816,7 +818,7 @@ class Attend extends React.Component {
                 console.error("Error updating attendance: ", error);
                 // alert("Có lỗi xảy ra khi cập nhật điểm danh.");
                 this.setState({
-                    notificationText: "Có lỗi xảy ra khi cập nhật điểm danh.",
+                    notificationText: "An error occurred while updating attendance.",
                     notificationType: "error",
                     showNotification: true,
                 });
@@ -837,7 +839,7 @@ class Attend extends React.Component {
                 console.log(`SMS sent for student ${studentId}:`, response.data);
                 // alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
                 this.setState({
-                    notificationText: "`Tin nhắn đã được gửi cho học sinh ID ${studentId}`",
+                    notificationText: `Message has been sent to student ID ${studentId}`,
                     notificationType: "success",
                     showNotification: true,
                 });
@@ -846,7 +848,7 @@ class Attend extends React.Component {
                 console.error("Error sending SMS:", error);
                 // alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
                 this.setState({
-                    notificationText: `Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`,
+                    notificationText: `An error occurred while sending a message to student ID ${studentId}`,
                     notificationType: "error",
                     showNotification: true,
                 });
@@ -962,13 +964,15 @@ class Attend extends React.Component {
                                                             <td>
                                                                 <div className="d-flex align-items-center">
                                                                     <img
-                                                                        src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                                                                        src={student.avatar ? student.avatar : avtprofile} // Sử dụng avtprofile nếu student.avatar không có giá trị
                                                                         alt="Profile"
                                                                         className="img-fluid rounded-circle mr-2"
-                                                                        style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                                                                        style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                                                        
                                                                     />
                                                                     <span>{student.fullName}</span>
                                                                 </div>
+
                                                             </td>
                                                             <td>{student.code}</td>
                                                             <td>
@@ -1039,18 +1043,18 @@ class Attend extends React.Component {
                                                 <tr key={student.studentId}>
                                                     <td>
                                                         <div className="d-flex align-items-center">
+                                                           
                                                             <img
-                                                                src="https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                                                                src={student.avatar ? student.avatar : avtprofile} // Sử dụng avtprofile nếu student.avatar không có giá trị
                                                                 alt="Profile"
                                                                 className="img-fluid rounded-circle mr-2"
-                                                                style={{ width: '40px', height: '40px', objectFit: 'cover' }}
-                                                                onMouseEnter={(e) =>
-                                                                    this.handleMouseEnter(
-                                                                        "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg",
-                                                                        e
-                                                                    )
-                                                                }
-                                                                onMouseLeave={this.handleMouseLeave}
+                                                                style={{ width: "40px", height: "40px", objectFit: "cover" }}
+                                                                // onMouseEnter={(e) =>
+                                                                //     this.handleMouseEnter(
+                                                                //         `${student.avatar ? student.avatar : avtprofile}` ,
+                                                                //         e
+                                                                //     )
+                                                                // }
                                                             />
                                                             <span>{student.fullName}</span>
                                                         </div>

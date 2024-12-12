@@ -10,7 +10,7 @@ import './Checkin.css'; // Import CSS cho hiệu ứng nút
 import Notification from "../../components/Notification";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Pagination from "../../components/Common/Pagination";
-
+import avtprofile from "../../assets/images/profile-default.jpg"
 class Checkin extends React.Component {
   state = {
     studentDataCheckin: [],
@@ -98,6 +98,8 @@ class Checkin extends React.Component {
     // Đóng modal sau khi xác nhận
     this.handleCloseConfirmModal();
     // this.fetchAttendanceData();
+    window.location.reload();
+
   };
 
   closeImageModal = () => {
@@ -210,7 +212,7 @@ class Checkin extends React.Component {
 
           if (matchedStudent) {
             this.setState({
-              notificationText: `Học sinh ${matchedStudent.fullName} được nhận diện thành công.`,
+              notificationText: `Student ${matchedStudent.fullName} was successfully identified.`,
               notificationType: "success",
               showNotification: true,
 
@@ -266,7 +268,7 @@ class Checkin extends React.Component {
       })
       .catch((error) => {
         this.setState({
-          notificationText: `Có lỗi xảy ra: ${error.message}`,
+          notificationText: `Error: ${error.message}`,
           notificationType: "error",
           showNotification: true,
         });
@@ -406,7 +408,7 @@ class Checkin extends React.Component {
       if (selectedStudents.length === 0) {
         // alert("Bạn chưa chọn học sinh nào.");
         this.setState({
-          notificationText: "Bạn chưa chọn học sinh nào.",
+          notificationText: "You have not selected any students yet.",
           notificationType: "error",
           showNotification: true,
         });
@@ -416,7 +418,7 @@ class Checkin extends React.Component {
       if (!selectedFile) {
         // alert("Không có ảnh nào được chụp. Vui lòng chụp ảnh trước khi xác nhận.");
         this.setState({
-          notificationText: "Không có ảnh nào được chụp. Vui lòng chụp ảnh trước khi xác nhận.",
+          notificationText: "No photo taken. Please take a photo before confirming.",
           notificationType: "error",
           showNotification: true,
         });
@@ -441,7 +443,7 @@ class Checkin extends React.Component {
       this.setState({ selectedStudents: [], isModalVisible: false, isUploading: false, showImageModal: false }, () => {
         // alert("Cập nhật trạng thái 'Đã về' và upload ảnh thành công!");
         this.setState({
-          notificationText: `Cập nhật trạng thái 'Đã về' và upload ảnh thành công!`,
+          notificationText: `Updated status 'Came Back' and uploaded photo successfully!`,
           notificationType: "success",
           showNotification: true,
         });
@@ -545,7 +547,7 @@ class Checkin extends React.Component {
       })
       .then((data) => {
         console.log(`Ảnh đã được upload thành công cho attendanceDetailID: ${attendanceDetailID}`, data);
-        this.handleAttendance(studentID, "Arrived");
+        this.handleAttendance(studentID, "Came Back");
       })
       .catch((error) => {
         console.error(`Có lỗi xảy ra khi upload ảnh cho attendanceDetailID: ${attendanceDetailID}`, error);
@@ -612,7 +614,7 @@ class Checkin extends React.Component {
           this.handleFetchPickupPersonInfo(recognizedUUID);
         } else {
           this.setState({
-            notificationText: "Không tìm thấy dữ liệu phù hợp trong ảnh.",
+            notificationText: "No matching data found in image.",
             notificationType: "error",
             showNotification: true,
           });
@@ -622,7 +624,7 @@ class Checkin extends React.Component {
       .catch((error) => {
         console.error("Error:", error);
         this.setState({
-          notificationText: `Có lỗi xảy ra: ${error.message}`,
+          notificationText: `Error: ${error.message}`,
           notificationType: "error",
           showNotification: true,
         });
@@ -786,7 +788,7 @@ class Checkin extends React.Component {
         console.log("SMS sent successfully:", response.data);
         // alert("Tin nhắn đã được gửi thành công!");
         this.setState({
-          notificationText: "Tin nhắn đã được gửi thành công!",
+          notificationText: "Message sent successfully!",
           notificationType: "success",
           showNotification: true,
         });
@@ -796,7 +798,7 @@ class Checkin extends React.Component {
         console.error("Error sending SMS:", error);
         // alert("Có lỗi xảy ra khi gửi tin nhắn.");
         this.setState({
-          notificationText: "Có lỗi xảy ra khi gửi tin nhắn.",
+          notificationText: "An error occurred while sending the message.",
           notificationType: "error",
           showNotification: true,
         });
@@ -835,7 +837,7 @@ class Checkin extends React.Component {
           // Gán avatar mặc định nếu avatar là null
           student.avatar =
             student.avatar ||
-            "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg";
+            avtprofile;
           return student;
         });
 
@@ -878,7 +880,7 @@ class Checkin extends React.Component {
             // name: `${parent.firstName || ""} ${parent.lastName || ""}`.trim(),
             name: `${parent.firstname} ${parent.lastName}`.trim(),
             phone: parent.phoneNumber || "Không có",
-            avatar: parent.avatar || "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg",
+            avatar: parent.avatar || avtprofile,
           };
           return acc;
         }, {});
@@ -1092,7 +1094,7 @@ class Checkin extends React.Component {
                   console.error("Error updating service:", error);
                   // alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
                   this.setState({
-                    notificationText: `Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`,
+                    notificationText: `An error occurred while updating the service for student ID ${studentId}`,
                     notificationType: "error",
                     showNotification: true,
                   });
@@ -1117,7 +1119,7 @@ class Checkin extends React.Component {
                   console.error("Error adding service:", error);
                   //alert(`Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`);
                   this.setState({
-                    notificationText: `Có lỗi xảy ra khi thêm dịch vụ cho học sinh ID ${studentId}`,
+                    notificationText: `An error occurred while adding service for student ID ${studentId}`,
                     notificationType: "error",
                     showNotification: true,
                   });
@@ -1147,7 +1149,7 @@ class Checkin extends React.Component {
                   console.error("Error updating service:", error);
                   //alert(`Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`);
                   this.setState({
-                    notificationText: `Có lỗi xảy ra khi cập nhật dịch vụ cho học sinh ID ${studentId}`,
+                    notificationText: `An error occurred while updating the service for student ID ${studentId}`,
                     notificationType: "error",
                     showNotification: true,
                   });
@@ -1275,7 +1277,7 @@ class Checkin extends React.Component {
 
         // Thông báo thành công
         this.setState({
-          notificationText: `Điểm danh cho học sinh ${studentId} đã được cập nhật thành công!`,
+          notificationText: `Attendance for student ${studentId} has been updated successfully!`,
           notificationType: "success",
           showNotification: true,
         });
@@ -1284,7 +1286,7 @@ class Checkin extends React.Component {
         console.error("Error updating attendance: ", error);
         // Thông báo lỗi
         this.setState({
-          notificationText: `Có lỗi xảy ra khi cập nhật điểm danh cho học sinh ${studentId}.`,
+          notificationText: `An error occurred while updating attendance for student ${studentId}.`,
           notificationType: "error",
           showNotification: true,
         });
@@ -1533,7 +1535,7 @@ class Checkin extends React.Component {
 
         // Thông báo thành công
         this.setState({
-          notificationText: `Điểm danh đã được cập nhật thành công!`,
+          notificationText: `Attendance has been updated successfully!`,
           notificationType: "success",
           showNotification: true,
         });
@@ -1570,7 +1572,7 @@ class Checkin extends React.Component {
       .catch((error) => {
         console.error("Error updating attendance: ", error);
         this.setState({
-          notificationText: `Có lỗi xảy ra khi cập nhật điểm danh.`,
+          notificationText: `An error occurred while updating attendance.`,
           notificationType: "error",
           showNotification: true,
         });
@@ -1589,7 +1591,7 @@ class Checkin extends React.Component {
         console.log(`SMS sent for student ${studentId}:`, response.data);
         // alert(`Tin nhắn đã được gửi cho học sinh ID ${studentId}`);
         this.setState({
-          notificationText: `Tin nhắn đã được gửi cho học sinh ID ${studentId}`,
+          notificationText: `Message has been sent to student ID ${studentId}`,
           notificationType: "success",
           showNotification: true,
         });
@@ -1599,7 +1601,7 @@ class Checkin extends React.Component {
         // alert(`Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`);
 
         this.setState({
-          notificationText: `Có lỗi xảy ra khi gửi tin nhắn cho học sinh ID ${studentId}`,
+          notificationText: `An error occurred while sending a message to student ID ${studentId}`,
           notificationType: "error",
           showNotification: true,
         });
@@ -1979,20 +1981,20 @@ class Checkin extends React.Component {
                                 <td>{parent.phone || "Không có số"}</td>
                                 <td>
                                   <button
-                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Arrived" ? "btn-success" : ""
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Came Back" ? "btn-success" : ""
                                       }`}
-                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Arrived")}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Came Back")}
                                     disabled={!isToday}
                                   >
-                                    Arrived
+                                    Came Back
                                   </button>
                                   <button
-                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Arrived" || !attendanceDataCheckout[student.studentId] ? "btn-danger" : "" ? "btn-danger" : ""
+                                    className={`btn mr-1 ${attendanceDataCheckout[student.studentId] === "Not Back Yet" || !attendanceDataCheckout[student.studentId] ? "btn-danger" : "" ? "btn-danger" : ""
                                       }`}
-                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Not Arrived")}
+                                    onClick={() => isToday && this.handleAttendance(student.studentId, "Not Back Yet")}
                                     disabled={!isToday}
                                   >
-                                    Not Arrived
+                                    Not Back Yet
                                   </button>
                                 </td>
                                 <td className="project-actions">

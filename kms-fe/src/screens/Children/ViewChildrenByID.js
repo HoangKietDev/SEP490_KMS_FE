@@ -158,7 +158,8 @@ class ViewStudentById extends React.Component {
         parentId,
         avatar: "", // Avatar để trống trong request JSON
       };
-
+      console.log(updatedStudent,"tesst");
+      
       // Gọi API UpdateChildren
       await axios.put(`${process.env.REACT_APP_API_URL}/api/Children/UpdateChildren`, updatedStudent, {
         headers: {

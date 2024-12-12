@@ -6,8 +6,11 @@ import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap nếu chưa c
 import Notification from "../../components/Notification";
 import axios from 'axios';
 import { getSession } from "../../components/Auth/Auth";
+import avtprofile from "../../assets/images/profile-default.jpg"
+
 class ViewChildrenByClassID extends React.Component {
   state = {
+    user: {},
     StudentsData: [],
     GradesData: [],
     searchTerm: "",
@@ -24,7 +27,8 @@ class ViewChildrenByClassID extends React.Component {
   componentDidMount() {
     window.scrollTo(0, 0);
     const classId = this.props.match.params.classId;
-
+    const user = JSON.parse(sessionStorage.getItem("user")); // Lấy user từ sessionStorage
+    this.setState({ user });
     // Fetch students data
     fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetChildrenByClassId/${classId}`)
       .then((response) => response.json())
@@ -63,7 +67,14 @@ class ViewChildrenByClassID extends React.Component {
       return { selectedStudents: newSelectedStudents };
     });
   };
-
+  handleView = (studentId) => {
+    // Chuyển hướng đến trang cập nhật thông tin học sinh
+    this.props.history.push(`/viewdetailschildren/${studentId}`);
+  };
+  handleEdit = (studentId) => {
+    // Chuyển hướng đến trang cập nhật thông tin học sinh
+    this.props.history.push(`/viewstudentbyId/${studentId}`);
+  };
   handleAddChildren = () => {
     const classId = this.props.match.params.classId;
     // Fetch students without class
@@ -316,8 +327,9 @@ class ViewChildrenByClassID extends React.Component {
           <PageHeader
             HeaderText="Student Management"
             Breadcrumb={[
-              { name: "Class Management", 
-                navigate: roleId === 5 ? "/viewclass3" : roleId === 2 ? "/viewclass2"  : "/viewclass"
+              {
+                name: "Class Management",
+                navigate: roleId === 5 ? "/viewclass3" : roleId === 2 ? "/viewclass2" : "/viewclass"
               },
               { name: "View Students", navigate: "" },
             ]}
@@ -406,7 +418,7 @@ class ViewChildrenByClassID extends React.Component {
                             <tr key={index}>
                               <td><div className="d-flex align-items-center">
                                 <img
-                                  src={student.avatar || "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"} // Avatar học sinh hoặc avatar mặc định
+                                  src={student.avatar ? student.avatar : avtprofile} // Sử dụng avtprofile nếu student.avatar không có giá trị
                                   alt="Profile"
                                   className="img-fluid rounded-circle mr-2"
                                   style={{ width: "40px", height: "40px", objectFit: "cover" }}
@@ -432,14 +444,19 @@ class ViewChildrenByClassID extends React.Component {
                                 )}
                               </td>
                               <td className="project-actions">
-                                <a className="btn btn-outline-secondary mr-1">
-                                  <i className="icon-eye"></i>
-                                </a>
-                                <a className="btn btn-outline-secondary">
-                                  <i className="icon-pencil"></i>
-                                </a>
-
+                                {/* Kiểm tra roleID từ session (user) */}
+                                {this.state.user && (this.state.user.roleID === 3 || this.state.user.roleID === 4) && (
+                                  <>
+                                    <a className="btn btn-outline-secondary mr-1" onClick={() => this.handleView(student.studentId)}>
+                                      <i className="icon-eye"></i>
+                                    </a>
+                                    <a className="btn btn-outline-secondary" onClick={() => this.handleEdit(student.studentId)}>
+                                      <i className="icon-pencil"></i>
+                                    </a>
+                                  </>
+                                )}
                               </td>
+
                             </tr>
                           ))
                         )}

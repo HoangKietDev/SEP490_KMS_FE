@@ -26,7 +26,12 @@ class ProfileV1Page extends React.Component {
     },
     showNotification: false, // State to control notification visibility
     notificationText: "", // Text for the notification
-    notificationType: "success" // Type of notification (success or error)
+    notificationType: "success", // Type of notification (success or error)
+    showPassword: {
+      currentPassword: false,
+      newPassword: false,
+      confirmNewPassword: false,
+    },
   };
 
   componentDidMount() {
@@ -60,7 +65,14 @@ class ProfileV1Page extends React.Component {
       console.error("Error fetching user data:", error);
     }
   };
-
+  handleTogglePasswordVisibility = (field) => {
+    this.setState((prevState) => ({
+      showPassword: {
+        ...prevState.showPassword,
+        [field]: !prevState.showPassword[field],
+      },
+    }));
+  };
   handleChange = (e) => {
     const { name, value } = e.target;
     this.setState((prevState) => ({
@@ -115,31 +127,46 @@ class ProfileV1Page extends React.Component {
         method: "PUT",
         body: formData,
       });
+      const data = await fetch(`${process.env.REACT_APP_API_URL}/api/User/ProfileById/${storedUser.user.userId}`);
+      const newavater = await data.json();
 
       if (response.ok) {
         const result = await response.json();
         console.log("User updated successfully:", result);
-        // alert("Cập nhật người dùng thành công!");
+        console.log(result, "test phan hoi");
+        // Chỉ cập nhật 3 trường trong sessionStorage
+        const updatedUser = {
+          ...storedUser.user,
+          firstname: updatedUserData.firstname,
+          lastName: updatedUserData.lastName,
+          avatar: newavater.avatar || storedUser.user.avatar // Giả sử phản hồi trả về URL avatar
+        };
+        sessionStorage.setItem("user", JSON.stringify({ ...storedUser, user: updatedUser }));
+
         this.setState({
-          notificationText: "Cập nhật người dùng thành công!",
+          notificationText: "User updated successfully!",
           notificationType: "success",
           showNotification: true
         });
       } else {
         console.error("Failed to update user:", response.statusText);
-        // alert("Cập nhật người dùng thất bại.");
         this.setState({
-          notificationText: "Cập nhật người dùng thất bại.",
+          notificationText: "User update failed.",
           notificationType: "error",
           showNotification: true
         });
-
       }
     } catch (error) {
       console.error("Error updating user data:", error);
-      alert("Có lỗi xảy ra trong quá trình cập nhật.");
+      this.setState({
+        notificationText: "An error occurred while updating the user.",
+        notificationType: "error",
+        showNotification: true
+      });
     }
+    window.location.reload();
   };
+
 
   handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -227,7 +254,7 @@ class ProfileV1Page extends React.Component {
   render() {
     const { updatedUserData, previewImage, passwordData, showNotification, // State to control notification visibility
       notificationText, // Text for the notification
-      notificationType } = this.state;
+      notificationType, showPassword } = this.state;
 
     if (!updatedUserData) {
       return <div>Loading...</div>;
@@ -408,37 +435,70 @@ class ProfileV1Page extends React.Component {
                       {/* Tab Change Password */}
                       <Tab eventKey="change-password" title="Change Password">
                         <div className="body">
-                          <h6>Change Password</h6>
                           <div className="form-group">
                             <label>Current Password</label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              name="currentPassword"
-                              value={passwordData.currentPassword}
-                              onChange={this.handlePasswordChange}
-                              required
-                            />
+                            <div className="input-group">
+                              <input
+                                className="form-control"
+                                type={showPassword.currentPassword ? "text" : "password"}
+                                name="currentPassword"
+                                value={passwordData.currentPassword}
+                                onChange={this.handlePasswordChange}
+                                required
+                              />
+                              <div className="input-group-append">
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary"
+                                  onClick={() => this.handleTogglePasswordVisibility("currentPassword")}
+                                >
+                                  {showPassword.currentPassword ? "Hide" : "Show"}
+                                </button>
+                              </div>
+                              
+                            </div>
                           </div>
                           <div className="form-group">
                             <label>New Password</label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              name="newPassword"
-                              value={passwordData.newPassword}
-                              onChange={this.handlePasswordChange}
-                            />
+                            <div className="input-group">
+                              <input
+                                className="form-control"
+                                type={showPassword.newPassword ? "text" : "password"}
+                                name="newPassword"
+                                value={passwordData.newPassword}
+                                onChange={this.handlePasswordChange}
+                              />
+                              <div className="input-group-append">
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary"
+                                  onClick={() => this.handleTogglePasswordVisibility("newPassword")}
+                                >
+                                  {showPassword.newPassword ? "Hide" : "Show"}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                           <div className="form-group">
                             <label>Confirm New Password</label>
-                            <input
-                              className="form-control"
-                              type="password"
-                              name="confirmNewPassword"
-                              value={passwordData.confirmNewPassword}
-                              onChange={this.handlePasswordChange}
-                            />
+                            <div className="input-group">
+                              <input
+                                className="form-control"
+                                type={showPassword.confirmNewPassword ? "text" : "password"}
+                                name="confirmNewPassword"
+                                value={passwordData.confirmNewPassword}
+                                onChange={this.handlePasswordChange}
+                              />
+                              <div className="input-group-append">
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-secondary"
+                                  onClick={() => this.handleTogglePasswordVisibility("confirmNewPassword")}
+                                >
+                                  {showPassword.confirmNewPassword ? "Hide" : "Show"}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                           <button
                             className="btn btn-primary"

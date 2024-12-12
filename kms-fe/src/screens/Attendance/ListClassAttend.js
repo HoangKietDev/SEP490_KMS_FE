@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
-
+import avtprofile from "../../assets/images/profile-default.jpg"
 class ListClassAttendance extends React.Component {
     state = {
         ProjectsData: [],

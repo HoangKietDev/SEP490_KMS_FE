@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import avtprofile from "../../assets/images/profile-default.jpg"
 class ListPickUpPerson extends React.Component {
     state = {
         PickupPersonData: null, // Lưu thông tin người đón
@@ -136,7 +136,7 @@ class ListPickUpPerson extends React.Component {
                                                             <img
                                                                 src={
                                                                     student.avatar ||
-                                                                    "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg"
+                                                                    avtprofile
                                                                 }
                                                                 alt="Avatar"
                                                                 className="img-fluid rounded-circle"
@@ -144,7 +144,7 @@ class ListPickUpPerson extends React.Component {
                                                                 onMouseEnter={(e) =>
                                                                     this.handleMouseEnter(
                                                                         student.avatar ||
-                                                                        "https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg",
+                                                                        avtprofile,
                                                                         e
                                                                     )
                                                                 }
