@@ -24,11 +24,14 @@ class ListClassAttendance extends React.Component {
             fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByTeacherId/${teacherId}`)
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data.message === "No classes found for this teacher.") {
-                        console.warn(data.message);
+                    // Kiểm tra nếu có lớp với status = 2
+                    const filteredClasses = data.filter(classItem => classItem.status === 2);
+
+                    if (filteredClasses.length === 0) {
+                        console.warn("No classes found with status = 2.");
                         this.setState({ ProjectsData: [] }); // Để trống danh sách lớp học
                     } else {
-                        this.setState({ ProjectsData: data }); // Cập nhật danh sách lớp học
+                        this.setState({ ProjectsData: filteredClasses }); // Cập nhật danh sách lớp học có status = 2
                     }
                 })
                 .catch((error) => {
