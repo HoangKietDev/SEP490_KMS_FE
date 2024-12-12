@@ -166,108 +166,90 @@ class ViewAllChildren extends React.Component {
               />
             )}
 
-            <a
-              onClick={() => {
-                this.handleDownload()
-              }}
-              className="btn btn-success text-white mr-4 "
-            >
-              <i className="icon-arrow-down mr-2"></i>Dowload Template
-            </a>
-            <div className="btn btn-success text-white mr-4 ">
-              <a
-                onClick={this.handleCreateStudent}
-                className="btn btn-success text-white d-flex align-items-center"
-              >
-                <i className="icon-plus mr-2"></i>Create Student
-              </a>
-            </div>
-            <form onSubmit={this.handleSubmit}>
-              <div className="form-group">
-                <label>Choose Excel File</label>
-                <input
-                  type="file"
-                  className="form-control col-3"
-                  accept=".xls,.xlsx" // Chỉ chấp nhận file Excel
-                  onChange={this.handleFileChange}
-                />
-                {error && <p className="text-danger">{error}</p>}
 
-              </div>
-              <button type="submit" className="btn btn-primary">
-                Upload Excel File
-              </button>
-            </form>
 
-            {/* <div className="form-inline m-3">
-              <div className="form-group mr-3">
-                <label htmlFor="statusFilter" className="mr-2">Grade:</label>
-                <select
-                  className="form-control"
-                  value={this.state.selectedGrade}
-                  onChange={(e) => this.setState({ selectedGrade: e.target.value })}
-                >
-                  <option value="">All Grades</option>
-                  {this.state.Grades.map((grade) => (
-                    <option key={grade.gradeId} value={grade.gradeId}>
-                      {grade.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group mr-3">
-                <label htmlFor="gradeFilter" className="mr-2">Class:</label>
-                <select
-                  className="form-control"
-                  value={this.state.selectedClass}
-                  onChange={(e) => this.setState({ selectedClass: e.target.value })}
-                >
-                  <option value="">All Classes</option>
-                  {this.state.Classes.map((cls, index) => (
-                    <option key={index} value={cls.className}>
-                      {cls.className}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div> */}
+
+
             <div className="row clearfix">
+
+              <div className="col-lg-12 col-md-12">
+                <div className="card planned_task">
+                  <div className="header row">
+                    <div className="col-md-5">
+                      <form onSubmit={this.handleSubmit}>
+                        <div className="form-group">
+                          <label>Choose Excel File</label>
+                          <input
+                            type="file"
+                            className="form-control"
+                            accept=".xls,.xlsx" // Chỉ chấp nhận file Excel
+                            onChange={this.handleFileChange}
+                          />
+                          {error && <p className="text-danger">{error}</p>}
+                        </div>
+                        <button type="submit" className="btn btn-primary">
+                          Upload Excel File
+                        </button>
+                      </form>
+                    </div>
+                    <div className="col-md-2">
+                      <div className="form-group mr-3">
+                        <label htmlFor="statusFilter" className="mr-2">Grade:</label>
+                        <select
+                          className="form-control"
+                          value={this.state.selectedGrade}
+                          onChange={(e) => this.setState({ selectedGrade: e.target.value })}
+                        >
+                          <option value="">All Grades</option>
+                          {this.state.Grades.map((grade) => (
+                            <option key={grade.gradeId} value={grade.gradeId}>
+                              {grade.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-2">
+                      <div className="form-group mr-3">
+                        <label htmlFor="gradeFilter" className="mr-2">Class:</label>
+                        <select
+                          className="form-control"
+                          value={this.state.selectedClass}
+                          onChange={(e) => this.setState({ selectedClass: e.target.value })}
+                        >
+                          <option value="">All Classes</option>
+                          {this.state.Classes.map((cls, index) => (
+                            <option key={index} value={cls.className}>
+                              {cls.className}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="col-md-3">
+                      <a
+                        onClick={this.handleCreateStudent}
+                        className="btn btn-success text-white w-100 mb-2"
+                      >
+                        <i className="icon-plus mr-2"></i>Create Student
+                      </a>
+                      <a
+                        onClick={() => {
+                          this.handleDownload()
+                        }}
+                        className="btn btn-success text-white w-100 "
+                      >
+                        <i className="icon-arrow-down mr-2"></i>Dowload Template
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="col-lg-12 col-md-12">
                 <div className="card">
                   <div className="body project_report">
                     <div className="table-responsive">
-                      <div className="form-inline m-2">
-                        <div className="form-group mr-3">
-                          <label htmlFor="statusFilter" className="mr-2">Grade:</label>
-                          <select
-                            className="form-control"
-                            value={this.state.selectedGrade}
-                            onChange={(e) => this.setState({ selectedGrade: e.target.value })}
-                          >
-                            <option value="">All Grades</option>
-                            {this.state.Grades.map((grade) => (
-                              <option key={grade.gradeId} value={grade.gradeId}>
-                                {grade.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="form-group mr-3">
-                          <label htmlFor="gradeFilter" className="mr-2">Class:</label>
-                          <select
-                            className="form-control"
-                            value={this.state.selectedClass}
-                            onChange={(e) => this.setState({ selectedClass: e.target.value })}
-                          >
-                            <option value="">All Classes</option>
-                            {this.state.Classes.map((cls, index) => (
-                              <option key={index} value={cls.className}>
-                                {cls.className}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
                       <table className="table m-b-0 table-hover">
                         <thead className="thead-light">
                           <tr>
