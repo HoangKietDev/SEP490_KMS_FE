@@ -148,7 +148,7 @@ class NavbarMenu extends React.Component {
     else if (
       activeKey === "/service" ||
       activeKey === "/create-service" ||
-      activeKey === "/chooservice"
+      activeKey === "/viewcheckservice"
     ) {
       this.activeMenutabContainer("ServiceContainer");
     }
@@ -203,7 +203,7 @@ class NavbarMenu extends React.Component {
     }
     // PickupPersonContainer
     else if (
-      activeKey === "/addpickupperson"
+      activeKey === "/listpickupperson"
     ) {
       this.activeMenutabContainer("PickupPersonContainer");
     }
@@ -580,21 +580,7 @@ class NavbarMenu extends React.Component {
                         </ul>
                       </li>
                     ) : null}
-                    {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
-                      <li id="scheduleContainer" className="">
-                        <a
-                          href="#!"
-                          className="has-arrow"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            this.props.history.push("/listschedule");
-                            this.activeMenutabContainer("scheduleContainer");
-                          }}
-                        >
-                          <i className="icon-grid"></i> <span>Daily Schedule</span>
-                        </a>
-                      </li>
-                    ) : null}
+                   
                     {/* Classes */}
                     {roleId === 2 || roleId === 3 || roleId === 4 || roleId === 5 || roleId === 6 ? (
                       <li id="ClassContainer" className="">
@@ -665,6 +651,7 @@ class NavbarMenu extends React.Component {
                         </a>
                       </li>
                     ) : null}
+                    
 
                     {/* Grade */}
                     {roleId === 4 ? (
@@ -804,7 +791,6 @@ class NavbarMenu extends React.Component {
 
                       </li>
                     ) : null}
-                    {/* Teachers */}
                     {roleId === 2 ? (
 
                       <li id="PickupPersonContainer" className="">
@@ -813,13 +799,28 @@ class NavbarMenu extends React.Component {
                           className="has-arrow"
                           onClick={(e) => {
                             e.preventDefault();
-                            this.props.history.push("/addpickupperson");
+                            this.props.history.push("/listpickupperson");
                             this.activeMenutabContainer("PickupPersonContainer");
                           }}
                         >
-                          <i className="icon-grid"></i> <span>Pickup Person Management</span>
+                          <i className="icon-grid"></i> <span>Pickup Person </span>
                         </a>
 
+                      </li>
+                    ) : null}
+                    {roleId === 2 ? (
+                      <li id="ServiceContainer" className="">
+                        <a
+                          href="#!"
+                          className="has-arrow"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            this.props.history.push("/viewcheckservice");
+                            this.activeMenutabContainer("ServiceContainer");
+                          }}
+                        >
+                          <i className="icon-grid"></i> <span>Check Services</span>
+                        </a>
                       </li>
                     ) : null}
                     {/* Requests */}

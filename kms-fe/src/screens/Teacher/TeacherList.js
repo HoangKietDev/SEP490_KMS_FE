@@ -260,7 +260,7 @@ class TeacherList extends React.Component {
                               <th>Teacher</th>
                               <th>Class</th>
                               <th>Status</th>
-                              <th>Assign Teacher</th>
+                              <th>Assign Check in/out</th>
                               <th>Action</th>
                             </tr>
                           </thead>

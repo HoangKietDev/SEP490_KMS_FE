@@ -65,25 +65,28 @@ class ViewCheckService extends React.Component {
             },
             () => {
                 if (studentId && this.state.date) {
-                    this.fetchCheckServices(studentId, this.state.date);
+                    this.fetchCheckServicesByWeek(studentId, this.getStartOfWeek(new Date(this.state.date)), this.getEndOfWeek(new Date(this.state.date)));
                 }
             }
         );
     };
 
     handleDateChange = (e) => {
-        const date = e.target.value;
+        const selectedDate = new Date(e.target.value);
+        const startOfWeek = this.getStartOfWeek(selectedDate);
+        const endOfWeek = this.getEndOfWeek(selectedDate);
+
         const { studentId } = this.state;
 
         this.setState(
             {
-                date,
+                date: e.target.value,
                 checkServices: [], // Reset check services when changing date
                 error: null, // Reset any existing errors
             },
             () => {
-                if (studentId && date) {
-                    this.fetchCheckServices(studentId, date);
+                if (studentId && startOfWeek && endOfWeek) {
+                    this.fetchCheckServicesByWeek(studentId, startOfWeek, endOfWeek);
                 }
             }
         );
@@ -98,12 +101,28 @@ class ViewCheckService extends React.Component {
         return `${year}-${month}-${day}`;
     };
 
-    fetchCheckServices = (studentId, date) => {
+    // Tính toán ngày đầu tuần và cuối tuần
+    getStartOfWeek = (date) => {
+        const day = date.getDay(),
+            diff = date.getDate() - day + (day == 0 ? -6 : 1); // Chủ nhật là ngày đầu tuần
+        const startOfWeek = new Date(date.setDate(diff));
+        return this.formatDate(startOfWeek);
+    };
+
+    getEndOfWeek = (date) => {
+        const day = date.getDay(),
+            diff = date.getDate() - day + (day == 0 ? -6 : 1) + 6; // Thứ Bảy là cuối tuần
+        const endOfWeek = new Date(date.setDate(diff));
+        return this.formatDate(endOfWeek);
+    };
+
+    // Gửi API với ngày đầu và cuối tuần
+    fetchCheckServicesByWeek = (studentId, startDate, endDate) => {
         this.setState({ loading: true, error: null });
 
         axios
             .get(
-                `${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndDate/${studentId}/${date}`
+                `${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndWeek/${studentId}/${startDate}/${endDate}`
             )
             .then((response) => {
                 this.setState({ checkServices: response.data, loading: false });
@@ -148,14 +167,11 @@ class ViewCheckService extends React.Component {
             >
                 <PageHeader
                     HeaderText="View Check Services"
-                    Breadcrumb={[
-                        { name: "Service Management", navigate: "" },
-                        { name: "View Check Services", navigate: "" },
-                    ]}
+                    Breadcrumb={[{ name: "Service Management", navigate: "" }, { name: "View Check Services", navigate: "" }]}
                 />
 
                 <div className="row mb-4">
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <div className="form-group">
                             <label className="form-label fw-bold">
                                 <i className="bi bi-person-lines-fill me-2"></i> Select Child
@@ -187,14 +203,14 @@ class ViewCheckService extends React.Component {
                         </div>
                     </div>
 
-                    <div className="col-md-6">
+                    <div className="col-md-3">
                         <div className="form-group">
                             <label className="form-label fw-bold">
-                                <i className="bi bi-calendar-event me-2"></i> Select Date
+                                <i className="bi bi-calendar-event me-2"></i> Select Date (Week)
                             </label>
                             <div className="input-group mb-3">
                                 <span className="input-group-text bg-light">
-                                    <i className="bi bi-calendar-date"></i>
+                                <i className="fa fa-calendar"></i>
                                 </span>
                                 <input
                                     type="date"
@@ -205,10 +221,9 @@ class ViewCheckService extends React.Component {
                                         borderRadius: "0.5rem",
                                         boxShadow: "0 0 5px rgba(0, 123, 255, 0.25)",
                                     }}
-                                // The 'type="date"' ensures the format is YYYY-MM-DD
                                 />
                             </div>
-                            <small className="text-muted">Select a date to view services.</small>
+                            <small className="text-muted">Select a date to view services within the week.</small>
                         </div>
                     </div>
                 </div>
@@ -239,44 +254,45 @@ class ViewCheckService extends React.Component {
                             <h5>
                                 Check Services for {this.getStudentName(studentId)} on {date}
                             </h5>
-                            <table className="table table-bordered table-hover">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th>Service ID</th>
-                                        <th>Service Name</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Payment Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {checkServices.map((checkService) => (
-                                        <tr key={checkService.checkServiceId}>
-                                            <td>{checkService.serviceId}</td>
-                                            <td>{this.getServiceName(checkService.serviceId)}</td>
-                                            <td>{checkService.date}</td>
-                                            <td>
-                                                {checkService.status === 0
-                                                    ? "Pending"
-                                                    : checkService.status === 1
-                                                        ? "Completed"
-                                                        : "Unknown"}
-                                            </td>
-                                            <td>
-                                                {checkService.payService === 0
-                                                    ? "Unpaid"
-                                                    : checkService.payService === 1
-                                                        ? "Paid"
-                                                        : "Unknown"}
-                                            </td>
+                            <div className="table-responsive">
+                                <table className="table table-striped table-bordered table-hover">
+                                    <thead className="thead-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Service Name</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Payment Status</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {checkServices.map((checkService, index) => (
+                                            <tr key={checkService.checkServiceId}>
+                                                <td>{index + 1}</td>
+                                                <td>{this.getServiceName(checkService.serviceId)}</td>
+                                                <td>{checkService.date}</td>
+                                                <td>
+                                                    {checkService.status === 0
+                                                        ? "Pending"
+                                                        : checkService.status === 1
+                                                            ? "Completed"
+                                                            : "Unknown"}
+                                                </td>
+                                                <td>
+                                                    {checkService.payService === 0
+                                                        ? "Unpaid"
+                                                        : checkService.payService === 1
+                                                            ? "Paid"
+                                                            : "Unknown"}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 ) : (
-                    // Show a message when no check services are found
                     (!loading && studentId && date) && (
                         <div className="row mt-4">
                             <div className="col-12">
@@ -287,10 +303,12 @@ class ViewCheckService extends React.Component {
                         </div>
                     )
                 )}
+
             </div>
         );
     }
 }
+
 const mapStateToProps = ({ ioTReducer }) => ({
     isSecuritySystem: ioTReducer.isSecuritySystem,
 });

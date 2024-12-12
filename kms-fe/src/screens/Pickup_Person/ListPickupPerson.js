@@ -35,7 +35,10 @@ class ListPickUpPerson extends React.Component {
             console.error("Parent ID not found in session.");
         }
     }
+    handleCreatePerson = (e) => {
+        this.props.history.push(`/addpickupperson`);
 
+    }
     handleSearchChange = (event) => {
         this.setState({ searchTerm: event.target.value });
     };
@@ -99,8 +102,16 @@ class ListPickUpPerson extends React.Component {
                                             <h5>{PickupPersonData.name}</h5>
                                             <p>Phone: {PickupPersonData.phoneNumber}</p>
                                         </div>
+                                        
                                     </div>
-
+                                    <div className="form-group col-md-2">
+                                        <a
+                                            onClick={this.handleCreatePerson}
+                                            className="btn btn-success text-white d-flex align-items-center"
+                                        >
+                                            <i className="icon-plus mr-2"></i>Create Person
+                                        </a>
+                                    </div>
                                     <input
                                         type="text"
                                         placeholder="Search student by name..."

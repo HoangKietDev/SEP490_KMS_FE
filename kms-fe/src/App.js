@@ -46,7 +46,7 @@ import UpdateClassByPrincipal from "./screens/Class/UpdateClassByPrincipal";
 import ViewClassByParentAndTeacher from "./screens/Class/ViewClassByParent";
 import ViewClassByTeacher from "./screens/Class/ViewClassByTeacher";
 import ViewAttendByParent from "./screens/Attendance/ViewAttendByParent";
-import ChooseService from "./screens/Service/ChooseService";
+import ViewCheckService from "./screens/Service/ViewCheckService";
 import ScheduleCreate from "./screens/Schedule/ScheduleCreate";
 import ScheduleDetailCreate from "./screens/Schedule/ScheduleDetailCreate";
 
@@ -146,7 +146,7 @@ class App extends React.Component {
       "payment", "payment-history", "paymentAll", "tuition",
       "profilev1page",
       "checkin", "listclasscheckin", "listclassattendance", "attend", "viewattendparent",
-      "chooseservice", "addpickupperson"
+      "viewcheckservice", "addpickupperson", "listpickupperson"
     ];
 
     // Kiểm tra xem URL có hợp lệ không, nếu không thì trả về trang page404
@@ -554,8 +554,8 @@ class App extends React.Component {
                 />
                 <ProtectedRoute
                   exact
-                  path={`${process.env.PUBLIC_URL}/chooseservice`}
-                  component={ChooseService}
+                  path={`${process.env.PUBLIC_URL}/viewcheckservice`}
+                  component={ViewCheckService}
                   allowedRoles={[2]}
                 />
                
@@ -571,13 +571,14 @@ class App extends React.Component {
                   component={AddPickupPerson}
                   allowedRoles={[2]}
                 />
-                <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
                 <ProtectedRoute
                   exact
                   path={`${process.env.PUBLIC_URL}/listpickupperson`}
                   component={ListPickupPerson}
                   allowedRoles={[2]}
                 />
+                <Route path="*" component={page404} /> {/* Catch-all route for undefined paths */}
+                
               </Switch>
             </div>
           </>

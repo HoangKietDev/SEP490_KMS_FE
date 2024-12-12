@@ -8,7 +8,8 @@ class ViewMenuByTeacherAndParent extends React.Component {
     state = {
         studentId: '',
         childerParent: [],
-        studentClasses: [],
+        studentClasses: [], // Lớp học của học sinh đã chọn
+        allClasses: [], // Lưu tất cả lớp học
         GradesData: [],
         statusFilter: '',
         gradeFilter: '',
@@ -28,8 +29,24 @@ class ViewMenuByTeacherAndParent extends React.Component {
 
         // Gọi API để lấy danh sách con theo parentID
         axios.get(`${process.env.REACT_APP_API_URL}/api/Request/GetStudentsByParentId/${parentID}`)
-            .then(response => {
+            .then(async (response) => {
                 this.setState({ childerParent: response.data });
+
+                // Gọi API GetClassesByStudentId cho từng học sinh và lưu dữ liệu vào state
+                const allClasses = [];
+                for (const student of response.data) {
+                    try {
+                        const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${student.studentId}`);
+                        const classData = classResponse.data;
+                        allClasses.push(...classData); // Ghép các lớp vào allClasses
+                    } catch (error) {
+                        console.error("Error fetching class data for student:", student.studentId, error);
+                    }
+                }
+
+                // Lọc các lớp trùng
+                const uniqueClasses = this.removeDuplicateClasses(allClasses);
+                this.setState({ allClasses: uniqueClasses, studentClasses: uniqueClasses }); // Hiển thị tất cả lớp ban đầu
             })
             .catch(error => {
                 console.error("Error fetching student data:", error);
@@ -45,13 +62,37 @@ class ViewMenuByTeacherAndParent extends React.Component {
             });
     }
 
+    // Hàm để lọc các lớp trùng
+    removeDuplicateClasses(classes) {
+        const seen = new Set();
+        return classes.filter(classData => {
+            const isDuplicate = seen.has(classData.classId);
+            if (!isDuplicate) {
+                seen.add(classData.classId);
+                return true;
+            }
+            return false;
+        });
+    }
+
     handleStudentChange = async (e) => {
         const studentId = e.target.value;
         this.setState({ studentId });
+
+        // Nếu không chọn học sinh nào, hiển thị tất cả các lớp đã lọc
+        if (!studentId) {
+            this.setState({ studentClasses: this.state.allClasses });
+            return;
+        }
+
         try {
+            // Gọi lại API GetClassesByStudentId khi thay đổi học sinh
             const classResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Class/GetClassesByStudentId/${studentId}`);
             const classData = classResponse.data;
-            this.setState({ studentClasses: classData });
+
+            // Lọc các lớp trùng cho học sinh đã chọn
+            const uniqueClasses = this.removeDuplicateClasses(classData);
+            this.setState({ studentClasses: uniqueClasses });
         } catch (error) {
             console.error("Error fetching class data:", error);
         }
