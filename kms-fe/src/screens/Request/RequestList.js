@@ -270,7 +270,7 @@ class RequestList extends React.Component {
                                   </button>
                                   {(roleId === 3 &&
                                     request.statusRequest === 2) ||
-                                    (roleId === 5 || roleId === 6 &&
+                                    ((roleId === 5 || roleId === 6) &&
                                       request.statusRequest === 1) ||
                                     (roleId === 2 &&
                                       request.statusRequest === 1) ? (

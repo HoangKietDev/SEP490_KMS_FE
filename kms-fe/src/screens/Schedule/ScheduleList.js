@@ -273,12 +273,14 @@ class ScheduleList extends React.Component {
 
 
     const statusOptions = [
+      { value: 0, label: "Draff", className: "badge-default" },
       { value: 1, label: "Pending", className: "badge-info" },
       { value: 2, label: "Approved", className: "badge-success" },
     ];
 
     const userData = getSession('user')?.user;
     const roleId = userData?.roleId
+    
 
 
 
@@ -460,7 +462,7 @@ class ScheduleList extends React.Component {
                                     ) : (roleId === 2 || roleId === 3 || roleId === 5 || roleId === 6 ) && (
                                       <td>
                                         <span className={`badge ${request?.status === 2 ? 'badge-success' : request?.status === 1 ? 'badge-info' : 'badge-default'}`}>
-                                          {statusOptions.find(option => option.value === request.status)?.label || 'Unknown'}
+                                          {statusOptions.find(option => option.value === request.status)?.label}
                                         </span>
                                       </td>
                                     )}

@@ -306,7 +306,7 @@ class Albumlist extends React.Component {
     console.log(filteredChildrenData);
 
     const statusOptions = [
-      { value: 1, label: "Public", className: "badge-success" },
+      { value: 1, label: "Approved", className: "badge-success" },
       { value: 0, label: "Draff", className: "badge-default" },
     ];
 
@@ -479,7 +479,7 @@ class Albumlist extends React.Component {
                                     </td>
 
 
-                                    {(roleId === 5 || roleId === 6) && ( // Chỉ cho phép role teacher thay đổi trạng thái
+                                    {(roleId === 5 || roleId === 6 || roleId === 3) && ( // Chỉ cho phép role teacher thay đổi trạng thái
                                       <td>
                                         <select
                                           value={album?.status}
@@ -494,7 +494,7 @@ class Albumlist extends React.Component {
                                         </select>
                                       </td>
                                     )}
-                                    {(roleId === 3 || roleId === 2) && ( // Nếu roleId = 3 ,2 chỉ hiển thị trạng thái mà không có select
+                                    {( roleId === 2) && ( // Nếu roleId = 3 ,2 chỉ hiển thị trạng thái mà không có select
                                       <td>
                                         <span className={`badge ${album?.status === 1 ? 'badge-success' : 'badge-default'}`}>
                                           {statusOptions.find(option => option.value === album?.status)?.label} {/* Hiển thị trạng thái */}
