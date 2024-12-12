@@ -98,7 +98,6 @@ class Checkin extends React.Component {
     // Đóng modal sau khi xác nhận
     this.handleCloseConfirmModal();
     // this.fetchAttendanceData();
-    window.location.reload();
 
   };
 
@@ -486,7 +485,7 @@ class Checkin extends React.Component {
                         </td>
                         <td>
                           <img
-                            src={student.avatar || "https://via.placeholder.com/50"}
+                            src={student.avatar || avtprofile}
                             alt="Avatar"
                             className="img-fluid rounded-circle"
                             style={{ width: "50px", height: "50px", objectFit: "cover" }}
@@ -1656,7 +1655,7 @@ class Checkin extends React.Component {
           attendanceDataCheckin[student.studentId] === "Attend" // Chỉ hiển thị học sinh có trạng thái "Attend"
       )
     const currentItems = dataCheckin.slice(indexOfFirstItem, indexOfLastItem);
-    
+    const currentItemscheckout = studentDataCheckout.slice(indexOfFirstItem, indexOfLastItem);
     return (
       <div className="container-fluid">
         <PageHeader
@@ -1930,7 +1929,7 @@ class Checkin extends React.Component {
                     </thead>
                     <tbody>
                       {attendanceDetailsCheckout.length > 0 ? (
-                        studentDataCheckout
+                        currentItemscheckout
                           .filter(
                             (student) =>
                               attendanceDataCheckin[student.studentId] === "Attend" // Chỉ hiển thị học sinh có trạng thái "Attend"
@@ -2031,6 +2030,14 @@ class Checkin extends React.Component {
                     <button className="btn btn-primary" onClick={this.handleShowConfirmModal} disabled={!isToday}>
                       Confirm Attendance
                     </button>
+                  </div>
+                  <div className="pt-4">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalItems={dataCheckout.length}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={this.handlePageChange}
+                    />
                   </div>
                 </>
               )}

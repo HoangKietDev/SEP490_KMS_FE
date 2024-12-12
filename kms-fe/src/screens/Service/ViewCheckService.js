@@ -14,6 +14,8 @@ class ViewCheckService extends React.Component {
         checkServices: [],
         loading: false,
         error: null,
+        startDate: "",
+        endDate : "",
         allServices: [], // To store all services for name resolution
     };
 
@@ -83,6 +85,8 @@ class ViewCheckService extends React.Component {
                 date: e.target.value,
                 checkServices: [], // Reset check services when changing date
                 error: null, // Reset any existing errors
+                endDate: endOfWeek,
+                startDate: startOfWeek,
             },
             () => {
                 if (studentId && startOfWeek && endOfWeek) {
@@ -119,19 +123,23 @@ class ViewCheckService extends React.Component {
     // Gửi API với ngày đầu và cuối tuần
     fetchCheckServicesByWeek = (studentId, startDate, endDate) => {
         this.setState({ loading: true, error: null });
-
+    
         axios
             .get(
                 `${process.env.REACT_APP_API_URL}/api/Service/GetCheckServiceByStudentIdAndWeek/${studentId}/${startDate}/${endDate}`
             )
             .then((response) => {
-                this.setState({ checkServices: response.data, loading: false });
+                // Lọc dữ liệu để chỉ lấy những bản ghi có status = 1
+                const filteredServices = response.data?.filter(service => service.status === 1);
+    
+                this.setState({ checkServices: filteredServices, loading: false });
             })
             .catch((error) => {
                 console.error("Error fetching check services:", error);
                 this.setState({ error: "Failed to fetch check services.", loading: false });
             });
     };
+    
 
     // Function to get service name by ID
     getServiceName = (serviceId) => {
@@ -156,6 +164,8 @@ class ViewCheckService extends React.Component {
             checkServices,
             loading,
             error,
+            endDate,
+            startDate
         } = this.state;
 
         return (
@@ -252,7 +262,7 @@ class ViewCheckService extends React.Component {
                     <div className="row mt-4">
                         <div className="col-12">
                             <h5>
-                                Check Services for {this.getStudentName(studentId)} on {date}
+                                Check Services for {this.getStudentName(studentId)} on {startDate} -  {endDate}
                             </h5>
                             <div className="table-responsive">
                                 <table className="table table-striped table-bordered table-hover">

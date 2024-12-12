@@ -8,6 +8,7 @@ import axios from "axios";
 import './Checkin.css'; // Import CSS cho hiệu ứng nút
 import Notification from "../../components/Notification";
 import avtprofile from "../../assets/images/profile-default.jpg"
+import Pagination from "../../components/Common/Pagination";
 
 class Attend extends React.Component {
     state = {
@@ -37,7 +38,10 @@ class Attend extends React.Component {
         isUploading: false, // Thêm state để theo dõi trạng thái upload
         showNotification: false, // State to control notification visibility
         notificationText: "", // Text for the notification
-        notificationType: "success" // Type of notification (success or error)
+        notificationType: "success",// Type of notification (success or error)
+
+        currentPage: 1,
+        itemsPerPage: 10,
     };
 
 
@@ -738,7 +742,9 @@ class Attend extends React.Component {
             }
         });
     };
-
+    handlePageChange = (pageNumber) => {
+        this.setState({ currentPage: pageNumber });
+    };
     updateAttendance = () => {
         const {
             attendanceDataCheckin,
@@ -884,10 +890,11 @@ class Attend extends React.Component {
             notificationType // Type of notification (success or error)
         } = this.state;
 
-        const
-
-
-            isToday = this.formatDate(new Date()) === this.formatDate(selectedDate);
+        const isToday = this.formatDate(new Date()) === this.formatDate(selectedDate);
+        const { currentPage, itemsPerPage } = this.state;
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItemsCheckin = studentDataCheckin.slice(indexOfFirstItem, indexOfLastItem);
 
         return (
             <div className="container-fluid">
@@ -957,7 +964,7 @@ class Attend extends React.Component {
                                         </thead>
                                         <tbody>
                                             {attendanceDetailsCheckin.length > 0 ? (
-                                                studentDataCheckin.map((student, index) => {
+                                                currentItemsCheckin.map((student, index) => {
                                                     const parent = this.state.parentData[student.parentId] || {}; // Lấy thông tin phụ huynh từ state
                                                     return (
                                                         <tr key={index}>
@@ -968,7 +975,7 @@ class Attend extends React.Component {
                                                                         alt="Profile"
                                                                         className="img-fluid rounded-circle mr-2"
                                                                         style={{ width: "40px", height: "40px", objectFit: "cover" }}
-                                                                        
+
                                                                     />
                                                                     <span>{student.fullName}</span>
                                                                 </div>
@@ -1025,7 +1032,16 @@ class Attend extends React.Component {
                                             Confirm Attendance
                                         </button>
                                     </div>
+                                    <div className="pt-4">
+                                        <Pagination
+                                            currentPage={currentPage}
+                                            totalItems={studentDataCheckin.length}
+                                            itemsPerPage={itemsPerPage}
+                                            onPageChange={this.handlePageChange}
+                                        />
+                                    </div>
                                 </>
+
                             )}
                             {activeTab === "checkService" && (
                                 <>
@@ -1039,22 +1055,22 @@ class Attend extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {studentDataCheckin.map((student) => (
+                                            {currentItemsCheckin.map((student) => (
                                                 <tr key={student.studentId}>
                                                     <td>
                                                         <div className="d-flex align-items-center">
-                                                           
+
                                                             <img
                                                                 src={student.avatar ? student.avatar : avtprofile} // Sử dụng avtprofile nếu student.avatar không có giá trị
                                                                 alt="Profile"
                                                                 className="img-fluid rounded-circle mr-2"
                                                                 style={{ width: "40px", height: "40px", objectFit: "cover" }}
-                                                                // onMouseEnter={(e) =>
-                                                                //     this.handleMouseEnter(
-                                                                //         `${student.avatar ? student.avatar : avtprofile}` ,
-                                                                //         e
-                                                                //     )
-                                                                // }
+                                                            // onMouseEnter={(e) =>
+                                                            //     this.handleMouseEnter(
+                                                            //         `${student.avatar ? student.avatar : avtprofile}` ,
+                                                            //         e
+                                                            //     )
+                                                            // }
                                                             />
                                                             <span>{student.fullName}</span>
                                                         </div>
@@ -1084,6 +1100,14 @@ class Attend extends React.Component {
                                         <button disabled={!isToday} className="btn btn-primary" onClick={this.handleConfirmService}>
                                             Confirm Service
                                         </button>
+                                    </div>
+                                    <div className="pt-4">
+                                        <Pagination
+                                            currentPage={currentPage}
+                                            totalItems={studentDataCheckin.length}
+                                            itemsPerPage={itemsPerPage}
+                                            onPageChange={this.handlePageChange}
+                                        />
                                     </div>
                                 </>
                             )}

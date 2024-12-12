@@ -402,7 +402,7 @@ class DashboardPrincipal extends React.Component {
 
           {/* Biểu đồ Class Gender Distribution */}
           <div className="row clearfix">
-            <div className="col-lg-4">
+            <div className="col-lg-6">
               <div className="card">
                 <div className="header">
                   <h2>Teacher Class Distribution (Pie Chart)</h2>
@@ -412,7 +412,7 @@ class DashboardPrincipal extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-6">
               <div className="card">
                 <div className="header">
                   <h2>Teacher Classification by Class Count (Bar Chart)</h2>
@@ -422,7 +422,7 @@ class DashboardPrincipal extends React.Component {
                 </div>
               </div>
             </div>
-            <div className="col-lg-4">
+            {/* <div className="col-lg-4">
               <div className="card">
                 <div className="header">
                   <h2>Monthly Enrollment Statistics</h2>
@@ -431,7 +431,7 @@ class DashboardPrincipal extends React.Component {
                   <ReactEcharts option={enrollmentData} style={{ height: '400px' }} opts={{ renderer: "svg" }} />
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
         

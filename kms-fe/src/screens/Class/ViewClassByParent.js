@@ -247,9 +247,7 @@ class ViewMenuByTeacherAndParent extends React.Component {
                                                                 >
                                                                     <i className="icon-eye"></i> View
                                                                 </button>
-                                                                <button className="btn btn-outline-secondary">
-                                                                    <i className="icon-trash"></i> Delete
-                                                                </button>
+                                                               
                                                             </td>
                                                         </tr>
                                                     ))}

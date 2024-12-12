@@ -4,6 +4,7 @@ import PageHeader from "../../components/PageHeader";
 import { withRouter } from "react-router-dom";
 import Notification from "../../components/Notification";
 import avtprofile from "../../assets/images/profile-default.jpg"
+import Pagination from "../../components/Common/Pagination";
 
 class ViewAllChildren extends React.Component {
   state = {
@@ -17,6 +18,8 @@ class ViewAllChildren extends React.Component {
     notificationType: "success",// Type of notification (success or error)
     searchQuery: "", // State để lưu trữ từ khóa tìm kiếm
 
+    currentPage: 1,
+    itemsPerPage: 10,
   };
 
   componentDidMount() {
@@ -135,12 +138,18 @@ class ViewAllChildren extends React.Component {
       return gradeMatches && classMatches && nameMatches;
     });
   };
-
+  handlePageChange = (pageNumber) => {
+    this.setState({ currentPage: pageNumber });
+  };
   render() {
     const { StudentsData, error, file, showNotification, // State to control notification visibility
       notificationText,// Text for the notification
       notificationType } = this.state;
+    const { currentPage, itemsPerPage } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
+    const currentItems = this.getFilteredStudents().slice(indexOfFirstItem, indexOfLastItem);
     return (
       <div
         style={{ flex: 1 }}
@@ -265,7 +274,7 @@ class ViewAllChildren extends React.Component {
                           </tr>
                         </thead>
                         <tbody>
-                          {this.getFilteredStudents().map((student, index) => {
+                          {currentItems.map((student, index) => {
                             // Lọc tên grade và class
                             const grade = this.state.Grades.find((g) => g.gradeId === student.gradeId);
                             const gradeName = grade ? grade.name : "Unknown";
@@ -319,6 +328,14 @@ class ViewAllChildren extends React.Component {
 
 
                       </table>
+                    </div>
+                    <div className="pt-4">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalItems={this.getFilteredStudents().length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={this.handlePageChange}
+                      />
                     </div>
                   </div>
                 </div>
