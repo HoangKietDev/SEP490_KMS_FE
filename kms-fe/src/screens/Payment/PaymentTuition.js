@@ -492,6 +492,9 @@ class Paymenttuition extends React.Component {
                                 <div className="card">
                                     {currentItems && currentItems.length !== 0 ?
                                         <div className="table-responsive">
+                                            <div>
+                                                <strong>Total Records: </strong>{currentItems?.length + " " || 0}  / {" " + StudentAll?.length} Students
+                                            </div>
                                             <table className="table m-b-0 table-hover">
                                                 <thead className="">
                                                     <tr className="theme-color">
@@ -629,6 +632,9 @@ class Paymenttuition extends React.Component {
                                     {tuitionData && tuitionData.length > 0 ?
                                         (
                                             <>
+                                                <div>
+                                                    <strong>Total Records: </strong>{currentTuitionData?.length + " " || 0}  / {" " + tuitionData?.length} Students
+                                                </div>
                                                 <Table striped bordered hover responsive style={{ maxHeight: '300px', overflowY: 'auto' }}>
                                                     <thead>
                                                         <tr>
