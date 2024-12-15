@@ -41,6 +41,7 @@ class UpdateClassByPrincipal extends React.Component {
         this.setState({
           className: data.className,
           isActive: data.isActive === 1,
+          number: data.number,
           expireDate: formattedExpireDate,
           schoolId: data.schoolId,
           semesterId: data.semesterId,
@@ -311,7 +312,7 @@ class UpdateClassByPrincipal extends React.Component {
   };
 
   render() {
-    const { className, status, submeet, grades, semesters, gradeId, semesterId, showNotification, notificationText, notificationType, teachers, availableTeachers } = this.state;
+    const { className,number, status, submeet, grades, semesters, gradeId, semesterId, showNotification, notificationText, notificationType, teachers, availableTeachers } = this.state;
 
     return (
       <div
@@ -407,6 +408,17 @@ class UpdateClassByPrincipal extends React.Component {
                   </div>
 
                   <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-group">
+                        <label>Number</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={number}
+                          onChange={(e) => this.setState({ number: e.target.value })}
+                        />
+                      </div>
+                    </div>
                     <div className="col-md-6">
                       <div className="form-group">
                         <label>Grade</label>

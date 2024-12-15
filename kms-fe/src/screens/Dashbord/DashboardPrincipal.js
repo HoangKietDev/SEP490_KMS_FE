@@ -142,25 +142,25 @@ class DashboardPrincipal extends React.Component {
         },
         yAxis: {
           type: "value",
-          name: "Doanh thu (VND)",
+          name: "Revenue (VND)",
         },
         series: [
           {
-            name: "Doanh thu học phí",
+            name: "Tuition revenue",
             type: "line",
             data: tuitionRevenues,
             smooth: true,
             itemStyle: { color: "#4CAF50" },
           },
           {
-            name: "Doanh thu dịch vụ",
+            name: "Service revenue",
             type: "line",
             data: serviceRevenues,
             smooth: true,
             itemStyle: { color: "#FF5722" },
           },
           {
-            name: "Tổng doanh thu",
+            name: "Total revenue",
             type: "line",
             data: totalRevenues,
             smooth: true,
@@ -181,7 +181,7 @@ class DashboardPrincipal extends React.Component {
           },
         },
         legend: {
-          data: ["Doanh thu học phí", "Doanh thu dịch vụ", "Tổng doanh thu"],
+          data: ["Tuition revenue", "Service revenue", "Total revenue"],
           top: "10%",
         },
       },
@@ -256,14 +256,14 @@ class DashboardPrincipal extends React.Component {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Dashboard/GetEnrollmentStatistics`);
       const data = response.data;
-  
+
       const months = Array.from({ length: 12 }, (_, i) => `Tháng ${i + 1}`);
       const newStudents = Array.from({ length: 12 }, (_, i) => {
         const monthIndex = i + 1;
         const enrollment = data.monthlyEnrollments.find((e) => e.month === monthIndex);
         return enrollment ? enrollment.newStudents : 0; // Nếu không có dữ liệu cho tháng, trả về 0
       });
-  
+
       this.setState({
         enrollmentData: {
           xAxis: {
@@ -293,7 +293,7 @@ class DashboardPrincipal extends React.Component {
       console.error("Error fetching enrollment data: ", error);
     }
   };
-  
+
 
   loadTeacherData = async () => {
     try {
@@ -399,7 +399,36 @@ class DashboardPrincipal extends React.Component {
       >
         <div className="container-fluid">
           <PageHeader HeaderText="Dashboard" Breadcrumb={[{ name: "Dashboard" }]} />
+          <div className="row clearfix">
 
+
+            <div className="col-lg-12">
+              <div className="card">
+                <div className="header">
+                  <h2>Monthly Revenue({selectedYear})</h2>
+                </div>
+                <div className="header">
+                  <h2>Choose Year</h2>
+                </div>
+                <div className="body">
+                  <select
+                    value={selectedYear}
+                    onChange={this.handleYearChange}
+                    className="form-control"
+                  >
+                    {[2023, 2024, 2025].map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="body" style={{ overflowX: "auto" }}>
+                  <ReactEcharts option={financialData} style={{ height: "400px" }} opts={{ renderer: "svg" }} />
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Biểu đồ Class Gender Distribution */}
           <div className="row clearfix">
             <div className="col-lg-6">
@@ -434,7 +463,7 @@ class DashboardPrincipal extends React.Component {
             </div> */}
           </div>
 
-        
+
 
           {/* Biểu đồ hình tròn - Tỷ lệ giáo viên có và không có lớp */}
           {/* <div className="row clearfix">
@@ -459,36 +488,7 @@ class DashboardPrincipal extends React.Component {
               </div>
             </div>
           </div> */}
-          <div className="row clearfix">
 
-
-            <div className="col-lg-12">
-              <div className="card">
-                <div className="header">
-                  <h2>Doanh thu theo tháng ({selectedYear})</h2>
-                </div>
-                <div className="header">
-                  <h2>Chọn năm</h2>
-                </div>
-                <div className="body">
-                  <select
-                    value={selectedYear}
-                    onChange={this.handleYearChange}
-                    className="form-control"
-                  >
-                    {[2023, 2024, 2025].map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="body" style={{ overflowX: "auto" }}>
-                  <ReactEcharts option={financialData} style={{ height: "400px" }} opts={{ renderer: "svg" }} />
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Biểu đồ cột - Phân loại giáo viên theo số lượng lớp */}
           <div className="row clearfix">

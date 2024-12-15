@@ -378,7 +378,7 @@ class App extends React.Component {
                   exact
                   path={`${process.env.PUBLIC_URL}/viewdetailschildren/:studentID`}
                   component={ViewDetailsChildren}
-                  allowedRoles={[1, 2, 4, 3]}
+                  allowedRoles={[ 2, 4, 3,5,6]}
 
                 />
                 <ProtectedRoute

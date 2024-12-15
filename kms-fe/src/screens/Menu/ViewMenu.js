@@ -138,42 +138,70 @@ class ViewMenu extends React.Component {
 
   handleUpload = async () => {
     const { selectedFile, selectedWeek } = this.state;
+  
+    // Kiểm tra nếu không có tệp được chọn
     if (!selectedFile) {
       this.setState({
         notificationText: "Please select a file first!",
         notificationType: "error",
-        showNotification: true
+        showNotification: true,
       });
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("file", selectedFile);
-
+  
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/Menu/ImportMenuExcel`, formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/Menu/ImportMenuExcel`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
+  
+      // Kiểm tra mã trạng thái HTTP để xem có phải 200 không
+      if (response.status !== 200) {
+        // Nếu không phải mã 200, hiển thị thông báo lỗi
+        this.setState({
+          notificationText: response.data.message || "Error uploading file.",
+          notificationType: "error",
+          showNotification: true,
+        });
+        return; // Dừng xử lý tiếp theo nếu có lỗi
+      }
+  
+      // Nếu upload thành công, thông báo thành công
       this.setState({
         notificationText: "File uploaded successfully!",
         notificationType: "success",
-        showNotification: true
+        showNotification: true,
       });
+  
       // Sau khi upload thành công, fetch lại dữ liệu:
       this.fetchMenuData(selectedWeek.startOfWeek, selectedWeek.endOfWeek);
+  
     } catch (error) {
       console.error("Error uploading file:", error);
-      this.setState({
-        notificationText: "Error uploading file.",
-        notificationType: "error",
-        showNotification: true
-      });
+  
+      // Kiểm tra nếu có lỗi từ API (khi có mã trạng thái khác 200)
+      if (error.response && error.response.data && error.response.data.message) {
+        this.setState({
+          notificationText: error.response.data.message, // Hiển thị thông báo lỗi từ phản hồi API
+          notificationType: "error",
+          showNotification: true,
+        });
+      } else {
+        // Nếu không có thông báo lỗi rõ ràng từ API, hiển thị lỗi chung
+        this.setState({
+          notificationText: "Error uploading file.",
+          notificationType: "error",
+          showNotification: true,
+        });
+      }
     }
   };
-
+  
+  
   toggleCalendar = () => {
     this.setState((prevState) => ({ showCalendar: !prevState.showCalendar }));
   };

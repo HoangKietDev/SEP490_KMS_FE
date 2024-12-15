@@ -28,6 +28,8 @@ class ViewChildrenByClassID extends React.Component {
     window.scrollTo(0, 0);
     const classId = this.props.match.params.classId;
     const user = JSON.parse(sessionStorage.getItem("user")); // Lấy user từ sessionStorage
+    console.log(user,"test usr");
+    
     this.setState({ user });
     // Fetch students data
     fetch(`${process.env.REACT_APP_API_URL}/api/Class/GetChildrenByClassId/${classId}`)
@@ -403,7 +405,9 @@ class ViewChildrenByClassID extends React.Component {
                           <th>Grade</th>
                           <th>Date of birth</th>
                           <th>Status</th>
+                          {this.state?.user && (this.state?.user?.user?.roleId === 3 || this.state?.user?.user?.roleId === 4 || this.state?.user?.user?.roleId === 5|| this.state?.user?.user?.roleId === 6 ) && (
                           <th>Action</th>
+                          )}
                         </tr>
                       </thead>
                       <tbody>
@@ -445,14 +449,17 @@ class ViewChildrenByClassID extends React.Component {
                               </td>
                               <td className="project-actions">
                                 {/* Kiểm tra roleID từ session (user) */}
-                                {this.state.user && (this.state.user.roleID === 3 || this.state.user.roleID === 4) && (
+                                {this.state.user && (this.state.user.user.roleId === 3 || this.state.user.user.roleId === 4 || this.state.user.user.roleId === 5 || this.state.user.user.roleId === 6) && (
                                   <>
                                     <a className="btn btn-outline-secondary mr-1" onClick={() => this.handleView(student.studentId)}>
                                       <i className="icon-eye"></i>
                                     </a>
+                                    {this.state.user && (this.state.user.user.roleId === 3 || this.state.user.user.roleId === 4 ) && (
+
                                     <a className="btn btn-outline-secondary" onClick={() => this.handleEdit(student.studentId)}>
                                       <i className="icon-pencil"></i>
                                     </a>
+                                    )}
                                   </>
                                 )}
                               </td>

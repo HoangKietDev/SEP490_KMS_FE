@@ -462,14 +462,17 @@ class ViewClass extends React.Component {
                           accept=".xls,.xlsx" // Chỉ chấp nhận file Excel
                         />
                       </div>
-                      <div className="form-group mr-3">
-                        <a
-                          onClick={this.handleCreateClass}
-                          className="btn btn-success text-white d-flex align-items-center"
-                        >
-                          <i className="icon-plus mr-2"></i>Create Class
-                        </a>
-                      </div>
+                      {isRole3 && (
+                        <div className="form-group mr-3">
+                          <a
+                            onClick={this.handleCreateClass}
+                            className="btn btn-success text-white d-flex align-items-center"
+                          >
+                            <i className="icon-plus mr-2"></i>Create Class
+                          </a>
+                        </div>
+                      )}
+
                     </div>
                     <div className="table-responsive">
                       <table className="table m-b-0 table-hover">

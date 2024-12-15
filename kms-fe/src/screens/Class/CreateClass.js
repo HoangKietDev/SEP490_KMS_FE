@@ -66,7 +66,8 @@ class CreateClass extends React.Component {
     if (number <= 0) errors.number = "Number of students must be greater than 0.";
     if (semesterId === 0) errors.semesterId = "Semester must be selected.";
     if (gradeId === 0) errors.gradeId = "Grade must be selected.";
-    if (selectedTeachers.length === 0) errors.selectedTeachers = "At least one teacher must be selected.";
+
+    if (!selectedTeachers || selectedTeachers.length === 0) errors.selectedTeachers = "At least one teacher must be selected.";
 
     this.setState({ errors, submeet: true });
 
@@ -158,29 +159,42 @@ class CreateClass extends React.Component {
       },
       body: JSON.stringify(newClass),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          // Nếu phản hồi không thành công, ném lỗi để xử lý trong catch
+          return response.json().then((errorData) => {
+            throw new Error(errorData.details || "Failed to add class. Please try again.");
+          });
+        }
+        return response.json();
+      })
       .then((data) => {
         const classId = data.classId;
 
-        // Hiển thị thông báo
+        // Hiển thị thông báo thành công
         this.setState({
           notificationText: "Class has been added successfully!",
           notificationType: "success",
           showNotification: true,
         });
 
-        // Thêm giáo viên vào lớp
-        selectedTeachers.forEach((teacherId) => {
-          fetch(`${process.env.REACT_APP_API_URL}/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-            .then((res) => res.json())
-            .then((result) => console.log(`Teacher ${teacherId} added to class successfully`, result))
-            .catch((error) => console.error("Error adding teacher to class:", error));
-        });
+        // Kiểm tra nếu có giáo viên để thêm vào lớp
+        if (selectedTeachers && selectedTeachers.length > 0) {
+          // Thêm giáo viên vào lớp
+          selectedTeachers.forEach((teacherId) => {
+            fetch(`${process.env.REACT_APP_API_URL}/api/Class/AddTeacherToClass?classId=${classId}&teacherId=${teacherId}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((res) => res.json())
+              .then((result) => console.log(`Teacher ${teacherId} added to class successfully`, result))
+              .catch((error) => console.error("Error adding teacher to class:", error));
+          });
+        } else {
+          console.log("No teachers to add to the class.");
+        }
 
         // Trì hoãn chuyển hướng 2 giây để hiển thị thông báo
         setTimeout(() => {
@@ -191,12 +205,13 @@ class CreateClass extends React.Component {
       .catch((error) => {
         console.error("Error adding class:", error);
         this.setState({
-          notificationText: "Failed to add class. Please try again.",
+          notificationText: error.message || "Failed to add class. Please try again.",
           notificationType: "error",
           showNotification: true,
         });
       });
   };
+
 
   resetForm = () => {
     this.setState({
@@ -364,7 +379,7 @@ class CreateClass extends React.Component {
 
                         {/* Dropdown cho phép chọn giáo viên */}
                         <select
-                          className="form-select"
+                          className={`form-select ${errors.selectedTeachers && submeet ? "is-invalid" : ""}`}
                           value=""
                           onChange={(e) => {
                             const selectedValue = parseInt(e.target.value);
@@ -374,7 +389,6 @@ class CreateClass extends React.Component {
                               });
                             }
                           }}
-                           // Thêm thuộc tính required vào đây
                         >
                           <option value="">Select a Teacher</option>
                           {teachers.map((teacher) => (
@@ -383,11 +397,14 @@ class CreateClass extends React.Component {
                             </option>
                           ))}
                         </select>
-                        <div className="invalid-feedback">Please select at least one teacher.</div> {/* Hiển thị thông báo nếu không chọn */}
+
+                        {/* Hiển thị lỗi nếu có */}
+                        {errors.selectedTeachers && submeet && (
+                          <div className="invalid-feedback">{errors.selectedTeachers}</div>
+                        )}
                       </div>
                     </div>
                   </div>
-
 
 
                   <div className="text-right">
