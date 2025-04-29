@@ -3,8 +3,6 @@ import { connect } from "react-redux";
 import { Route, Switch, withRouter, Redirect } from "react-router-dom";
 import Login from "./screens/Login";
 import DashboardAdmin from "./screens/Dashbord/Dashbord";
-import demographic from "./screens/Dashbord/Demographic";
-import ioT from "./screens/Dashbord/IoT";
 import NavbarMenu from "./components/NavbarMenu";
 import forgotpassword from "./screens/Auth/ForgotPassword";
 import resetpassword from "./screens/Auth/ResetPassword";
